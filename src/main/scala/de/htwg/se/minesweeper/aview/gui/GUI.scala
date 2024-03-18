@@ -48,7 +48,6 @@ class GUI(using var controller: IController) extends Frame with Observer:
                 repaint()
             }
         }
-        
         timerStarted = true
         timer.schedule(task, 1000L, 1000L)
     }
