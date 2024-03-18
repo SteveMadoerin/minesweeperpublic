@@ -1,0 +1,15 @@
+{
+  "field" : {
+    "size" : 1,
+    "matrix" : [ {
+      "row" : 0,
+      "col" : 0,
+      "cell" : "*"
+    } ],
+    "hidden" : [ {
+      "row" : 0,
+      "col" : 0,
+      "cell" : " "
+    } ]
+  }
+}

@@ -1,0 +1,66 @@
+# macOS
+.DS_Store
+
+# Eclipse
+bin/
+.settings/
+.classpath
+
+# Maven
+log/
+target/
+
+# Gradle
+.gradle/
+build/
+pom.xml
+
+# sbt specific
+.cache
+.history
+.lib/
+dist/*
+target/
+lib_managed/
+src_managed/
+project/boot/
+project/plugins/project/
+project/local-plugins.sbt
+project/target/
+project/project/
+logs/
+project/.sbtserver
+.sbtserver/
+.history
+.ensime
+.ensime_cache/
+.sbt-scripted/
+local.sbt
+
+# Bloop
+.bsp
+
+# VS Code
+.vscode/
+
+# Metals
+.bloop/
+.metals/
+metals.sbt
+
+# IDEA
+.idea/
+target/
+.idea
+.idea_modules
+/.worksheet/
+
+# Scala-IDE specific
+.scala_dependencies
+.worksheet
+
+# Sonar
+.sonar/
+
+# Application
+minesweeper.log
