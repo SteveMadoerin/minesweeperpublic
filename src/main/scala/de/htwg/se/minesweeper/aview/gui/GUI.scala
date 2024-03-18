@@ -32,7 +32,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
     var l = 0
     var m = 0
     var r = 0
-
+    
     var clock = new AtomicInteger(0)
     val timer = new Timer()
     var task: TimerTask = _
