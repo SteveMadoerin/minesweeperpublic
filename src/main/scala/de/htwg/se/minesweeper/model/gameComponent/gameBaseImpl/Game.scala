@@ -74,9 +74,9 @@ case class Game (var state: Status) extends IGame:
     def premierMove(x: Int, y: Int, field: IField): IField = 
         val adjacent = Playfield()
         var adjacentInitialised = adjacent.newField(side, this)
-        val newReplacedbombHidMatrix = if(adjacentInitialised.getInvisibleMatrix.cell(y, x) == Symbols.Bomb){
+        val newReplacedbombHidMatrix = if(adjacentInitialised.getHidden.cell(y, x) == Symbols.Bomb){
             var replacedHiddenMatrix = replaceBomb(x, y, adjacentInitialised)
-            val replacedAdjacentHiddenField = Default.mergeMatrixToField(field.getVisibleMatrix, replacedHiddenMatrix.getInvisibleMatrix) // Dependency Injection
+            val replacedAdjacentHiddenField = Default.mergeMatrixToField(field.getMatrix, replacedHiddenMatrix.getHidden) // Dependency Injection
             replacedAdjacentHiddenField
         } else {
             adjacentInitialised
@@ -99,17 +99,17 @@ case class Game (var state: Status) extends IGame:
         val indices = 0 until size
         val result =indices
             .flatMap(col => indices.map(row => (row, col))
-            .filter((row, col) => field.getInvisibleMatrix.cell(row, col) != Symbols.Bomb))
+            .filter((row, col) => field.getHidden.cell(row, col) != Symbols.Bomb))
     
         val rand = Random.nextInt(result.size)
         val newX = result(rand)._1
         val newY = result(rand)._2
     
-        field.setInvisibleMatrix(field.getInvisibleMatrix.replaceCell(newY, newX, Symbols.Bomb))
+        field.setInvisibleMatrix(field.getHidden.replaceCell(newY, newX, Symbols.Bomb))
 
-        field.setInvisibleMatrix(field.getInvisibleMatrix.replaceCell(y, x, Symbols.Empty))
-        field.setVisibleMatrix(field.getVisibleMatrix.replaceCell(y, x, Symbols.Covered))
-        field.setInvisibleMatrix(initializeAdjacentNumbers(field.getInvisibleMatrix))
+        field.setInvisibleMatrix(field.getHidden.replaceCell(y, x, Symbols.Empty))
+        field.setVisibleMatrix(field.getMatrix.replaceCell(y, x, Symbols.Covered))
+        field.setInvisibleMatrix(initializeAdjacentNumbers(field.getHidden))
         field
     
 

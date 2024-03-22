@@ -332,7 +332,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
         timerStarted = false
     }
 
-    def calcFlagCount: Int = controller.getControllerGame.calcMineAndFlag(controller.getControllerField.getVisibleMatrix)
+    def calcFlagCount: Int = controller.getControllerGame.calcMineAndFlag(controller.getControllerField.getMatrix)
 
     def setFlagCountDisplay: (ImageIcon, ImageIcon, ImageIcon) =
         val leftDigit =  calcFlagCount / 100

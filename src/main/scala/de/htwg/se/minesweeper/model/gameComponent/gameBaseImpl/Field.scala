@@ -77,13 +77,11 @@ case class Field(matrix: Matrix[Symbols], hidden: Matrix[Symbols]) extends IFiel
 
     def getField = this
     def getFieldSize: Int = size
-    def getMatrix: Matrix[Symbols] = visibleMatrix
-    def getHidden: Matrix[Symbols] = invisibleMatrix
-    def getVisibleMatrix: Matrix[Symbols] = matrix
-    def getInvisibleMatrix: Matrix[Symbols] = hidden
+    def getMatrix: Matrix[Symbols] = matrix
+    def getHidden: Matrix[Symbols] = hidden
+
     def getRealMatrix: Matrix[Symbols] = visibleMatrix //test anpassen
     
-
-    def setInvisibleMatrix(matrix: Matrix[Symbols]) = hidden
-    def setVisibleMatrix(matrix: Matrix[Symbols]) = matrix
+    def setInvisibleMatrix(matrix: Matrix[Symbols]): Unit =  copy(hidden = matrix) //matrix
+    def setVisibleMatrix(matrix: Matrix[Symbols]): Unit = copy(matrix = matrix)
     override def toString(): String = mesh()
