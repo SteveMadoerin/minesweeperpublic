@@ -9,8 +9,8 @@ case class Field(matrix: Matrix[Symbols], hidden: Matrix[Symbols]) extends IFiel
     def this(size: Int, filling: Symbols)= this(new Matrix(size, filling), new Matrix(size, Symbols.Empty))
     def this(matrix: Matrix[Symbols])= this(matrix, matrix)
 
-    var visibleMatrix = matrix
-    var invisibleMatrix = hidden
+    val visibleMatrix = matrix
+    val invisibleMatrix = hidden
     
 
     def bar(cellWidth: Int = 3, cellNum: Int = 3) = (("+" + "-" * cellWidth) * cellNum) + "+" + endl
@@ -21,7 +21,7 @@ case class Field(matrix: Matrix[Symbols], hidden: Matrix[Symbols]) extends IFiel
     def removeFlag(x: Int, y: Int) = copy(matrix.replaceCell(y, x, Symbols.Covered))
 
     def open(x: Int, y: Int, spiel: IGame): IField =
-        if(this.invisibleMatrix.cell(y, x) == Symbols.Bomb){spiel.handleGameState("Lost")} else if(spiel.calcWonOrLost(this.visibleMatrix, spiel.getBombs)){spiel.handleGameState("Won")}
+        if(this.hidden.cell(y, x) == Symbols.Bomb){spiel.handleGameState("Lost")} else if(spiel.calcWonOrLost(this.matrix, spiel.getBombs)){spiel.handleGameState("Won")}
         val extractedSymbol = this.getInvisible(y, x)
         val returnField = this.put(extractedSymbol, y, x)
         returnField
@@ -35,8 +35,8 @@ case class Field(matrix: Matrix[Symbols], hidden: Matrix[Symbols]) extends IFiel
 
     def put(symbol: Symbols, x: Int, y: Int) = copy(matrix.replaceCell(x, y, symbol))
     def get(x: Int, y: Int): Symbols = matrix.cell(x, y)
-    def getVisible(x: Int, y: Int): Symbols = visibleMatrix.cell(x, y)
-    def getInvisible(x: Int, y: Int): Symbols = invisibleMatrix.cell(x, y)
+    def getVisible(x: Int, y: Int): Symbols = matrix.cell(x, y)
+    def getInvisible(x: Int, y: Int): Symbols = hidden.cell(x, y)
     def isValidF(row: Int, col: Int, side: Int): Boolean = {row >= 0 && row <= side && col >= 0 && col <= side}
 
     def openNewXXX(x: Int, y: Int, field: IField): IField =
@@ -77,13 +77,13 @@ case class Field(matrix: Matrix[Symbols], hidden: Matrix[Symbols]) extends IFiel
 
     def getField = this
     def getFieldSize: Int = size
-    def getMatrix: Matrix[Symbols] = matrix
-    def getHidden: Matrix[Symbols] = hidden
-    def getVisibleMatrix: Matrix[Symbols] = visibleMatrix
-    def getInvisibleMatrix: Matrix[Symbols] = invisibleMatrix
-    def getRealMatrix: Matrix[Symbols] = matrix
+    def getMatrix: Matrix[Symbols] = visibleMatrix
+    def getHidden: Matrix[Symbols] = invisibleMatrix
+    def getVisibleMatrix: Matrix[Symbols] = matrix
+    def getInvisibleMatrix: Matrix[Symbols] = hidden
+    def getRealMatrix: Matrix[Symbols] = visibleMatrix //test anpassen
     
 
-    def setInvisibleMatrix(matrix: Matrix[Symbols]): Unit = invisibleMatrix = matrix
-    def setVisibleMatrix(matrix: Matrix[Symbols]): Unit = visibleMatrix = matrix
+    def setInvisibleMatrix(matrix: Matrix[Symbols]) = hidden
+    def setVisibleMatrix(matrix: Matrix[Symbols]) = matrix
     override def toString(): String = mesh()
