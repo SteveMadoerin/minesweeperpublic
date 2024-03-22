@@ -64,9 +64,7 @@ class FieldSpec extends AnyWordSpec
                 }
             }
             "field open" should {
-                var testSpiel = new Game(Status.Playing)
-                testSpiel.bombs = 9
-                testSpiel.side = 3
+                var testSpiel = new Game(Status.Playing, 9, 3)
 
                 val sicht = new Matrix(4, Symbols.Covered)
                 val unsicht = new Matrix(4, Symbols.Eight)

@@ -81,9 +81,6 @@ class ControllerSpec extends AnyWordSpec{
         var game = Default.prepareGame
         val emptyField = game.getField
 
-        game.bombs = 3
-        game.side = 3
-
         val controller = new Controller(using game)
         val observer = new Observer {
         var notified = false
@@ -103,9 +100,6 @@ class ControllerSpec extends AnyWordSpec{
     "def helpMenue" should {
         var game = Default.prepareGame
         val emptyField = game.getField
-
-        game.bombs = 3
-        game.side = 3
 
         val controller5 = new Controller(using game)
         val observer = new Observer {
@@ -147,9 +141,7 @@ class ControllerSpec extends AnyWordSpec{
     }
 
     "cheat" should{
-        val game4 = new Game(Status.Playing)
-        game4.bombs = 3
-        game4.side = 3
+        val game4 = new Game(Status.Playing, 3, 3)
         game4.setField()
         val spielfeld = Playfield()
         val testfield = spielfeld.newField(3, game4)
@@ -174,11 +166,9 @@ class ControllerSpec extends AnyWordSpec{
 
     "uncover field" should {
 
-        var game22 = new Game(Status.Playing)
+        var game22 = new Game(Status.Playing, 2, 3)
         val emptyField = new Field(3, Symbols.Covered)
         game22.setField()
-        game22.bombs = 2
-        game22.side = 3
         val invisible = emptyField.hidden.replaceCell(1, 1, Symbols.Bomb)	
         val testField = new Field(emptyField.matrix, invisible)
         val move3 = Move("open", 1 ,1)
@@ -244,11 +234,9 @@ class ControllerSpec extends AnyWordSpec{
     }
 
     "def makeAndPublish with 2 parameters" should {
-        val game26 = new Game(Status.Playing)
+        val game26 = new Game(Status.Playing, 3, 3)
         val emptyField = new Field(3, Symbols.Empty)
         game26.setField()
-        game26.bombs = 3
-        game26.side = 3
 
         val controller9 = new Controller(using game26)
         val observer = new Observer {
@@ -267,11 +255,9 @@ class ControllerSpec extends AnyWordSpec{
     }
 
     "def gameOver" should {
-        val game27 = new Game(Status.Playing)
+        val game27 = new Game(Status.Playing,3, 3)	
         val emptyField = new Field(3, Symbols.Empty)
         game27.setField()
-        game27.bombs = 3
-        game27.side = 3
 
         val controller10 = new Controller(using game27)
         val observer = new Observer {
@@ -308,10 +294,8 @@ class ControllerSpec extends AnyWordSpec{
     }
 
     "def checkGameOver" should {
-        val game29 = new Game(Status.Playing)
+        val game29 = new Game(Status.Playing, 3, 3)
         val emptyField = new Field(3, Symbols.Empty)
-        game29.bombs = 3
-        game29.side = 3
 
         val controller12 = new Controller(using game29)
         val observer = new Observer {
@@ -328,10 +312,8 @@ class ControllerSpec extends AnyWordSpec{
     }
 
     "def newGameGui" should {
-        val game31 = new Game(Status.Playing)
+        val game31 = new Game(Status.Playing, 3, 3)
         val emptyField = new Field(3, Symbols.Empty)
-        game31.bombs = 3
-        game31.side = 3
 
         val controller14 = new Controller(using game31)
         val observer = new Observer {
@@ -347,10 +329,8 @@ class ControllerSpec extends AnyWordSpec{
     }
 
     "def newGame" should {
-        val game32 = new Game(Status.Playing)
+        val game32 = new Game(Status.Playing ,3 ,3)
         val emptyField = new Field(3, Symbols.Empty)
-        game32.bombs = 3
-        game32.side = 3
 
         val controller15 = new Controller(using game32)
         val observer = new Observer {
@@ -370,23 +350,6 @@ class ControllerSpec extends AnyWordSpec{
         }
     }
 
-/* 
-    "def showInvisibleCell" should {
-        val game33: IGame = Default.prepareGame
-        val startField = game33.getField
-
-        val controller16 = new Controller(using game33)
-        val observer = new Observer {
-        var notified = false
-        override def update(e: NewEvent): Boolean = 
-            notified = true
-            notified
-        }
-
-        "make and publish a move" in {
-            controller16.showInvisibleCell(1, 1) should not be (" ")
-        }
-    } */
 
     "def showVisibleCell" should {
         val game34: IGame = Default.prepareGame
@@ -407,10 +370,8 @@ class ControllerSpec extends AnyWordSpec{
 
 
     "def newGameField" should{
-        val game36 = new Game(Status.Playing)
+        val game36 = new Game(Status.Playing, 3, 3)
         val emptyField = new Field(3, Symbols.Empty)
-        game36.bombs = 3
-        game36.side = 3
 
         val controller19 = new Controller(using game36)
         val observer = new Observer {
@@ -461,11 +422,9 @@ class ControllerSpec extends AnyWordSpec{
 
     }
     "def controllerSaveGame" should{
-        var game39 = new Game(Status.Playing)
+        var game39 = new Game(Status.Playing, 3, 2)
         val emptyField = new Field(3, Symbols.Empty)
         game39.setField()
-        game39.bombs = 3
-        game39.side = 2
 
         val controller22 = new Controller(using game39)
         val observer = new Observer {
@@ -481,11 +440,9 @@ class ControllerSpec extends AnyWordSpec{
     }
 
     "def saveScoreAndPlayerName" should{
-        val game41 = new Game(Status.Playing)
+        val game41 = new Game(Status.Playing, 3, 2)
         val emptyField = new Field(3, Symbols.Empty)
         game41.setField()
-        game41.bombs = 3
-        game41.side = 2
 
         val controller24 = new Controller(using game41)
         val observer = new Observer {
@@ -503,11 +460,9 @@ class ControllerSpec extends AnyWordSpec{
     }
 
     "def loadPlayerScores" should{
-        val game42 = new Game(Status.Playing)
+        val game42 = new Game(Status.Playing, 3, 2)
         val emptyField = new Field(3, Symbols.Empty)
         game42.setField()
-        game42.bombs = 3
-        game42.side = 2
 
         val controller25 = new Controller(using game42)
         val observer = new Observer {
@@ -525,11 +480,9 @@ class ControllerSpec extends AnyWordSpec{
     }
 
     "def Controller.loadGame" should{
-        val game43 = new Game(Status.Playing)
+        val game43 = new Game(Status.Playing, 3, 2)
         val emptyField = new Field(3, Symbols.Empty)
         game43.setField()
-        game43.bombs = 3
-        game43.side = 2
 
         val controller26 = new Controller(using game43)
         val observer = new Observer {

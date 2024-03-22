@@ -28,7 +28,7 @@ trait IGame {
     def handleGameState(state: String): Unit
     def checkExit: Boolean
 
-    def getGame: IGame
+    //def getGame: IGame
     def setBombs(bombs: Int): Unit
     def setSide(side: Int): Unit
     def setState(newState: Status): Unit
@@ -38,7 +38,7 @@ trait IGame {
     def setTime(newTime: Int): Unit
 
     // NEW
-    def prepareBoard(s: Option[String], realGame: IGame): IField
+    def prepareBoard(s: Option[String]): IField
     def createField: IField
     def getField: IField
     // NEW

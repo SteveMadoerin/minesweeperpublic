@@ -8,17 +8,15 @@ import scala.annotation.tailrec
 import de.htwg.se.minesweeper.Default.given
 
 
-case class Game (var state: Status) extends IGame:
+case class Game (var state: Status, bombs : Int = 10, side: Int = 9) extends IGame:
     private var hyperField: IField = _ 
-    var bombs = 10
-    var side = 9
     var time = 0
 
     def getField = hyperField
 
-    def setSideAndBombs(side: Int, bombs: Int) = {
-        setSide(side)
-        setBombs(bombs)
+    def setSideAndBombs(side: Int, bombz: Int) = {
+        copy(side = side)
+        copy(bombs = bombz)
     }
 
     def createField: IField = {
@@ -38,11 +36,17 @@ case class Game (var state: Status) extends IGame:
         }
     }
 
-    def prepareBoard(s: Option[String], realGame: IGame): IField = {
+/*     def prepareBoard(s: Option[String], realGame: IGame): IField = {
         realGame.setBombs(optionToList(s)(1))
         realGame.setSide(optionToList(s)(0))
         val adjacentField = Playfield()
         adjacentField.newField(optionToList(s)(0), realGame)
+    } */
+    def prepareBoard(s: Option[String]): IField = {
+        val (newSide, newBombs) = optionToList(s).splitAt(1)
+        val updatedGame = this.copy(side = newSide.head, bombs = newBombs.head)
+        val adjacentField = Playfield()
+        adjacentField.newField(updatedGame.side, updatedGame)
     }
 
     def setField() = {
@@ -217,9 +221,8 @@ case class Game (var state: Status) extends IGame:
         placeMines(matrix, 0)
     }
 
-    def getGame: Game = this
-    def setBombs(bombs: Int) = this.bombs = bombs
-    def setSide(side: Int) = this.side = side
+    def setBombs(bombz: Int) = copy(bombs = bombz)
+    def setSide(side: Int) = copy(side = side)
     def setState(newState: Status) = this.state = newState
     def setTime(time: Int) = this.time = time
     def getTime: Int = time

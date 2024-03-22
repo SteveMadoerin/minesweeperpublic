@@ -82,7 +82,7 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
         notifyObservers(NewEvent.Input)
 
     def newGameField(optionString: Option[String]) =
-        field = game.prepareBoard(optionString, game) // NEW
+        field = game.prepareBoard(optionString) // NEW
         notifyObservers(NewEvent.NewGame)
 
     def newGame(side: Int, bombs: Int) =

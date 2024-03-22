@@ -64,9 +64,7 @@ class GameSpec extends AnyWordSpec {
 
 
     "Method replaceBomb" should {
-        val testGame10 = new Game(Status.Playing)
-        testGame10.bombs = 2
-        testGame10.side = 3
+        val testGame10 = new Game(Status.Playing, 2, 3)
 
         val sicht1 = new Matrix(4, Symbols.Covered)
         val unsicht1 = new Matrix(4, Symbols.Empty)
@@ -84,9 +82,7 @@ class GameSpec extends AnyWordSpec {
 
     "Premier move" should{
 
-        val game42 = new Game(Status.Playing)
-        game42.bombs = 1
-        game42.side = 3
+        val game42 = new Game(Status.Playing, 1, 3)
 
         val sicht11 = new Matrix(4, Symbols.Covered)
         val unsicht11 = new Matrix(4, Symbols.Empty)
@@ -101,9 +97,7 @@ class GameSpec extends AnyWordSpec {
 
     "Method check exit" should {
         "return false game is in Status playing" in {
-            val testGame55 = new Game(Status.Playing)
-            testGame55.bombs = 1
-            testGame55.side = 3
+            val testGame55 = new Game(Status.Playing, 1, 3)	
             val testB = GameState
 
             testB.handle(new PlayEvent)
@@ -115,9 +109,7 @@ class GameSpec extends AnyWordSpec {
     }
     
     "def calcMineAndFlag" should {
-        val testGame = new Game(Status.Playing)
-        testGame.bombs = 1
-        testGame.side = 3
+        val testGame = new Game(Status.Playing , 1, 3)
 
         val sicht = new Matrix(4, Symbols.Covered)
         val unsicht = new Matrix(4, Symbols.Zero)
@@ -131,9 +123,7 @@ class GameSpec extends AnyWordSpec {
     }
 
     "optionToList" should {
-        val testGame66 = new Game(Status.Playing)
-        testGame66.bombs = 1
-        testGame66.side = 3
+        val testGame66 = new Game(Status.Playing , 1, 3)	
 
         "return List(5, 5) when given Some(\"SuperEasy\")" in {
             testGame66.optionToList(Some("SuperEasy")) shouldEqual List(5, 5)
@@ -161,21 +151,17 @@ class GameSpec extends AnyWordSpec {
     }
 
     "def getGame" should {
-        val testGame = new Game(Status.Playing)
-        testGame.bombs = 1
-        testGame.side = 3
+        val testGame = new Game(Status.Playing, 1, 3)
         testGame.setField()
 
         "return the game" in {
-            val result = testGame.getGame
+            val result = testGame
             result should be (testGame)
         }
     }
 
     "def setState" should {
-        val testGame67 = new Game(Status.Playing)
-        testGame67.bombs = 1
-        testGame67.side = 3
+        val testGame67 = new Game(Status.Playing, 1 , 3)	
         testGame67.setField()
 
         "return the game" in {
@@ -186,9 +172,7 @@ class GameSpec extends AnyWordSpec {
     }
 
     "Game object" should {
-        val testGame = Game(Status.Playing)
-        testGame.bombs = 1
-        testGame.side = 3
+        val testGame = Game(Status.Playing, 1, 3)
         testGame.setField()
 
         "return the game" in {

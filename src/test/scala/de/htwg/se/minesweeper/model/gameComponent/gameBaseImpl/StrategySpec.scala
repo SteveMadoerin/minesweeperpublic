@@ -11,9 +11,7 @@ class StrategySpec extends AnyWordSpec{
     "it" should {
         "use the first move strategy" in {
             val decider = new Decider()
-            var game = new Game(Status.Playing)
-            game.side = 2
-            game.bombs = 1
+            var game = new Game(Status.Playing, 2, 1)
             game.setField()
             val unsichtbar = Matrix(Vector(Vector(Symbols.One, Symbols.One), Vector(Symbols.One, Symbols.Bomb)))
             val sichtbar = Matrix(Vector(Vector(Symbols.Covered, Symbols.Covered), Vector(Symbols.Covered, Symbols.Covered)))
@@ -29,9 +27,7 @@ class StrategySpec extends AnyWordSpec{
         "use the normal move strategy" in {
             var spielbrett = GameState
             val decider2 = new Decider()
-            var game2 = new Game(Status.Playing)
-            game2.side = 2
-            game2.bombs = 1
+            var game2 = new Game(Status.Playing, 2, 1)
             game2.setField()
             val unsichtbar = Matrix(Vector(Vector(Symbols.One, Symbols.One), Vector(Symbols.One, Symbols.Bomb)))
             val sichtbar = Matrix(Vector(Vector(Symbols.Covered, Symbols.Covered), Vector(Symbols.Covered, Symbols.Covered)))
