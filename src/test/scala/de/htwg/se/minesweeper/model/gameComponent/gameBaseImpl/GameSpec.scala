@@ -77,7 +77,7 @@ class GameSpec extends AnyWordSpec {
         "replace matrix and ensure the player doesn't click on bomb at first move" in{
 
             val result33 = testGame10.replaceBomb(1, 1, testField1)
-            result33.getInvisible(1, 1) should not be (Symbols.Bomb)
+            result33.showInvisibleCell(1, 1) should not be (Symbols.Bomb)
         }
 
     }
@@ -95,7 +95,7 @@ class GameSpec extends AnyWordSpec {
 
         "guarante that you do not loose on first move" in{
             val result42 = game42.premierMove(1, 1, preparedField)
-            result42.getInvisible(1, 1) should not be (Symbols.Bomb)
+            result42.showInvisibleCell(1, 1) should not be (Symbols.Bomb)
         }
     }
 

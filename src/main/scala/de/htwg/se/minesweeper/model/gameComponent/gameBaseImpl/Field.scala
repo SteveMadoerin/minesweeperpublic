@@ -18,7 +18,7 @@ case class Field(matrix: Matrix[Symbols], hidden: Matrix[Symbols]) extends IFiel
 
     def open(x: Int, y: Int, spiel: IGame): IField =
         if(this.hidden.cell(y, x) == Symbols.Bomb){spiel.handleGameState("Lost")} else if(spiel.calcWonOrLost(this.matrix, spiel.getBombs)){spiel.handleGameState("Won")}
-        val extractedSymbol = this.getInvisible(y, x)
+        val extractedSymbol = this.showInvisibleCell(y, x)
         val returnField = this.put(extractedSymbol, y, x)
         returnField
     
@@ -31,12 +31,12 @@ case class Field(matrix: Matrix[Symbols], hidden: Matrix[Symbols]) extends IFiel
 
     def put(symbol: Symbols, x: Int, y: Int) = copy(matrix.replaceCell(x, y, symbol))
     //def get(x: Int, y: Int): Symbols = matrix.cell(x, y)
-    def getVisible(x: Int, y: Int): Symbols = matrix.cell(x, y)
-    def getInvisible(x: Int, y: Int): Symbols = hidden.cell(x, y)
+    def showVisibleCell(x: Int, y: Int): Symbols = matrix.cell(x, y)
+    def showInvisibleCell(x: Int, y: Int): Symbols = hidden.cell(x, y)
     def isValidF(row: Int, col: Int, side: Int): Boolean = {row >= 0 && row <= side && col >= 0 && col <= side}
 
     def openNewXXX(x: Int, y: Int, field: IField): IField =
-        val extractedSymbol = field.getInvisible(y, x)
+        val extractedSymbol = field.showInvisibleCell(y, x)
         val returnField = field.put(extractedSymbol, y, x)
         returnField
 
@@ -54,8 +54,8 @@ case class Field(matrix: Matrix[Symbols], hidden: Matrix[Symbols]) extends IFiel
             val newY = y + dy
 
             if (isValidF(newY, newX, field.getFieldSize - 1)) {
-                val currentCell = field.getVisible(newY, newX)
-                val invisibleCell = field.getInvisible(newY, newX)
+                val currentCell = field.showVisibleCell(newY, newX)
+                val invisibleCell = field.showInvisibleCell(newY, newX)
 
                 if (currentCell == Symbols.Covered && invisibleCell == Symbols.Zero) {
                     mysteriousField = openNewXXX(newX, newY, mysteriousField)
@@ -71,7 +71,7 @@ case class Field(matrix: Matrix[Symbols], hidden: Matrix[Symbols]) extends IFiel
         mysteriousField
     }
 
-    def getField = this
+    //def getField = this
     def getFieldSize: Int = size
     def getMatrix: Matrix[Symbols] = matrix
     def getHidden: Matrix[Symbols] = hidden

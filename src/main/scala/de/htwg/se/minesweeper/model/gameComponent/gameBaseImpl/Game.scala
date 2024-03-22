@@ -90,7 +90,7 @@ case class Game (var state: Status) extends IGame:
     def getStatus: Status = state
 
     def openNew(x: Int, y: Int, field: IField): IField = {
-        val extractedSymbol = field.getInvisible(y, x)
+        val extractedSymbol = field.showInvisibleCell(y, x)
         val returnField = field.put(extractedSymbol, y, x)
         returnField
     }

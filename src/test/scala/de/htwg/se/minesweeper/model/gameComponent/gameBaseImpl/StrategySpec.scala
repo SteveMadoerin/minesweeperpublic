@@ -20,7 +20,7 @@ class StrategySpec extends AnyWordSpec{
             val field = Field(sichtbar, unsichtbar)
 
             val result = decider.evaluateStrategy(true, 1, 1, field, game)
-            assert(result.getVisible(1, 1) == Symbols.One)
+            assert(result.showVisibleCell(1, 1) == Symbols.One)
 
         }
     }
@@ -38,7 +38,7 @@ class StrategySpec extends AnyWordSpec{
             val field2 = Field(sichtbar, unsichtbar)
 
             val result2 = decider2.evaluateStrategy(false, 1, 1, field2, game2)
-            assert(result2.getVisible(1, 1) != Symbols.One)
+            assert(result2.showVisibleCell(1, 1) != Symbols.One)
 
         }
     }

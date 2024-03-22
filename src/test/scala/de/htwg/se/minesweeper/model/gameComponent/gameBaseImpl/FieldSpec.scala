@@ -76,7 +76,7 @@ class FieldSpec extends AnyWordSpec
 
                 "return a new field" in{
                     val resultField = testField.open(1, 1, testSpiel)
-                    resultField.getVisible(1,1) should be (Symbols.Eight)
+                    resultField.showVisibleCell(1,1) should be (Symbols.Eight)
 
                 }
             }
@@ -88,7 +88,7 @@ class FieldSpec extends AnyWordSpec
                 val testField69 = new Field(sicht69, unsicht69)
                 
                 "get cell of invisible matrix" in{
-                    val testResult = testField69.getInvisible(1, 1) 
+                    val testResult = testField69.showInvisibleCell(1, 1) 
                     testResult should be (Symbols.Eight)
 
                 }
@@ -101,7 +101,7 @@ class FieldSpec extends AnyWordSpec
                 val testField70 = new Field(sicht70, unsicht70)
                 
                 "get cell of visible matrix" in{
-                    val testResult = testField70.getVisible(1, 1) 
+                    val testResult = testField70.showVisibleCell(1, 1) 
                     testResult should be (Symbols.Covered)
 
                 }
@@ -114,7 +114,7 @@ class FieldSpec extends AnyWordSpec
 
                 "return a new field" in{
                     val resultField = testField71.gameOverField
-                    resultField.getVisible(1,1) should be (Symbols.Eight)
+                    resultField.showVisibleCell(1,1) should be (Symbols.Eight)
 
                 }
             }
@@ -126,7 +126,7 @@ class FieldSpec extends AnyWordSpec
 
                 "return a new field" in{
                     val resultField = testField72.openNewXXX(1, 1, testField72)
-                    resultField.getVisible(1,1) should be (Symbols.Eight)
+                    resultField.showVisibleCell(1,1) should be (Symbols.Eight)
 
                 }
             }
@@ -147,9 +147,9 @@ class FieldSpec extends AnyWordSpec
 
                 "return a new field" in{
                     val resultField = testField74.recursiveMadness(2, 2, testField74)
-                    resultField.getVisible(2,2) should be (Symbols.Zero)
-                    resultField.getVisible(1,1) should be (Symbols.Zero)
-                    resultField.getVisible(0,0) should be (Symbols.Eight)
+                    resultField.showVisibleCell(2,2) should be (Symbols.Zero)
+                    resultField.showVisibleCell(1,1) should be (Symbols.Zero)
+                    resultField.showVisibleCell(0,0) should be (Symbols.Eight)
 
                 }
             }
@@ -173,7 +173,7 @@ class FieldSpec extends AnyWordSpec
                 val testField76 = new Field(sicht76, unsicht76)
 
                 "return the same field" in{
-                    val resultField = testField76.getField
+                    val resultField = testField76
                     resultField should be (testField76)
                 }
             }

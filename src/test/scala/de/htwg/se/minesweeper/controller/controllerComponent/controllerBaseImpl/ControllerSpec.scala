@@ -197,7 +197,7 @@ class ControllerSpec extends AnyWordSpec{
         
             controller1.doMove(false, move3, game22)
             val resultField = controller1.field
-            resultField.getVisible(2, 1) should not be (Symbols.Bomb)
+            resultField.showVisibleCell(2, 1) should not be (Symbols.Bomb)
         }
     }
 
@@ -218,7 +218,7 @@ class ControllerSpec extends AnyWordSpec{
         "put a move" in {
             val move = Move("open", 1, 1)
             controller.put(move)
-            controller.getControllerField.getVisible(1, 1) should be (Symbols.Covered)
+            controller.getControllerField.showVisibleCell(1, 1) should be (Symbols.Covered)
         }
     }
 
@@ -239,7 +239,7 @@ class ControllerSpec extends AnyWordSpec{
         "make and publish a move" in {
             val move = Move("open", 1, 1)
             controller8.makeAndPublish(controller8.doMove, false, move, game25)
-            controller8.getControllerField.getVisible(1, 1) should not be (Symbols.Empty)
+            controller8.getControllerField.showVisibleCell(1, 1) should not be (Symbols.Empty)
         }
     }
 
@@ -262,7 +262,7 @@ class ControllerSpec extends AnyWordSpec{
         "make and publish a move" in {
             val move = Move("flag", 1, 1)
             controller9.makeAndPublish(controller9.put, move)
-            controller9.field.getVisible(1, 1) should be (Symbols.F)
+            controller9.field.showVisibleCell(1, 1) should be (Symbols.F)
         }
     }
 
@@ -303,7 +303,7 @@ class ControllerSpec extends AnyWordSpec{
 
         "make and publish a move" in {
             controller11.openRec(1, 1, startField)
-            controller11.field.getVisible(1, 1) should not be (Symbols.Empty)
+            controller11.field.showVisibleCell(1, 1) should not be (Symbols.Empty)
         }
     }
 
@@ -370,8 +370,8 @@ class ControllerSpec extends AnyWordSpec{
         }
     }
 
-
-    "def getInvisible" should {
+/* 
+    "def showInvisibleCell" should {
         val game33: IGame = Default.prepareGame
         val startField = game33.getField
 
@@ -384,11 +384,11 @@ class ControllerSpec extends AnyWordSpec{
         }
 
         "make and publish a move" in {
-            controller16.getInvisible(1, 1) should not be (" ")
+            controller16.showInvisibleCell(1, 1) should not be (" ")
         }
-    }
+    } */
 
-    "def get" should {
+    "def showVisibleCell" should {
         val game34: IGame = Default.prepareGame
         val startField = game34.getField
 
@@ -401,26 +401,10 @@ class ControllerSpec extends AnyWordSpec{
         }
 
         "make and publish a move" in {
-            controller17.get(1, 1) should be ("~")
+            controller17.showVisibleCell(1, 1) should be ("~")
         }
     }
 
-    "def getVisible" should {
-        val game35: IGame = Default.prepareGame
-        val startField = game35.getField
-
-        val controller18 = new Controller(using game35)
-        val observer = new Observer {
-        var notified = false
-        override def update(e: NewEvent): Boolean = 
-            notified = true
-            notified
-        }
-
-        "make and publish a move" in {
-            controller18.getVisible(1, 1) should be ("~")
-        }
-    }
 
     "def newGameField" should{
         val game36 = new Game(Status.Playing)

@@ -295,7 +295,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
         (for(
             x <- 0 to bounds;
             y <- 0 to bounds
-            ) yield(x,y, controller.getVisible(x,y))).foreach(t => contents += new CellButton(t._1, t._2, t._3, first))
+            ) yield(x,y, controller.showVisibleCell(x,y))).foreach(t => contents += new CellButton(t._1, t._2, t._3, first))
     }
     
     def setTime = synchronized {
@@ -361,9 +361,9 @@ class GUI(using var controller: IController) extends Frame with Observer:
             case e: MouseClicked if (controller.getSpielbrettState == Status.Won || controller.getSpielbrettState == Status.Lost) =>
             
             case e: MouseClicked if e.peer.getButton == MouseEvent.BUTTON3 => 
-                if (controller.get(x,y) == "~"){
+                if (controller.showVisibleCell(x,y) == "~"){
                     controller.makeAndPublish(controller.put, Move("flag", y, x))
-                } else if (controller.get(x,y) == "F"){
+                } else if (controller.showVisibleCell(x,y) == "F"){
                     controller.makeAndPublish(controller.put, Move("unflag", y, x))
                 } else {
                     println(">> You can't flag an open field")

@@ -27,9 +27,9 @@ trait IController extends Observable{
     def loadPlayerScores(filePath: String): Seq[(String, Int)]
     def saveScoreAndPlayerName(playerName: String, saveScore: Int, filePath: String): Unit
 
-    def get(x: Int, y: Int): String
-    def getInvisible(x: Int, y: Int): String
-    def getVisible(x: Int, y: Int): String
+    def showVisibleCell(x: Int, y: Int): String
+    //def showInvisibleCell(x: Int, y: Int): String
+    //def getVisible(x: Int, y: Int): String
    
     def getFieldSize: Int
     def getSpielbrettState: Status

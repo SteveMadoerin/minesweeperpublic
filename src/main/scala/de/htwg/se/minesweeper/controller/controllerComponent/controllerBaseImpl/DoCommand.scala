@@ -17,7 +17,7 @@ class DoCommand(move: Move) extends Command[IField]:
     override def doStep(field: IField): IField = 
         move.value match {
             case "open" => 
-                val extractedSymbol = field.getInvisible(move.y, move.x)
+                val extractedSymbol = field.showInvisibleCell(move.y, move.x)
                 val returnField = field.put(extractedSymbol, move.y, move.x)
                 returnField
             case "recursion" => 
@@ -41,7 +41,7 @@ class DoCommand(move: Move) extends Command[IField]:
     override def redoStep(field: IField): IField = 
         move.value match {
             case "open" => 
-                val extractedSymbol = field.getInvisible(move.y, move.x)
+                val extractedSymbol = field.showInvisibleCell(move.y, move.x)
                 val returnField = field.put(extractedSymbol, move.y, move.x)
                 returnField
             

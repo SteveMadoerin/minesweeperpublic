@@ -18,7 +18,7 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
     
     def doMove(b: Boolean, move: Move, game: IGame) = 
         field = decider.evaluateStrategy(b, move.x, move.y, field, game)
-        if(field.getInvisible(move.y, move.x) == Symbols.Zero){field}
+        if(field.showInvisibleCell(move.y, move.x) == Symbols.Zero){field}
         else{undoRedoManager.doStep(field, DoCommand(move))}
 
     def loadGame =
@@ -93,7 +93,7 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
 
     def makeAndPublish(makeThis: (Boolean, Move, IGame) => IField, b: Boolean, move: Move, game: IGame): Unit =
         field = makeThis(b, move, game)
-        if (field.getInvisible(move.y, move.x) == Symbols.Zero){field = openRec(move.x,move.y,field)}
+        if (field.showInvisibleCell(move.y, move.x) == Symbols.Zero){field = openRec(move.x,move.y,field)}
         val firstOrNext = if (b) NewEvent.Start else NewEvent.Next
         notifyObservers(firstOrNext)
 
@@ -113,9 +113,8 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
         file.loadPlayerScores(filePath)
     }
 
-    def get(x: Int, y: Int): String = field.getVisible(x,y).toString
-    def getInvisible(x: Int, y: Int): String = field.getInvisible(x,y).toString
-    def getVisible(x: Int, y: Int): String = field.getVisible(x,y).toString
+    def showVisibleCell(x: Int, y: Int): String = field.showVisibleCell(x,y).toString
+    //def showInvisibleCell(x: Int, y: Int): String = field.showInvisibleCell(x,y).toString
 
     def getFieldSize: Int = field.getFieldSize
     def getSpielbrettState: Status = spielbrett.state
