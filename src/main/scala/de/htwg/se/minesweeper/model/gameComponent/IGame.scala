@@ -28,9 +28,6 @@ trait IGame {
     def handleGameState(state: String): Unit
     def checkExit: Boolean
 
-    //def getGame: IGame
-    def setBombs(bombs: Int): Unit
-    def setSide(side: Int): Unit
     def setState(newState: Status): Unit
     def setSideAndBombs(side: Int, bombs: Int): Unit
 

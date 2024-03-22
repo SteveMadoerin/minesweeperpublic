@@ -48,8 +48,8 @@ class FileIO extends IFileIO{
         var game = initGame
 
         game.setTime(time)
-        game.setBombs(bombs)
-        game.setSide(side)
+        game.setSideAndBombs(side, bombs)
+
         gameOption = Some(game)
 
         gameOption match {

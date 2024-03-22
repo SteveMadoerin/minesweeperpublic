@@ -36,12 +36,6 @@ case class Game (var state: Status, bombs : Int = 10, side: Int = 9) extends IGa
         }
     }
 
-/*     def prepareBoard(s: Option[String], realGame: IGame): IField = {
-        realGame.setBombs(optionToList(s)(1))
-        realGame.setSide(optionToList(s)(0))
-        val adjacentField = Playfield()
-        adjacentField.newField(optionToList(s)(0), realGame)
-    } */
     def prepareBoard(s: Option[String]): IField = {
         val (newSide, newBombs) = optionToList(s).splitAt(1)
         val updatedGame = this.copy(side = newSide.head, bombs = newBombs.head)
@@ -221,8 +215,8 @@ case class Game (var state: Status, bombs : Int = 10, side: Int = 9) extends IGa
         placeMines(matrix, 0)
     }
 
-    def setBombs(bombz: Int) = copy(bombs = bombz)
-    def setSide(side: Int) = copy(side = side)
+    //def setBombs(bombz: Int) = copy(bombs = bombz)
+    //def setSide(side: Int) = copy(side = side)
     def setState(newState: Status) = this.state = newState
     def setTime(time: Int) = this.time = time
     def getTime: Int = time
