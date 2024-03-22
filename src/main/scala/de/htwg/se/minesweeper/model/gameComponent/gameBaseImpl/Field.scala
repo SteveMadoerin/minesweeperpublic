@@ -9,10 +9,6 @@ case class Field(matrix: Matrix[Symbols], hidden: Matrix[Symbols]) extends IFiel
     def this(size: Int, filling: Symbols)= this(new Matrix(size, filling), new Matrix(size, Symbols.Empty))
     def this(matrix: Matrix[Symbols])= this(matrix, matrix)
 
-    val visibleMatrix = matrix
-    val invisibleMatrix = hidden
-    
-
     def bar(cellWidth: Int = 3, cellNum: Int = 3) = (("+" + "-" * cellWidth) * cellNum) + "+" + endl
     def cells(row: Int = 3, cellWidth: Int = 3) = matrix.row(row).map(_.toString).map(" " * ((cellWidth-1)/2) + _ + " " *((cellWidth -1)/2)).mkString("|","|","|") + endl
     def mesh(cellWidth: Int = 3) = (0 until size).map(cells(_, cellWidth)).mkString(bar(cellWidth, size), bar(cellWidth, size), bar(cellWidth, size))
@@ -79,8 +75,6 @@ case class Field(matrix: Matrix[Symbols], hidden: Matrix[Symbols]) extends IFiel
     def getFieldSize: Int = size
     def getMatrix: Matrix[Symbols] = matrix
     def getHidden: Matrix[Symbols] = hidden
-
-    def getRealMatrix: Matrix[Symbols] = visibleMatrix //test anpassen
     
     def setInvisibleMatrix(matrix: Matrix[Symbols]): Unit =  copy(hidden = matrix) //matrix
     def setVisibleMatrix(matrix: Matrix[Symbols]): Unit = copy(matrix = matrix)

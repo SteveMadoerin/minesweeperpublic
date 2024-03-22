@@ -178,16 +178,6 @@ class FieldSpec extends AnyWordSpec
                 }
             }
 
-            "def getRealMatrix" should {
-                val sicht77 = new Matrix(4, Symbols.Covered)
-                val unsicht77 = new Matrix(4, Symbols.Eight)
-                val testField77 = new Field(sicht77, unsicht77)
-
-                "should return the visible matrix" in{
-                    val resultVisibleMatrix = testField77.getRealMatrix
-                    resultVisibleMatrix should be (testField77.getVisibleMatrix)
-                }
-            }
 
         }
     }
