@@ -37,7 +37,7 @@ class FileIOXmlSpec extends AnyWordSpec {
       "save the field and reload it" in {
         fileIO2.saveField(field)
         val loadFieldTest = fileIO2.loadField2.get
-        loadFieldTest.getFieldSize should be (1)
+        loadFieldTest.getMatrix.size should be (1)
       }
     }
 
