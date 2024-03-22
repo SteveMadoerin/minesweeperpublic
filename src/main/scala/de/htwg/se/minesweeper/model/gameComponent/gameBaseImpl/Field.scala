@@ -30,7 +30,6 @@ case class Field(matrix: Matrix[Symbols], hidden: Matrix[Symbols]) extends IFiel
         revMat
 
     def put(symbol: Symbols, x: Int, y: Int) = copy(matrix.replaceCell(x, y, symbol))
-    //def get(x: Int, y: Int): Symbols = matrix.cell(x, y)
     def showVisibleCell(x: Int, y: Int): Symbols = matrix.cell(x, y)
     def showInvisibleCell(x: Int, y: Int): Symbols = hidden.cell(x, y)
     def isValidF(row: Int, col: Int, side: Int): Boolean = {row >= 0 && row <= side && col >= 0 && col <= side}
@@ -53,7 +52,7 @@ case class Field(matrix: Matrix[Symbols], hidden: Matrix[Symbols]) extends IFiel
             val newX = x + dx
             val newY = y + dy
 
-            if (isValidF(newY, newX, field.getFieldSize - 1)) {
+            if (isValidF(newY, newX, field.getMatrix.size - 1)) {
                 val currentCell = field.showVisibleCell(newY, newX)
                 val invisibleCell = field.showInvisibleCell(newY, newX)
 
@@ -71,8 +70,7 @@ case class Field(matrix: Matrix[Symbols], hidden: Matrix[Symbols]) extends IFiel
         mysteriousField
     }
 
-    //def getField = this
-    def getFieldSize: Int = size
+    //def getFieldSize: Int = size
     def getMatrix: Matrix[Symbols] = matrix
     def getHidden: Matrix[Symbols] = hidden
     

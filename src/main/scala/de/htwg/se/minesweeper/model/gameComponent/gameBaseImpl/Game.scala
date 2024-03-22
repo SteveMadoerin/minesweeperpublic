@@ -97,7 +97,7 @@ case class Game (var state: Status) extends IGame:
 
 
     def replaceBomb(x: Int, y: Int, field: IField): IField = {
-        val size = field.getFieldSize
+        val size = field.getMatrix.size
         val indices = 0 until size
         val result = indices
             .flatMap(col => indices.map(row => (row, col)))

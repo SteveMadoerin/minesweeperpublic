@@ -58,10 +58,8 @@ trait IField{
     def openNewXXX(x: Int, y: Int, field: IField): IField
     def isValidF(row: Int, col: Int, side: Int): Boolean
     def recursiveMadness(x: Int, y: Int, field: IField): IField
-    def getFieldSize: Int
     def getMatrix: Matrix[Symbols]
     def getHidden: Matrix[Symbols]
-    //def getField: IField
 
     def toString: String
 }

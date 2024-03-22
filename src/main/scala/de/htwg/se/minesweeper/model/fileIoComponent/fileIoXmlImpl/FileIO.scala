@@ -131,20 +131,20 @@ class FileIO extends IFileIO {
 
     def fieldToXml(field: IField) = {
 
-        <field size = {field.getFieldSize.toString}>
+        <field size = {field.getMatrix.size.toString}>
             <matrix>
             {
                 for {
-                    row <- 0 until field.getFieldSize
-                    col <- 0 until field.getFieldSize
+                    row <- 0 until field.getMatrix.size
+                    col <- 0 until field.getMatrix.size
                 } yield cellToXmlVisible(field, row, col)
             }
             </matrix>
             <hidden>
             {
                 for {
-                    row <- 0 until field.getFieldSize
-                    col <- 0 until field.getFieldSize
+                    row <- 0 until field.getMatrix.size
+                    col <- 0 until field.getMatrix.size
                 } yield cellToXmlHidden(field, row, col)
             }
             </hidden>

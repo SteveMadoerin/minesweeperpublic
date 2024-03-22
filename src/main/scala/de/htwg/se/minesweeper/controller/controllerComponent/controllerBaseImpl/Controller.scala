@@ -116,7 +116,7 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
     def showVisibleCell(x: Int, y: Int): String = field.showVisibleCell(x,y).toString
     //def showInvisibleCell(x: Int, y: Int): String = field.showInvisibleCell(x,y).toString
 
-    def getFieldSize: Int = field.getFieldSize
+    def getFieldSize: Int = field.getMatrix.size
     def getSpielbrettState: Status = spielbrett.state
     def getControllerField: IField = field
     def getControllerGame: IGame = game
