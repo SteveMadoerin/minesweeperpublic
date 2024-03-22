@@ -2,8 +2,8 @@ package de.htwg.se.minesweeper.model.gameComponent.gameBaseImpl
 
 import de.htwg.se.minesweeper.model.gameComponent._
 
-case class Field(matrix: IMatrix[Symbols], hidden: IMatrix[Symbols]) extends IField:
-    val size = matrix.getSize
+case class Field(matrix: Matrix[Symbols], hidden: Matrix[Symbols]) extends IField:
+    val size = matrix.size
     val endl = sys.props("line.separator")
 
     def this(size: Int, filling: Symbols)= this(new Matrix(size, filling), new Matrix(size, Symbols.Empty))

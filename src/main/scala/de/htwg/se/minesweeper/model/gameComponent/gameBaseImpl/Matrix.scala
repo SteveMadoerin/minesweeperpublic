@@ -8,8 +8,7 @@ case class Matrix[T] (rows: Vector[Vector[T]]) extends IMatrix[T]:
     
     val size: Int = rows.size
 
-    def getSize: Int = size
-    def getRealMatrix: Matrix[T] = this
+    //def getSize: Int = size //removve sa_02
     def cell(row: Int, col: Int): T = rows(row)(col) // returns value of a cell at given row & column
     def row(row: Int)= rows(row) // returns a Vector, representing entire row at given row Index
     // returns a new matrix with all cells filled with given filling element
