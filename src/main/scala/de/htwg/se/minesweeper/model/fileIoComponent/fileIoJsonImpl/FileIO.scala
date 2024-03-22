@@ -79,7 +79,7 @@ class FileIO extends IFileIO{
                             Json.obj(
                                 "row" -> row,
                                 "col" -> col,
-                                "cell" -> field.get(row, col).toString
+                                "cell" -> field.getVisible(row, col).toString
                             )
                         }
                     ),

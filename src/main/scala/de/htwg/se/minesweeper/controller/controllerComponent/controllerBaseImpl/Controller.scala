@@ -113,7 +113,7 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
         file.loadPlayerScores(filePath)
     }
 
-    def get(x: Int, y: Int): String = field.get(x,y).toString
+    def get(x: Int, y: Int): String = field.getVisible(x,y).toString
     def getInvisible(x: Int, y: Int): String = field.getInvisible(x,y).toString
     def getVisible(x: Int, y: Int): String = field.getVisible(x,y).toString
 

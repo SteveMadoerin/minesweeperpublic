@@ -197,7 +197,7 @@ class ControllerSpec extends AnyWordSpec{
         
             controller1.doMove(false, move3, game22)
             val resultField = controller1.field
-            resultField.get(2, 1) should not be (Symbols.Bomb)
+            resultField.getVisible(2, 1) should not be (Symbols.Bomb)
         }
     }
 
@@ -218,7 +218,7 @@ class ControllerSpec extends AnyWordSpec{
         "put a move" in {
             val move = Move("open", 1, 1)
             controller.put(move)
-            controller.getControllerField.get(1, 1) should be (Symbols.Covered)
+            controller.getControllerField.getVisible(1, 1) should be (Symbols.Covered)
         }
     }
 
@@ -239,7 +239,7 @@ class ControllerSpec extends AnyWordSpec{
         "make and publish a move" in {
             val move = Move("open", 1, 1)
             controller8.makeAndPublish(controller8.doMove, false, move, game25)
-            controller8.getControllerField.get(1, 1) should not be (Symbols.Empty)
+            controller8.getControllerField.getVisible(1, 1) should not be (Symbols.Empty)
         }
     }
 
@@ -262,7 +262,7 @@ class ControllerSpec extends AnyWordSpec{
         "make and publish a move" in {
             val move = Move("flag", 1, 1)
             controller9.makeAndPublish(controller9.put, move)
-            controller9.field.get(1, 1) should be (Symbols.F)
+            controller9.field.getVisible(1, 1) should be (Symbols.F)
         }
     }
 
@@ -303,7 +303,7 @@ class ControllerSpec extends AnyWordSpec{
 
         "make and publish a move" in {
             controller11.openRec(1, 1, startField)
-            controller11.field.get(1, 1) should not be (Symbols.Empty)
+            controller11.field.getVisible(1, 1) should not be (Symbols.Empty)
         }
     }
 

@@ -29,7 +29,7 @@ class DoCommandSpec extends AnyWordSpec{
         "have do step open" in{
             val testField2 = new Field(sicht1, unsicht1)
             val stepField = doCommand.doStep(testField2)
-            stepField.get(1, 1) should be (Symbols.Eight) 
+            stepField.getVisible(1, 1) should be (Symbols.Eight) 
 
         }
 
@@ -59,7 +59,7 @@ class DoCommandSpec extends AnyWordSpec{
         "have do step flag" in{
             val testField6 = new Field(sicht1, unsicht1)
             val stepField3 = doCommand2.doStep(testField6)
-            stepField3.get(1, 1) should be (Symbols.F) 
+            stepField3.getVisible(1, 1) should be (Symbols.F) 
 
         }
 
@@ -89,7 +89,7 @@ class DoCommandSpec extends AnyWordSpec{
         "have do step unflag" in{
             val testField10 = new Field(sicht1, unsicht1)
             val stepField6 = doCommand3.doStep(testField10)
-            stepField6.get(1, 1) should be (Symbols.Covered) 
+            stepField6.getVisible(1, 1) should be (Symbols.Covered) 
 
         }
 

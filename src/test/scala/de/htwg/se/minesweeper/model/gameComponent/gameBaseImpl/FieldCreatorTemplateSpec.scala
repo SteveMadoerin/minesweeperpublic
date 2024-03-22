@@ -14,7 +14,7 @@ class FieldCreatorTemplateSpec extends AnyWordSpec{
             testGame.bombs = 1
 
             val result = testfield.newField(3, testGame)
-            result.get(1,1) should be (Symbols.Covered)
+            result.getVisible(1,1) should be (Symbols.Covered)
         }
     }
 

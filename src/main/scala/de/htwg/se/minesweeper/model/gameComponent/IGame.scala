@@ -53,7 +53,7 @@ trait IField{
     def reveal: IField
 
     def put(symbol: Symbols, x: Int, y: Int): IField
-    def get(x: Int, y: Int): Symbols
+    //def get(x: Int, y: Int): Symbols
     def getVisible(x: Int, y: Int): Symbols
     def getInvisible(x: Int, y: Int): Symbols
     def openNewXXX(x: Int, y: Int, field: IField): IField
