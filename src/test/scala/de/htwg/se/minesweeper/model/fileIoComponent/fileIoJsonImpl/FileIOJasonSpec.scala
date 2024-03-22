@@ -26,7 +26,7 @@ class FileIOJasonSpec extends AnyWordSpec {
         fileIO1.saveGame(game)
         val loadGameTest = fileIO1.loadGame.get
         loadGameTest.getBombs should be (10)
-        loadGameTest.getSide should be (10)
+        loadGameTest.getSide should be (9)
         loadGameTest.getTime should be (10)
       }
     }

@@ -10,10 +10,11 @@ class StrategySpec extends AnyWordSpec{
 
     "it" should {
         "use the first move strategy" in {
+            var spielbrett = GameState
             val decider = new Decider()
-            var game = new Game(Status.Playing, 2, 1)
+            var game = new Game(Status.Playing, 10, 9)
             game.setField()
-            val unsichtbar = Matrix(Vector(Vector(Symbols.One, Symbols.One), Vector(Symbols.One, Symbols.Bomb)))
+            val unsichtbar = Matrix(Vector(Vector(Symbols.One, Symbols.One), Vector(Symbols.One, Symbols.One)))
             val sichtbar = Matrix(Vector(Vector(Symbols.Covered, Symbols.Covered), Vector(Symbols.Covered, Symbols.Covered)))
             val field = Field(sichtbar, unsichtbar)
 

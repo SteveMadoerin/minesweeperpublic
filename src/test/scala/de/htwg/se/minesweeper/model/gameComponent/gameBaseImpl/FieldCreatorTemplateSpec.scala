@@ -20,7 +20,7 @@ class FieldCreatorTemplateSpec extends AnyWordSpec{
         "create a playfield" in {
             var spielbrett1 = GameState
             val testfield2 = new Playfield
-            val testGame2 = new Game(Status.Playing, 3, 1)
+            val testGame2 = new Game(Status.Playing, 3, 3)
             testGame2.setField()
 
             val result2 = testfield2.newField(3, testGame2)
@@ -32,7 +32,7 @@ class FieldCreatorTemplateSpec extends AnyWordSpec{
         "create a minefield" in {
             var spielbrett2 = GameState
             val testfield3 = new Minefield
-            val testGame3 = new Game(Status.Playing, 3, 1)
+            val testGame3 = new Game(Status.Playing, 3, 3)
             testGame3.setField()
 
             val result2 = testfield3.newField(3, testGame3)

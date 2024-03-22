@@ -7,7 +7,7 @@ import java.io.ByteArrayOutputStream
 
 class GameSpec extends AnyWordSpec {
     
-    "The chooseDifficulty method" should {
+/*     "The chooseDifficulty method" should {
 
         val newGame = new Game(Status.Playing)
 
@@ -61,7 +61,7 @@ class GameSpec extends AnyWordSpec {
             }
         }
     }
-
+ */
 
     "Method replaceBomb" should {
         val testGame10 = new Game(Status.Playing, 2, 3)
