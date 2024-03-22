@@ -89,29 +89,37 @@ case class Game (var state: Status) extends IGame:
 
     def getStatus: Status = state
 
-    def openNew(x: Int, y: Int, field: IField): IField =
+    def openNew(x: Int, y: Int, field: IField): IField = {
         val extractedSymbol = field.getInvisible(y, x)
         val returnField = field.put(extractedSymbol, y, x)
         returnField
+    }
 
-    def replaceBomb(x: Int, y: Int, field: IField): IField =
+
+    def replaceBomb(x: Int, y: Int, field: IField): IField = {
         val size = field.getFieldSize
         val indices = 0 until size
-        val result =indices
-            .flatMap(col => indices.map(row => (row, col))
-            .filter((row, col) => field.getHidden.cell(row, col) != Symbols.Bomb))
-    
-        val rand = Random.nextInt(result.size)
-        val newX = result(rand)._1
-        val newY = result(rand)._2
-    
-        field.setInvisibleMatrix(field.getHidden.replaceCell(newY, newX, Symbols.Bomb))
+        val result = indices
+            .flatMap(col => indices.map(row => (row, col)))
+            .filter { case (row, col) => field.getHidden.cell(row, col) != Symbols.Bomb }
 
-        field.setInvisibleMatrix(field.getHidden.replaceCell(y, x, Symbols.Empty))
-        field.setVisibleMatrix(field.getMatrix.replaceCell(y, x, Symbols.Covered))
-        field.setInvisibleMatrix(initializeAdjacentNumbers(field.getHidden))
-        field
-    
+        val rand = Random.nextInt(result.size)
+        val (newX, newY) = result(rand)
+
+        val newHiddenMatrixWithBomb = field.getHidden.replaceCell(newY, newX, Symbols.Bomb)
+        val newHiddenMatrixWithoutBomb = newHiddenMatrixWithBomb.replaceCell(y, x, Symbols.Empty)
+        val newHiddenMatrixWithNumbers = initializeAdjacentNumbers(newHiddenMatrixWithoutBomb)
+
+        val newVisibleMatrix = field.getMatrix.replaceCell(y, x, Symbols.Covered)
+
+        field match {
+            case f: Field => f.copy(
+                hidden = newHiddenMatrixWithNumbers,
+                matrix = newVisibleMatrix
+            )
+            case _ => field 
+        }
+    }
 
 
     def calcCovered(visibleMatrix: Matrix[Symbols]): Int =

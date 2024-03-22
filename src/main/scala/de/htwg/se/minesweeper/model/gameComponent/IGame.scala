@@ -63,8 +63,8 @@ trait IField{
     def getMatrix: Matrix[Symbols]
     def getHidden: Matrix[Symbols]
     def getField: IField
-    def setInvisibleMatrix(matrix: Matrix[Symbols]): Unit
-    def setVisibleMatrix(matrix: Matrix[Symbols]): Unit
+    //def setInvisibleMatrix(matrix: Matrix[Symbols]): Unit
+    //def setVisibleMatrix(matrix: Matrix[Symbols]): Unit
 
     def toString: String
 }

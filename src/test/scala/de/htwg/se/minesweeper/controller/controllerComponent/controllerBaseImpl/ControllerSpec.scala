@@ -179,7 +179,7 @@ class ControllerSpec extends AnyWordSpec{
         game22.setField()
         game22.bombs = 2
         game22.side = 3
-        val invisible = emptyField.invisibleMatrix.replaceCell(1, 1, Symbols.Bomb)	
+        val invisible = emptyField.hidden.replaceCell(1, 1, Symbols.Bomb)	
         val testField = new Field(emptyField.matrix, invisible)
         val move3 = Move("open", 1 ,1)
 
