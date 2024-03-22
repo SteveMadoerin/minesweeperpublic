@@ -1,7 +1,7 @@
 package de.htwg.se.minesweeper.model.fileIoComponent.fileIoXmlImpl
 
 import de.htwg.se.minesweeper.model.fileIoComponent.IFileIO
-import de.htwg.se.minesweeper.model.gameComponent.{IGame, IField, IMatrix}
+import de.htwg.se.minesweeper.model.gameComponent.{IGame, IField}
 import de.htwg.se.minesweeper.model.gameComponent.gameBaseImpl._
 import de.htwg.se.minesweeper.Default.{given}
 import de.htwg.se.minesweeper.Default
@@ -76,8 +76,8 @@ class FileIO extends IFileIO {
 
     override def loadField2: Option[IField] = {
         var fieldOption: Option[IField] = None
-        var matrixOption: Option[IMatrix[Symbols]] = None
-        var hiddenOption: Option[IMatrix[Symbols]] = None
+        var matrixOption: Option[Matrix[Symbols]] = None
+        var hiddenOption: Option[Matrix[Symbols]] = None
 
         val file = scala.xml.XML.loadFile("C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\field.xml")
         val size = (file \\ "field" \@ "size").toInt

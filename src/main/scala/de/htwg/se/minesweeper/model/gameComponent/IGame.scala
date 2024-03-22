@@ -1,6 +1,6 @@
 package de.htwg.se.minesweeper.model.gameComponent
 
-import de.htwg.se.minesweeper.model.gameComponent.gameBaseImpl.{Symbols, Status}
+import de.htwg.se.minesweeper.model.gameComponent.gameBaseImpl.{Symbols, Status, Matrix}
 
 
 trait IGame {
@@ -14,16 +14,16 @@ trait IGame {
     def openNew(x: Int, y: Int, field: IField): IField
     def replaceBomb(x: Int, y: Int, field: IField): IField
    
-    def calcFlag(visibleMatrix: IMatrix[Symbols]): Int
-    def addCoveredAndFlag(visibleMatrix: IMatrix[Symbols]): Int
-    def calcMineAndFlag(visibleMatrix: IMatrix[Symbols]): Int
-    def calcAdjacentMines(row: Int, col: Int, side: Int, invisibleMatrix: IMatrix[Symbols]): Int
-    def calcWonOrLost(visibleMatrix: IMatrix[Symbols], mines: Int): Boolean
+    def calcFlag(visibleMatrix: Matrix[Symbols]): Int
+    def addCoveredAndFlag(visibleMatrix: Matrix[Symbols]): Int
+    def calcMineAndFlag(visibleMatrix: Matrix[Symbols]): Int
+    def calcAdjacentMines(row: Int, col: Int, side: Int, invisibleMatrix: Matrix[Symbols]): Int
+    def calcWonOrLost(visibleMatrix: Matrix[Symbols], mines: Int): Boolean
 
     def isValid(row: Int, col: Int, side: Int): Boolean
 
-    def initializeAdjacentNumbers(matrix: IMatrix[Symbols]): IMatrix[Symbols]
-    def intitializeBombs(matrix: IMatrix[Symbols], bombs: Int): IMatrix[Symbols]
+    def initializeAdjacentNumbers(matrix: Matrix[Symbols]): Matrix[Symbols]
+    def intitializeBombs(matrix: Matrix[Symbols], bombs: Int): Matrix[Symbols]
 
     def handleGameState(state: String): Unit
     def checkExit: Boolean
@@ -60,26 +60,17 @@ trait IField{
     def isValidF(row: Int, col: Int, side: Int): Boolean
     def recursiveMadness(x: Int, y: Int, field: IField): IField
     def getFieldSize: Int
-    def getMatrix: IMatrix[Symbols]
-    def getHidden: IMatrix[Symbols]
-    def getVisibleMatrix: IMatrix[Symbols]
-    def getInvisibleMatrix: IMatrix[Symbols]
+    def getMatrix: Matrix[Symbols]
+    def getHidden: Matrix[Symbols]
+    def getVisibleMatrix: Matrix[Symbols]
+    def getInvisibleMatrix: Matrix[Symbols]
     def getField: IField
-    def setInvisibleMatrix(matrix: IMatrix[Symbols]): Unit
-    def setVisibleMatrix(matrix: IMatrix[Symbols]): Unit
+    def setInvisibleMatrix(matrix: Matrix[Symbols]): Unit
+    def setVisibleMatrix(matrix: Matrix[Symbols]): Unit
 
     def toString: String
 }
 
-trait IMatrix[T] {
-    def getSize: Int
-    def cell(row: Int, col: Int): T
-    def row(row: Int): Vector[T]
-    def replaceCell(row: Int, col: Int, cell: T): IMatrix[T]
-    def fill(filling: T): IMatrix[T]
-    def getRealMatrix: IMatrix[T]
-    def toString: String
-}
 
 
 

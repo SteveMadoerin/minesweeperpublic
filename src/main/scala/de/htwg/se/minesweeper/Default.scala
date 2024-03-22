@@ -21,9 +21,9 @@ object Default{
     given IFileIO = new XmlFileIO() //choose Implementation here
     val filePathHighScore = "C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\highscore.xml"
 
-    def scalableMatrix(size: Int, filling: Symbols): IMatrix[Symbols] = new Matrix(size, filling)
+    def scalableMatrix(size: Int, filling: Symbols): Matrix[Symbols] = new Matrix(size, filling)
     def scalableField(size: Int, filling: Symbols): IField = new Field(size, filling)
-    def mergeMatrixToField(sichtbar: IMatrix[Symbols], unsichtbar: IMatrix[Symbols] ): IField = new Field(sichtbar, unsichtbar)
+    def mergeMatrixToField(sichtbar: Matrix[Symbols], unsichtbar: Matrix[Symbols] ): IField = new Field(sichtbar, unsichtbar)
 
     // NEW
     def prepareGame = {

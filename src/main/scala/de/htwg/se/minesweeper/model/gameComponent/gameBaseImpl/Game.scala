@@ -114,25 +114,25 @@ case class Game (var state: Status) extends IGame:
     
 
 
-    def calcCovered(visibleMatrix: IMatrix[Symbols]): Int =
-        val sizze = visibleMatrix.getSize-1
+    def calcCovered(visibleMatrix: Matrix[Symbols]): Int =
+        val sizze = visibleMatrix.size -1
         val multiIndex = 0 to sizze
         multiIndex
             .flatMap(row => multiIndex.map(col => (row, col)))
             .count{ case(row, col) => visibleMatrix.cell(row, col) == Symbols.Covered && isValid(row, col, sizze)}
 
-    def calcFlag(visibleMatrix: IMatrix[Symbols]): Int =
-        val sizze = visibleMatrix.getSize-1
+    def calcFlag(visibleMatrix: Matrix[Symbols]): Int =
+        val sizze = visibleMatrix.size -1
         val multiIndex = 0 to sizze
         multiIndex
             .flatMap(row => multiIndex.map(col => (row, col))) //.flatMap and .map to create a new collection of all possible (row, col) pairs
             .count { case (row, col) => visibleMatrix.cell(row, col) == Symbols.F && isValid(row, col, sizze) } // count pairs that meet the condition
 
-    def addCoveredAndFlag(visibleMatrix: IMatrix[Symbols]): Int = (calcCovered(visibleMatrix) + calcFlag(visibleMatrix))
+    def addCoveredAndFlag(visibleMatrix: Matrix[Symbols]): Int = (calcCovered(visibleMatrix) + calcFlag(visibleMatrix))
 
-    def calcMineAndFlag(visibleMatrix: IMatrix[Symbols]): Int = (this.bombs - calcFlag(visibleMatrix))
+    def calcMineAndFlag(visibleMatrix: Matrix[Symbols]): Int = (this.bombs - calcFlag(visibleMatrix))
 
-    def calcAdjacentMines(row: Int, col: Int, side: Int, invisibleMatrix: IMatrix[Symbols]): Int = {
+    def calcAdjacentMines(row: Int, col: Int, side: Int, invisibleMatrix: Matrix[Symbols]): Int = {
 
         val neighbors = List(
             (row - 1, col), // NORTH
@@ -149,7 +149,7 @@ case class Game (var state: Status) extends IGame:
         neighbors.count { case (r, c) => isValid(r, c, side) && isMine(r, c, invisibleMatrix) }
     }
 
-    def calcWonOrLost(visibleMatrix: IMatrix[Symbols], mines: Int): Boolean = (mines+1 - addCoveredAndFlag(visibleMatrix) == 0)
+    def calcWonOrLost(visibleMatrix: Matrix[Symbols], mines: Int): Boolean = (mines+1 - addCoveredAndFlag(visibleMatrix) == 0)
 
     def handleGameState(state: String) = 
         state match{
@@ -158,11 +158,11 @@ case class Game (var state: Status) extends IGame:
             case _ => GameState.handle(PlayEvent())
         }
     
-    def isMine(row: Int, col: Int, m: IMatrix[Symbols]): Boolean = {if(m.cell(row, col) == Symbols.Bomb) true else false}
+    def isMine(row: Int, col: Int, m: Matrix[Symbols]): Boolean = {if(m.cell(row, col) == Symbols.Bomb) true else false}
     def isValid(row: Int, col: Int, side: Int): Boolean = {row >= 0 && row <= side && col >= 0 && col <= side}
 
-    def initializeAdjacentNumbers(matrix: IMatrix[Symbols]): IMatrix[Symbols] =
-        val si = matrix.getSize - 1
+    def initializeAdjacentNumbers(matrix: Matrix[Symbols]): Matrix[Symbols] =
+        val si = matrix.size - 1
         val multiIndex = 0 to si
         multiIndex
             .flatMap(col => multiIndex.map(row => (row, col))) // .flatMap and .map to create collection of all possible (row, col) pairs
@@ -186,12 +186,12 @@ case class Game (var state: Status) extends IGame:
             }
 
     
-    def intitializeBombs(matrix: IMatrix[Symbols], bombs: Int): IMatrix[Symbols] = {
-        val sizze = matrix.getSize - 1
+    def intitializeBombs(matrix: Matrix[Symbols], bombs: Int): Matrix[Symbols] = {
+        val sizze = matrix.size - 1
         val random = new Random()
 
         @tailrec
-        def placeMines(ma: IMatrix[Symbols], minesPlaced: Int): IMatrix[Symbols] = {
+        def placeMines(ma: Matrix[Symbols], minesPlaced: Int): Matrix[Symbols] = {
             if (minesPlaced >= bombs) ma
             else {
                 val row = random.nextInt(sizze)

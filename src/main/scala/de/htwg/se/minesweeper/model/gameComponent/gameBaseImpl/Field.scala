@@ -2,12 +2,12 @@ package de.htwg.se.minesweeper.model.gameComponent.gameBaseImpl
 
 import de.htwg.se.minesweeper.model.gameComponent._
 
-case class Field(matrix: IMatrix[Symbols], hidden: IMatrix[Symbols]) extends IField:
-    val size = matrix.getSize
+case class Field(matrix: Matrix[Symbols], hidden: Matrix[Symbols]) extends IField:
+    val size = matrix.size
     val endl = sys.props("line.separator")
 
     def this(size: Int, filling: Symbols)= this(new Matrix(size, filling), new Matrix(size, Symbols.Empty))
-    def this(matrix: IMatrix[Symbols])= this(matrix, matrix)
+    def this(matrix: Matrix[Symbols])= this(matrix, matrix)
 
     var visibleMatrix = matrix
     var invisibleMatrix = hidden
@@ -21,7 +21,7 @@ case class Field(matrix: IMatrix[Symbols], hidden: IMatrix[Symbols]) extends IFi
     def removeFlag(x: Int, y: Int) = copy(matrix.replaceCell(y, x, Symbols.Covered))
 
     def open(x: Int, y: Int, spiel: IGame): IField =
-        if(this.invisibleMatrix.cell(y, x) == Symbols.Bomb){spiel.handleGameState("Lost")} else if(spiel.calcWonOrLost(this.getVisibleMatrix, spiel.getBombs)){spiel.handleGameState("Won")}
+        if(this.invisibleMatrix.cell(y, x) == Symbols.Bomb){spiel.handleGameState("Lost")} else if(spiel.calcWonOrLost(this.visibleMatrix, spiel.getBombs)){spiel.handleGameState("Won")}
         val extractedSymbol = this.getInvisible(y, x)
         val returnField = this.put(extractedSymbol, y, x)
         returnField
@@ -77,12 +77,13 @@ case class Field(matrix: IMatrix[Symbols], hidden: IMatrix[Symbols]) extends IFi
 
     def getField = this
     def getFieldSize: Int = size
-    def getMatrix: IMatrix[Symbols] = matrix
-    def getHidden: IMatrix[Symbols] = hidden
-    def getVisibleMatrix: IMatrix[Symbols] = visibleMatrix
-    def getInvisibleMatrix: IMatrix[Symbols] = invisibleMatrix
-    def getRealMatrix: IMatrix[Symbols] = matrix
+    def getMatrix: Matrix[Symbols] = matrix
+    def getHidden: Matrix[Symbols] = hidden
+    def getVisibleMatrix: Matrix[Symbols] = visibleMatrix
+    def getInvisibleMatrix: Matrix[Symbols] = invisibleMatrix
+    def getRealMatrix: Matrix[Symbols] = matrix
+    
 
-    def setInvisibleMatrix(matrix: IMatrix[Symbols]): Unit = invisibleMatrix = matrix
-    def setVisibleMatrix(matrix: IMatrix[Symbols]): Unit = visibleMatrix = matrix
+    def setInvisibleMatrix(matrix: Matrix[Symbols]): Unit = invisibleMatrix = matrix
+    def setVisibleMatrix(matrix: Matrix[Symbols]): Unit = visibleMatrix = matrix
     override def toString(): String = mesh()

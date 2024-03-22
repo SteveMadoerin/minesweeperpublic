@@ -1,15 +1,14 @@
 package de.htwg.se.minesweeper.model.fileIoComponent.fileIoJsonImpl
 
 import de.htwg.se.minesweeper.model.fileIoComponent.IFileIO
-import de.htwg.se.minesweeper.model.gameComponent.IGame
-import de.htwg.se.minesweeper.model.gameComponent.IField
+import de.htwg.se.minesweeper.model.gameComponent.{IGame, IField}
 import scala.io.Source
 import java.io._
 import play.api.libs.json._
 import de.htwg.se.minesweeper.Default.{given}
 import de.htwg.se.minesweeper.Default
 import de.htwg.se.minesweeper.model.gameComponent.gameBaseImpl.Symbols
-import de.htwg.se.minesweeper.model.gameComponent.IMatrix
+import de.htwg.se.minesweeper.model.gameComponent.gameBaseImpl.Matrix
 
 
 class FileIO extends IFileIO{
@@ -123,8 +122,8 @@ class FileIO extends IFileIO{
     override def loadField2: Option[IField] = {
 
         var fieldOption: Option[IField] = None
-        var matrixOption: Option[IMatrix[Symbols]] = None
-        var hiddenOption: Option[IMatrix[Symbols]] = None
+        var matrixOption: Option[Matrix[Symbols]] = None
+        var hiddenOption: Option[Matrix[Symbols]] = None
 
         val source: String = Source.fromFile("C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\field.json").getLines.mkString
         val json: JsValue = Json.parse(source)
