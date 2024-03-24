@@ -85,7 +85,9 @@ case class Game (var state: Status, bombs : Int = 10, side: Int = 9) extends IGa
     def getSide: Int = side
     def getBombs: Int = bombs
 
-    def getStatus: Status = state
+    def getStatus: Status = {
+        state
+    }
 
     def openNew(x: Int, y: Int, field: IField): IField = {
         val extractedSymbol = field.showInvisibleCell(y, x)
@@ -157,11 +159,19 @@ case class Game (var state: Status, bombs : Int = 10, side: Int = 9) extends IGa
 
     def calcWonOrLost(visibleMatrix: Matrix[Symbols], mines: Int): Boolean = (mines+1 - addCoveredAndFlag(visibleMatrix) == 0)
 
-    def handleGameState(state: String) = 
-        state match{
-            case "Won" => GameState.handle(WonEvent())
-            case "Lost" => GameState.handle(LostEvent())
-            case _ => GameState.handle(PlayEvent())
+    def handleGameState(stateAsString: String) = 
+        stateAsString match{
+            case "Won" => {
+                this.state = Status.Won
+                println("Game is won")
+            }
+            case "Lost" => {
+                this.state = Status.Lost
+                println("Game is lost")
+            }
+            case _ => {
+                this.state = Status.Playing
+            }
         }
     
     def isMine(row: Int, col: Int, m: Matrix[Symbols]): Boolean = {if(m.cell(row, col) == Symbols.Bomb) true else false}
@@ -215,11 +225,9 @@ case class Game (var state: Status, bombs : Int = 10, side: Int = 9) extends IGa
         placeMines(matrix, 0)
     }
 
-    //def setBombs(bombz: Int) = copy(bombs = bombz)
-    //def setSide(side: Int) = copy(side = side)
-    def setState(newState: Status) = this.state = newState
+    def setState(newState: Status) = copy(state = newState)
     def setTime(time: Int) = this.time = time
     def getTime: Int = time
     
-    def checkExit = if GameState.state == Status.Lost || GameState.state == Status.Won then true else false
+    def checkExit = if this.state == Status.Lost || this.state == Status.Won then true else false
 

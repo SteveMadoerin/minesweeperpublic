@@ -9,7 +9,7 @@ import de.htwg.se.minesweeper.model.gameComponent.gameBaseImpl._
 import de.htwg.se.minesweeper.util.{Observer, Move}
 
 import java.io.ByteArrayOutputStream
-import de.htwg.se.minesweeper.util.NewEvent
+import de.htwg.se.minesweeper.util.Event
 import de.htwg.se.minesweeper.Default.{given}
 import de.htwg.se.minesweeper.controller.controllerComponent.IController
 import de.htwg.se.minesweeper.model.gameComponent.IGame
@@ -45,7 +45,7 @@ class ControllerSpec extends AnyWordSpec{
  
         val observer = new Observer {
             var notified = false
-            override def update(e: NewEvent): Boolean = 
+            override def update(e: Event): Boolean = 
                 notified = true
                 notified
         }
@@ -65,7 +65,7 @@ class ControllerSpec extends AnyWordSpec{
         val controller = new Controller(using game)
         val observer = new Observer {
             var notified = false
-            override def update(e: NewEvent): Boolean = 
+            override def update(e: Event): Boolean = 
                 notified = true
                 notified
         }
@@ -84,7 +84,7 @@ class ControllerSpec extends AnyWordSpec{
         val controller = new Controller(using game)
         val observer = new Observer {
         var notified = false
-        override def update(e: NewEvent): Boolean = 
+        override def update(e: Event): Boolean = 
             notified = true
             notified
         }
@@ -104,7 +104,7 @@ class ControllerSpec extends AnyWordSpec{
         val controller5 = new Controller(using game)
         val observer = new Observer {
         var notified = false
-        override def update(e: NewEvent): Boolean = 
+        override def update(e: Event): Boolean = 
             notified = true
             notified
         }
@@ -151,7 +151,7 @@ class ControllerSpec extends AnyWordSpec{
         val controller7 = new Controller(using game4)
         val observer = new Observer {
         var notified = false
-        override def update(e: NewEvent): Boolean = 
+        override def update(e: Event): Boolean = 
             notified = true
             notified
         }
@@ -177,7 +177,7 @@ class ControllerSpec extends AnyWordSpec{
 
         var notified = false
         val observer = new Observer {
-        override def update(e: NewEvent): Boolean = 
+        override def update(e: Event): Boolean = 
             notified = true
             notified
         }
@@ -199,7 +199,7 @@ class ControllerSpec extends AnyWordSpec{
         val controller = new Controller(using game24)
         val observer = new Observer {
         var notified = false
-        override def update(e: NewEvent): Boolean = 
+        override def update(e: Event): Boolean = 
             notified = true
             notified
         }
@@ -220,7 +220,7 @@ class ControllerSpec extends AnyWordSpec{
     
         val observer = new Observer {
         var notified = false
-        override def update(e: NewEvent): Boolean = 
+        override def update(e: Event): Boolean = 
             notified = true
             notified
         }
@@ -241,7 +241,7 @@ class ControllerSpec extends AnyWordSpec{
         val controller9 = new Controller(using game26)
         val observer = new Observer {
         var notified = false
-        override def update(e: NewEvent): Boolean = 
+        override def update(e: Event): Boolean = 
             notified = true
             notified
         }
@@ -262,7 +262,7 @@ class ControllerSpec extends AnyWordSpec{
         val controller10 = new Controller(using game27)
         val observer = new Observer {
         var notified = false
-        override def update(e: NewEvent): Boolean = 
+        override def update(e: Event): Boolean = 
             notified = true
             notified
         }
@@ -281,7 +281,7 @@ class ControllerSpec extends AnyWordSpec{
         val controller11 = new Controller(using game28)
         val observer = new Observer {
         var notified = false
-        override def update(e: NewEvent): Boolean = 
+        override def update(e: Event): Boolean = 
             notified = true
             notified
         }
@@ -300,7 +300,7 @@ class ControllerSpec extends AnyWordSpec{
         val controller12 = new Controller(using game29)
         val observer = new Observer {
         var notified = false
-        override def update(e: NewEvent): Boolean = 
+        override def update(e: Event): Boolean = 
             notified = true
             notified
         }
@@ -318,7 +318,7 @@ class ControllerSpec extends AnyWordSpec{
         val controller14 = new Controller(using game31)
         val observer = new Observer {
         var notified = false
-        override def update(e: NewEvent): Boolean = 
+        override def update(e: Event): Boolean = 
             notified = true
             notified
         }
@@ -335,7 +335,7 @@ class ControllerSpec extends AnyWordSpec{
         val controller15 = new Controller(using game32)
         val observer = new Observer {
         var notified = false
-        override def update(e: NewEvent): Boolean = 
+        override def update(e: Event): Boolean = 
             notified = true
             notified
         }
@@ -344,7 +344,7 @@ class ControllerSpec extends AnyWordSpec{
             val in = new java.io.ByteArrayInputStream("steve\n0\n".getBytes)
                 Console.withIn(in){
                     controller15.newGame(5 , 5)
-                    controller15.notifyObservers(NewEvent.NewGame)
+                    controller15.notifyObservers(Event.NewGame)
                 }
             
         }
@@ -358,7 +358,7 @@ class ControllerSpec extends AnyWordSpec{
         val controller17 = new Controller(using game34)
         val observer = new Observer {
         var notified = false
-        override def update(e: NewEvent): Boolean = 
+        override def update(e: Event): Boolean = 
             notified = true
             notified
         }
@@ -376,14 +376,14 @@ class ControllerSpec extends AnyWordSpec{
         val controller19 = new Controller(using game36)
         val observer = new Observer {
         var notified = false
-        override def update(e: NewEvent): Boolean = 
+        override def update(e: Event): Boolean = 
             notified = true
             notified
         }
 
         "make and publish a move" in {
             controller19.newGameField(Some("Easy"))
-            controller19.notifyObservers(NewEvent.NewGame)
+            controller19.notifyObservers(Event.NewGame)
         }
     }
 
@@ -394,7 +394,7 @@ class ControllerSpec extends AnyWordSpec{
         val controller20 = new Controller(using game37)
         val observer = new Observer {
         var notified = false
-        override def update(e: NewEvent): Boolean = 
+        override def update(e: Event): Boolean = 
             notified = true
             notified
         }
@@ -411,7 +411,7 @@ class ControllerSpec extends AnyWordSpec{
         val controller21 = new Controller(using game38)
         val observer = new Observer {
         var notified = false
-        override def update(e: NewEvent): Boolean = 
+        override def update(e: Event): Boolean = 
             notified = true
             notified
         }
@@ -429,7 +429,7 @@ class ControllerSpec extends AnyWordSpec{
         val controller22 = new Controller(using game39)
         val observer = new Observer {
         var notified = false
-        override def update(e: NewEvent): Boolean = 
+        override def update(e: Event): Boolean = 
             notified = true
             notified
         }
@@ -447,7 +447,7 @@ class ControllerSpec extends AnyWordSpec{
         val controller24 = new Controller(using game41)
         val observer = new Observer {
         var notified = false
-        override def update(e: NewEvent): Boolean =
+        override def update(e: Event): Boolean =
             notified = true
             notified
         }
@@ -468,7 +468,7 @@ class ControllerSpec extends AnyWordSpec{
         val observer = new Observer {
         var notified = false
 
-        override def update(e: NewEvent): Boolean =
+        override def update(e: Event): Boolean =
             notified = true
             notified
         }
@@ -488,7 +488,7 @@ class ControllerSpec extends AnyWordSpec{
         val observer = new Observer {
         var notified = false
 
-        override def update(e: NewEvent): Boolean =
+        override def update(e: Event): Boolean =
             notified = true
             notified
         }

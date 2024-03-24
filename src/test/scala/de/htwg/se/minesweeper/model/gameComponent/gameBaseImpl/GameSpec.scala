@@ -97,10 +97,10 @@ class GameSpec extends AnyWordSpec {
 
     "Method check exit" should {
         "return false game is in Status playing" in {
-            val testGame55 = new Game(Status.Playing, 1, 3)	
-            val testB = GameState
+            var testGame55 = new Game(Status.Playing, 1, 3)	
+            val testB = "Playing"
 
-            testB.handle(new PlayEvent)
+            testGame55.handleGameState(testB)
 
             testGame55.checkExit should be (false)
 

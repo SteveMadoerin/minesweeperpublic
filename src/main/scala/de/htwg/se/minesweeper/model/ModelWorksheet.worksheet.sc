@@ -1,3 +1,4 @@
+import de.htwg.se.minesweeper.Default
 object HelloTest{
     def main(args: Array[String]): Unit = {
         printTest(1,2,7,8,9)
@@ -190,3 +191,11 @@ val squareRoot: PartialFunction[Double, Double] = {
 // a Partial Function has the method isDefined
 squareRoot.isDefinedAt(2)
 squareRoot.isDefinedAt(-2)
+
+
+
+var testGame1 = Default.prepareGame
+val status = testGame1.getStatus
+testGame1.handleGameState("Lost")
+testGame1.handleGameState("Won")
+testGame1.getStatus

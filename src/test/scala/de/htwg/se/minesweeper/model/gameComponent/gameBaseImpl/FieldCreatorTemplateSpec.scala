@@ -18,7 +18,6 @@ class FieldCreatorTemplateSpec extends AnyWordSpec{
 
     "the Template method" should{
         "create a playfield" in {
-            var spielbrett1 = GameState
             val testfield2 = new Playfield
             val testGame2 = new Game(Status.Playing, 3, 3)
             testGame2.setField()
@@ -30,7 +29,6 @@ class FieldCreatorTemplateSpec extends AnyWordSpec{
 
     "the Template method .." should{
         "create a minefield" in {
-            var spielbrett2 = GameState
             val testfield3 = new Minefield
             val testGame3 = new Game(Status.Playing, 3, 3)
             testGame3.setField()

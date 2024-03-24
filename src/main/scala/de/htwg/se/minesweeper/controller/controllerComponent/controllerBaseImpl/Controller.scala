@@ -3,16 +3,15 @@ package de.htwg.se.minesweeper.controller.controllerComponent.controllerBaseImpl
 import de.htwg.se.minesweeper.controller.controllerComponent.IController
 import de.htwg.se.minesweeper.model.gameComponent.gameBaseImpl._
 import de.htwg.se.minesweeper.model.gameComponent._
-import de.htwg.se.minesweeper.util.{Observable, Move, UndoRedoManager, NewEvent}
+import de.htwg.se.minesweeper.util.{Observable, Move, UndoRedoManager, Event}
 
 import de.htwg.se.minesweeper.Default.{given}
 import de.htwg.se.minesweeper.model.fileIoComponent.IFileIO
-import de.htwg.se.minesweeper.model.gameComponent.gameBaseImpl.GameState
 import de.htwg.se.minesweeper.Default
 
 class Controller(using var game: IGame, var file: IFileIO) extends IController with Observable:
     var field: IField = game.getField
-    var spielbrett = GameState
+    var spielbrettState = game.getStatus
     var decider = new Decider()
     val undoRedoManager = new UndoRedoManager[IField]
     
@@ -28,7 +27,7 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
             case Some(game) => this.game = game
             case None =>
         }
-        GameState.handle(PlayEvent())
+        game.handleGameState("Playing")
 
         val fieldOption = file.loadField2
         fieldOption match {
@@ -36,30 +35,30 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
             case None =>
         }
 
-        notifyObservers(NewEvent.Load)
+        notifyObservers(Event.Load)
     
     def saveGame =
 
-        notifyObservers(NewEvent.SaveTime)
+        notifyObservers(Event.SaveTime)
         file.saveGame(game)
         file.saveField(field)
-        GameState.handle(PlayEvent())
-        notifyObservers(NewEvent.Save)
+        game.handleGameState("Playing")
+        notifyObservers(Event.Save)
 
     def exit =
-        notifyObservers(NewEvent.Exit)
+        notifyObservers(Event.Exit)
 
     def gameOver =
         field = field.gameOverField
-        notifyObservers(NewEvent.GameOver)
+        notifyObservers(Event.GameOver)
 
     def flag(x: Int, y: Int) = 
         field = field.putFlag(x,y)
-        notifyObservers(NewEvent.Next)
+        notifyObservers(Event.Next)
 
     def unflag(x: Int, y: Int) = 
         field = field.removeFlag(x,y)
-        notifyObservers(NewEvent.Next)
+        notifyObservers(Event.Next)
     
     def openRec(x: Int, y: Int, field: IField): IField = 
         val feld = undoRedoManager.doStep(field, DoCommand(Move("recursion", x, y)))
@@ -68,42 +67,42 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
     def helpMenu = 
         game.helpMessage
         println(field.toString)
-        notifyObservers(NewEvent.Help)
+        notifyObservers(Event.Help)
     
     def cheat = 
         field.reveal
-        notifyObservers(NewEvent.Cheat)
+        notifyObservers(Event.Cheat)
     
     def checkGameOver =
         game.checkExit
 
     def newGameGUI =
-        GameState.handle(PlayEvent())
-        notifyObservers(NewEvent.Input)
+        game.handleGameState("Playing")
+        notifyObservers(Event.Input)
 
     def newGameField(optionString: Option[String]) =
         field = game.prepareBoard(optionString) // NEW
-        notifyObservers(NewEvent.NewGame)
+        notifyObservers(Event.NewGame)
 
     def newGame(side: Int, bombs: Int) =
-        GameState.handle(PlayEvent())
+        game.handleGameState("Playing")
         game.setSideAndBombs(side, bombs)
         field = game.createField
-        notifyObservers(NewEvent.NewGame)
+        notifyObservers(Event.NewGame)
 
     def makeAndPublish(makeThis: (Boolean, Move, IGame) => IField, b: Boolean, move: Move, game: IGame): Unit =
         field = makeThis(b, move, game)
         if (field.showInvisibleCell(move.y, move.x) == Symbols.Zero){field = openRec(move.x,move.y,field)}
-        val firstOrNext = if (b) NewEvent.Start else NewEvent.Next
+        val firstOrNext = if (b) Event.Start else Event.Next
         notifyObservers(firstOrNext)
 
     def makeAndPublish(makeThis: Move => IField, move: Move): Unit =
         field = makeThis(move)
-        notifyObservers(NewEvent.Next)
+        notifyObservers(Event.Next)
 
     def makeAndPublish(makeThis: => IField) =
         field = makeThis
-        notifyObservers(NewEvent.Next)
+        notifyObservers(Event.Next)
 
     def saveScoreAndPlayerName(playerName: String, saveScore: Int, filePath: String) = {
         file.savePlayerScore(playerName, saveScore, filePath)
@@ -114,10 +113,9 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
     }
 
     def showVisibleCell(x: Int, y: Int): String = field.showVisibleCell(x,y).toString
-    //def showInvisibleCell(x: Int, y: Int): String = field.showInvisibleCell(x,y).toString
 
     def getFieldSize: Int = field._matrix.size
-    def getSpielbrettState: Status = spielbrett.state
+    def getSpielbrettState: Status = game.getStatus
     def getControllerField: IField = field
     def getControllerGame: IGame = game
     

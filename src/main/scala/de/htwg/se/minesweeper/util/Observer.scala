@@ -1,15 +1,15 @@
 package de.htwg.se.minesweeper.util
 
 trait Observer:
-    def update(e: NewEvent): Boolean
+    def update(e: Event): Boolean
 
 trait Observable:
     var subscribers:Vector[Observer] = Vector()
     def add(s:Observer) = subscribers = subscribers :+ s
     def remove(s:Observer) = subscribers = subscribers.filterNot(o => o==s)
-    def notifyObservers(e: NewEvent) = subscribers.foreach(o => o.update(e))
+    def notifyObservers(e: Event) = subscribers.foreach(o => o.update(e))
 
-enum NewEvent:
+enum Event:
     case NewGame
     case Start
     case Next

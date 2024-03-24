@@ -2,7 +2,7 @@ package de.htwg.se.minesweeper.aview
 
 
 import de.htwg.se.minesweeper.controller.controllerComponent.IController
-import de.htwg.se.minesweeper.util.{Observer, Move, NewEvent}
+import de.htwg.se.minesweeper.util.{Observer, Move, Event}
 
 import scala.io.StdIn.readLine
 import scala.util.{Try, Success, Failure}
@@ -24,22 +24,22 @@ class TUI(using var controller: IController) extends Observer:
         resize
         parseInputandPrintLoop(isFirstMove)
         
-    override def update(e: NewEvent): Boolean = 
+    override def update(e: Event): Boolean = 
       e match
-        case NewEvent.NewGame => 
+        case Event.NewGame => 
           infoMessages(controller.getControllerField.toString())
           isFirstMove = true
           true
-        case NewEvent.Start => infoMessages(controller.getControllerField.toString()); true
-        case NewEvent.Next => infoMessages(controller.getControllerField.toString()); true
-        case NewEvent.GameOver => infoMessages(controller.getControllerField.toString()); true
-        case NewEvent.Cheat => false
-        case NewEvent.Help => false
-        case NewEvent.Input => false
-        case NewEvent.Load => infoMessages(controller.getControllerField.toString()); true
-        case NewEvent.Save => false
-        case NewEvent.SaveTime => false
-        case NewEvent.Exit => System.exit(0); false
+        case Event.Start => infoMessages(controller.getControllerField.toString()); true
+        case Event.Next => infoMessages(controller.getControllerField.toString()); true
+        case Event.GameOver => infoMessages(controller.getControllerField.toString()); true
+        case Event.Cheat => false
+        case Event.Help => false
+        case Event.Input => false
+        case Event.Load => infoMessages(controller.getControllerField.toString()); true
+        case Event.Save => false
+        case Event.SaveTime => false
+        case Event.Exit => System.exit(0); false
 
     def userInX(rawInput: String): Option[Move] = 
       val cleanInputPattern: Regex = """^[a-z]{1}[0-9]{4}$""".r
@@ -80,9 +80,9 @@ class TUI(using var controller: IController) extends Observer:
           validCoordinates
         }
 
+    
     def parseInputandPrintLoop(firstMoveCheck: Boolean): Unit = {
       infoMessages("Enter your move (<action><x><y>, eg. o0102, q to quit, h for help):")
-      
       var stillFirstMove = false
       userInX(readLine) match
         case None => if firstMoveCheck == true then stillFirstMove = true

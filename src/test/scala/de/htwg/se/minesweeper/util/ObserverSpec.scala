@@ -14,7 +14,7 @@ class ObserverSpec extends AnyWordSpec{
 
         "allow an Observer to be added" in {
             val observer = new Observer{
-                override def update(e: NewEvent): Boolean = false
+                override def update(e: Event): Boolean = false
             }
             observable.add(observer)
             assert(observable.subscribers.contains(observer))
@@ -22,7 +22,7 @@ class ObserverSpec extends AnyWordSpec{
 
         "allow an Observer to be removed" in {
             val observer = new Observer{
-                override def update(e: NewEvent): Boolean = false
+                override def update(e: Event): Boolean = false
             }
             observable.add(observer)
             observable.remove(observer)
@@ -32,14 +32,14 @@ class ObserverSpec extends AnyWordSpec{
         "notify its observers when an update occurs" in {
             var notified = false
             val observer = new Observer{
-                override def update(e: NewEvent) = 
+                override def update(e: Event) = 
                 {
                     notified = true
                     true
                 }
             }
             observable.add(observer)
-            observable.notifyObservers(NewEvent.Next)
+            observable.notifyObservers(Event.Next)
             assert(notified)
         }
 

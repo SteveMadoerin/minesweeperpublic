@@ -1,8 +1,8 @@
 package de.htwg.se.minesweeper.aview.gui
 
 import de.htwg.se.minesweeper.controller.controllerComponent.IController
-import de.htwg.se.minesweeper.util.{Observer, NewEvent, Move}
-import de.htwg.se.minesweeper.model.gameComponent.gameBaseImpl.{Status, GameState}
+import de.htwg.se.minesweeper.util.{Observer, Event, Move}
+import de.htwg.se.minesweeper.model.gameComponent.gameBaseImpl.{Status}
 import de.htwg.se.minesweeper.Default.{given}
 import de.htwg.se.minesweeper.Default
 import scala.swing.event.MouseClicked
@@ -129,10 +129,10 @@ class GUI(using var controller: IController) extends Frame with Observer:
 
     }
 
-    override def update(e: NewEvent): Boolean = {
+    override def update(e: Event): Boolean = {
         e match {
 
-            case NewEvent.NewGame =>
+            case Event.NewGame =>
                 firstMoveControl.set(true)
                 boardBounds = controller.getFieldSize -1
                 if(r>0){
@@ -144,7 +144,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
                 repaint()
                 true
             
-            case NewEvent.Start =>
+            case Event.Start =>
 
                 if(!timerStarted){
                     startTimer()
@@ -154,7 +154,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
                 }
                 true
             
-            case NewEvent.Next =>
+            case Event.Next =>
                 
                 if(!timerStarted){
                     restartTimer(new AtomicInteger(controller.getControllerGame.getTime))
@@ -164,7 +164,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
                 }
                 true
             
-            case NewEvent.GameOver =>
+            case Event.GameOver =>
 
                 contents = updateContents
                 repaint()
@@ -180,13 +180,13 @@ class GUI(using var controller: IController) extends Frame with Observer:
                 loadScoreNew
                 true
             
-            case NewEvent.Cheat =>
+            case Event.Cheat =>
 
                 val text = s"${controller.getControllerField.gameOverField}"
                 showMessage(null, text, "Cheat Menu", Message.Plain)
                 false
             
-            case NewEvent.Help =>
+            case Event.Help =>
                 val text = 
                     """This is Minesweeper Help - Menu
                     |                                                                                                    
@@ -203,13 +203,13 @@ class GUI(using var controller: IController) extends Frame with Observer:
                 showMessage(null, text, "Help Menu", Message.Info)
                 false
             
-            case NewEvent.Input =>
+            case Event.Input =>
 
                 val x = getGraphicalInput
                 controller.newGameField(x)
                 true
             
-            case NewEvent.Load =>
+            case Event.Load =>
 
                 setLoadedTimer(new AtomicInteger(controller.getControllerGame.getTime))
                 timeLoaded = true
@@ -218,12 +218,12 @@ class GUI(using var controller: IController) extends Frame with Observer:
                 repaint()
                 true
             
-            case NewEvent.Save =>
+            case Event.Save =>
                 
                 restartTimer(new AtomicInteger(controller.getControllerGame.getTime))
                 true
             
-            case NewEvent.SaveTime =>
+            case Event.SaveTime =>
 
                 pauseTimer()
                 controller.getControllerGame.setTime(clock.get())
@@ -231,7 +231,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
                 repaint()
                 true
             
-            case NewEvent.Exit => false
+            case Event.Exit => false
         }
     }
 

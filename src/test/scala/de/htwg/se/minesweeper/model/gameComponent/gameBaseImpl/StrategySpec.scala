@@ -10,7 +10,6 @@ class StrategySpec extends AnyWordSpec{
 
     "it" should {
         "use the first move strategy" in {
-            var spielbrett = GameState
             val decider = new Decider()
             var game = new Game(Status.Playing, 10, 9)
             game.setField()
@@ -26,7 +25,6 @@ class StrategySpec extends AnyWordSpec{
 
     "the class" should {
         "use the normal move strategy" in {
-            var spielbrett = GameState
             val decider2 = new Decider()
             var game2 = new Game(Status.Playing, 2, 1)
             game2.setField()

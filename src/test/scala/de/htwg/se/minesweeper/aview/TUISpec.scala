@@ -6,7 +6,7 @@ import org.scalatest.wordspec.AnyWordSpec
 import de.htwg.se.minesweeper.controller.controllerComponent.controllerBaseImpl.Controller
 import de.htwg.se.minesweeper.model.gameComponent.gameBaseImpl._
 import de.htwg.se.minesweeper.util.Move
-import de.htwg.se.minesweeper.util.NewEvent
+import de.htwg.se.minesweeper.util.Event
 import de.htwg.se.minesweeper.Default.{given}
 import java.io.PrintStream
 import java.io.ByteArrayOutputStream
@@ -33,9 +33,9 @@ class TUISpec extends AnyWordSpec{
 
     "The TUI update method" should{
         val tui2 = new TUI()
-        "update or not a newEvent" in{
-            tui2.update(NewEvent.Cheat) should be(false)
-            tui2.update(NewEvent.Help) should be(false)
+        "update or not a Event" in{
+            tui2.update(Event.Cheat) should be(false)
+            tui2.update(Event.Help) should be(false)
         }
     }
 
