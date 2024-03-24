@@ -72,9 +72,9 @@ case class Game (var state: Status, bombs : Int = 10, side: Int = 9) extends IGa
     def premierMove(x: Int, y: Int, field: IField): IField = 
         val adjacent = Playfield()
         var adjacentInitialised = adjacent.newField(side, this)
-        val newReplacedbombHidMatrix = if(adjacentInitialised.getHidden.cell(y, x) == Symbols.Bomb){
+        val newReplacedbombHidMatrix = if(adjacentInitialised._hidden.cell(y, x) == Symbols.Bomb){
             var replacedHiddenMatrix = replaceBomb(x, y, adjacentInitialised)
-            val replacedAdjacentHiddenField = Default.mergeMatrixToField(field.getMatrix, replacedHiddenMatrix.getHidden) // Dependency Injection
+            val replacedAdjacentHiddenField = Default.mergeMatrixToField(field._matrix, replacedHiddenMatrix._hidden) // Dependency Injection
             replacedAdjacentHiddenField
         } else {
             adjacentInitialised
@@ -95,20 +95,20 @@ case class Game (var state: Status, bombs : Int = 10, side: Int = 9) extends IGa
 
 
     def replaceBomb(x: Int, y: Int, field: IField): IField = {
-        val size = field.getMatrix.size
+        val size = field._matrix.size
         val indices = 0 until size
         val result = indices
             .flatMap(col => indices.map(row => (row, col)))
-            .filter { case (row, col) => field.getHidden.cell(row, col) != Symbols.Bomb }
+            .filter { case (row, col) => field._hidden.cell(row, col) != Symbols.Bomb }
 
         val rand = Random.nextInt(result.size)
         val (newX, newY) = result(rand)
 
-        val newHiddenMatrixWithBomb = field.getHidden.replaceCell(newY, newX, Symbols.Bomb)
+        val newHiddenMatrixWithBomb = field._hidden.replaceCell(newY, newX, Symbols.Bomb)
         val newHiddenMatrixWithoutBomb = newHiddenMatrixWithBomb.replaceCell(y, x, Symbols.Empty)
         val newHiddenMatrixWithNumbers = initializeAdjacentNumbers(newHiddenMatrixWithoutBomb)
 
-        val newVisibleMatrix = field.getMatrix.replaceCell(y, x, Symbols.Covered)
+        val newVisibleMatrix = field._matrix.replaceCell(y, x, Symbols.Covered)
 
         field match {
             case f: Field => f.copy(

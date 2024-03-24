@@ -43,6 +43,7 @@ trait IGame {
 }
 
 trait IField{
+
     def putFlag(x: Int, y: Int): IField
     def removeFlag(x: Int, y: Int): IField
     def open(x: Int, y: Int, spiel: IGame): IField
@@ -55,8 +56,8 @@ trait IField{
     def openNewXXX(x: Int, y: Int, field: IField): IField
     def isValidF(row: Int, col: Int, side: Int): Boolean
     def recursiveMadness(x: Int, y: Int, field: IField): IField
-    def getMatrix: Matrix[Symbols]
-    def getHidden: Matrix[Symbols]
+    def _matrix: Matrix[Symbols]
+    def _hidden: Matrix[Symbols]
 
     def toString: String
 }

@@ -116,11 +116,10 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
     def showVisibleCell(x: Int, y: Int): String = field.showVisibleCell(x,y).toString
     //def showInvisibleCell(x: Int, y: Int): String = field.showInvisibleCell(x,y).toString
 
-    def getFieldSize: Int = field.getMatrix.size
+    def getFieldSize: Int = field._matrix.size
     def getSpielbrettState: Status = spielbrett.state
     def getControllerField: IField = field
     def getControllerGame: IGame = game
-    override def getControllerGameInterface: IGame  = game
     
     def put(move: Move): IField = undoRedoManager.doStep(field, DoCommand(move))
     def undo: IField = undoRedoManager.undoStep(field)

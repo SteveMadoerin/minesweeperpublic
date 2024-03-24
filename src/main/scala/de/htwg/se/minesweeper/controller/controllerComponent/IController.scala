@@ -28,14 +28,11 @@ trait IController extends Observable{
     def saveScoreAndPlayerName(playerName: String, saveScore: Int, filePath: String): Unit
 
     def showVisibleCell(x: Int, y: Int): String
-    //def showInvisibleCell(x: Int, y: Int): String
-    //def getVisible(x: Int, y: Int): String
    
     def getFieldSize: Int
     def getSpielbrettState: Status
     def getControllerField: IField
     def getControllerGame: IGame
-    def getControllerGameInterface: IGame
 
     def put(move: Move): IField
     def undo: IField

@@ -158,7 +158,7 @@ class FieldSpec extends AnyWordSpec
                 val testField75 = new Field(sicht75, unsicht75)
 
                 "return a new field" in{
-                    val resultField = testField75.getMatrix.size
+                    val resultField = testField75._matrix.size
                     resultField should be (4)
 
                 }

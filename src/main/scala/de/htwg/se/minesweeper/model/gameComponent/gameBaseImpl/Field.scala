@@ -22,7 +22,7 @@ case class Field(matrix: Matrix[Symbols], hidden: Matrix[Symbols]) extends IFiel
         val returnField = this.put(extractedSymbol, y, x)
         returnField
     
-    def gameOverField: IField = new Field(this.getHidden)
+    def gameOverField: IField = new Field(this._hidden)
     
     def reveal =
         val revMat = new Field(this.hidden)
@@ -33,6 +33,9 @@ case class Field(matrix: Matrix[Symbols], hidden: Matrix[Symbols]) extends IFiel
     def showVisibleCell(x: Int, y: Int): Symbols = matrix.cell(x, y)
     def showInvisibleCell(x: Int, y: Int): Symbols = hidden.cell(x, y)
     def isValidF(row: Int, col: Int, side: Int): Boolean = {row >= 0 && row <= side && col >= 0 && col <= side}
+    
+    def _matrix: Matrix[Symbols] = matrix
+    def _hidden: Matrix[Symbols] = hidden
 
     def openNewXXX(x: Int, y: Int, field: IField): IField =
         val extractedSymbol = field.showInvisibleCell(y, x)
@@ -40,37 +43,32 @@ case class Field(matrix: Matrix[Symbols], hidden: Matrix[Symbols]) extends IFiel
         returnField
 
     def recursiveMadness(x: Int, y: Int, field: IField): IField = {
-        var mysteriousField = field
-
         val directions = List(
             (-1, -1), (-1, 0), (-1, 1),
-            ( 0, -1),          ( 0, 1),
-            ( 1, -1), ( 1, 0), ( 1, 1)
+            (0, -1),          (0, 1),
+            (1, -1), (1, 0), (1, 1)
         )
-
-        for ((dx, dy) <- directions) {
+    
+        def exploreDirections(currentField: IField, remainingDirections: List[(Int, Int)]): IField = remainingDirections match {
+            case (dx, dy) :: tail =>
             val newX = x + dx
             val newY = y + dy
-
-            if (isValidF(newY, newX, field.getMatrix.size - 1)) {
-                val currentCell = field.showVisibleCell(newY, newX)
-                val invisibleCell = field.showInvisibleCell(newY, newX)
-
-                if (currentCell == Symbols.Covered && invisibleCell == Symbols.Zero) {
-                    mysteriousField = openNewXXX(newX, newY, mysteriousField)
-                    mysteriousField = recursiveMadness(newX, newY, mysteriousField)
-                }
-
-                if (currentCell == Symbols.Covered && invisibleCell != Symbols.Zero) {
-                    mysteriousField = openNewXXX(newX, newY, mysteriousField)
-                }
+            if (isValidF(newY, newX, currentField._matrix.size - 1)) {
+                val currentCell = currentField.showVisibleCell(newY, newX)
+                val invisibleCell = currentField.showInvisibleCell(newY, newX)
+                val updatedField = if (currentCell == Symbols.Covered) {
+                val openedField = openNewXXX(newX, newY, currentField)
+                if (invisibleCell == Symbols.Zero) recursiveMadness(newX, newY, openedField)
+                else openedField
+                } else currentField
+                exploreDirections(updatedField, tail)
+            } else {
+                exploreDirections(currentField, tail)
             }
+            case Nil => currentField
         }
 
-        mysteriousField
+        exploreDirections(field, directions)
     }
 
-    def getMatrix: Matrix[Symbols] = matrix
-    def getHidden: Matrix[Symbols] = hidden
-    //def setVisibleMatrix(matrix: Matrix[Symbols]): Unit = copy(matrix = matrix)
     override def toString(): String = mesh()

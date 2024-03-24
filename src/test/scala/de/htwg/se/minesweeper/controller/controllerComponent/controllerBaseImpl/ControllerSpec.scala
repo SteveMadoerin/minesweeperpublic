@@ -73,7 +73,7 @@ class ControllerSpec extends AnyWordSpec{
 
         "update the field" in {
             controller.flag(2, 2)
-            controller.getControllerField.getMatrix.cell(2,2) should be (Symbols.F)
+            controller.getControllerField._matrix.cell(2,2) should be (Symbols.F)
         }
     }
 
@@ -92,7 +92,7 @@ class ControllerSpec extends AnyWordSpec{
 
         "update the field" in {
             controller.unflag(2, 2)
-            controller.getControllerField.getMatrix.cell(2,2) should be (Symbols.Covered)
+            controller.getControllerField._matrix.cell(2,2) should be (Symbols.Covered)
       }
 
     }

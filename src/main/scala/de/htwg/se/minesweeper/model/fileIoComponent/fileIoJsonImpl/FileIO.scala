@@ -70,11 +70,11 @@ class FileIO extends IFileIO{
         Json.prettyPrint(
             Json.obj(
                 "field" -> Json.obj(
-                    "size" -> field.getMatrix.size,
+                    "size" -> field._matrix.size,
                     "matrix" -> Json.toJson(
                         for {
-                            row <- 0 until field.getMatrix.size
-                            col <- 0 until field.getMatrix.size
+                            row <- 0 until field._matrix.size
+                            col <- 0 until field._matrix.size
                         } yield {
                             Json.obj(
                                 "row" -> row,
@@ -85,8 +85,8 @@ class FileIO extends IFileIO{
                     ),
                     "hidden" -> Json.toJson(
                         for {
-                            row <- 0 until field.getMatrix.size
-                            col <- 0 until field.getMatrix.size
+                            row <- 0 until field._matrix.size
+                            col <- 0 until field._matrix.size
                         } yield {
                             Json.obj(
                                 "row" -> row,
