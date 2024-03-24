@@ -2,7 +2,7 @@ package de.htwg.se.minesweeper.aview.gui
 
 import de.htwg.se.minesweeper.controller.controllerComponent.IController
 import de.htwg.se.minesweeper.util.{Observer, NewEvent, Move}
-import de.htwg.se.minesweeper.model.gameComponent.gameBaseImpl.{Status, GameState}
+import de.htwg.se.minesweeper.model.gameComponent.gameBaseImpl.{Status, GameState, Won, Playing, Lost}
 import de.htwg.se.minesweeper.Default.{given}
 import de.htwg.se.minesweeper.Default
 import scala.swing.event.MouseClicked
@@ -324,7 +324,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
 
     def calculateScore: Int =
         val score = ((controller.getFieldSize * controller.getFieldSize)) * 10 - (l*100+m*10+r)
-        if controller.getSpielbrettState == Status.Won then score else 0
+        if controller.getSpielbrettState == Won then score else 0
     
     def resetTimer() = {
         clock.set(0)
@@ -358,7 +358,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
         maximumSize_=(new Dimension(40,40))
         listenTo(mouse.clicks)
         reactions += {
-            case e: MouseClicked if (controller.getSpielbrettState == Status.Won || controller.getSpielbrettState == Status.Lost) =>
+            case e: MouseClicked if (controller.getSpielbrettState == Won || controller.getSpielbrettState == Lost) =>
             
             case e: MouseClicked if e.peer.getButton == MouseEvent.BUTTON3 => 
                 if (controller.get(x,y) == "~"){

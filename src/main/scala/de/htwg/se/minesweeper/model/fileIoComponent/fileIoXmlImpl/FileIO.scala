@@ -13,9 +13,9 @@ class FileIO extends IFileIO {
 
     def stateExtractor(state: String): Status = {
         state match {
-            case "Playing" => Status.Playing
-            case "Won" => Status.Won
-            case "Lost" => Status.Lost
+            case "Playing" => Playing
+            case "Won" => Won
+            case "Lost" => Lost
         }
     }
 

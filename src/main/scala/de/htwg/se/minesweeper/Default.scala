@@ -27,7 +27,7 @@ object Default{
 
     // NEW
     def prepareGame = {
-        var realGame = new Game(Status.Playing)
+        var realGame = new Game(Playing)
         realGame.createField
         realGame
     }

@@ -6,26 +6,27 @@ import de.htwg.se.minesweeper.Default
 
 object GameState{
 
-    var state = playState
+    //Initial state
+    val initialState: Status = Playing
 
-    def handle(e: Event) = {
+    def handle(e: Event,currentState: Status): Status = {
         e match{
-            case play: PlayEvent => state = playState
-            case won: WonEvent => state = wonState
-            case lost: LostEvent => state = lostState
+            case _: PlayEvent => playState(currentState)
+            case _: WonEvent => Won//wonState
+            case _: LostEvent => Lost//lostState
         }
     }
 
-    def playState = 
+    def playState(currentSate: Status): Status =
         println("")
-        Status.Playing
+        currentSate
 
-    def wonState = 
+    def wonState: Status =
         println(s"Game is won") 
-        Status.Won
+        Won
 
-    def lostState =
+    def lostState: Status =
         println(s"Game is lost ")
-        Status.Lost
+        Lost
 
 }

@@ -151,11 +151,11 @@ case class Game (var state: Status) extends IGame:
 
     def calcWonOrLost(visibleMatrix: IMatrix[Symbols], mines: Int): Boolean = (mines+1 - addCoveredAndFlag(visibleMatrix) == 0)
 
-    def handleGameState(state: String) = 
+    def handleGameState(state: String) =
         state match{
-            case "Won" => GameState.handle(WonEvent())
-            case "Lost" => GameState.handle(LostEvent())
-            case _ => GameState.handle(PlayEvent())
+            case "Won" => GameState.handle(WonEvent(), GameState.initialState)
+            case "Lost" => GameState.handle(LostEvent(), GameState.initialState)
+            case _ => GameState.handle(PlayEvent(), GameState.initialState)
         }
     
     def isMine(row: Int, col: Int, m: IMatrix[Symbols]): Boolean = {if(m.cell(row, col) == Symbols.Bomb) true else false}
@@ -216,5 +216,5 @@ case class Game (var state: Status) extends IGame:
     def setTime(time: Int) = this.time = time
     def getTime: Int = time
     
-    def checkExit = if GameState.state == Status.Lost || GameState.state == Status.Won then true else false
+    def checkExit = if GameState.initialState == Lost || GameState.initialState == Won then true else false
 

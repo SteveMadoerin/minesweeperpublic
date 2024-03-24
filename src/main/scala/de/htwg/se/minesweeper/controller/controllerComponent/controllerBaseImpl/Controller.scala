@@ -28,7 +28,7 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
             case Some(game) => this.game = game
             case None =>
         }
-        GameState.handle(PlayEvent())
+        GameState.handle(PlayEvent(), GameState.initialState)
 
         val fieldOption = file.loadField2
         fieldOption match {
@@ -43,7 +43,7 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
         notifyObservers(NewEvent.SaveTime)
         file.saveGame(game)
         file.saveField(field)
-        GameState.handle(PlayEvent())
+        GameState.handle(PlayEvent(), GameState.initialState)
         notifyObservers(NewEvent.Save)
 
     def exit =
@@ -78,7 +78,7 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
         game.checkExit
 
     def newGameGUI =
-        GameState.handle(PlayEvent())
+        GameState.handle(PlayEvent(), GameState.initialState)
         notifyObservers(NewEvent.Input)
 
     def newGameField(optionString: Option[String]) =
@@ -86,7 +86,7 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
         notifyObservers(NewEvent.NewGame)
 
     def newGame(side: Int, bombs: Int) =
-        GameState.handle(PlayEvent())
+        GameState.handle(PlayEvent(), GameState.initialState)
         game.setSideAndBombs(side, bombs)
         field = game.createField
         notifyObservers(NewEvent.NewGame)
@@ -118,7 +118,7 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
     def getVisible(x: Int, y: Int): String = field.getVisible(x,y).toString
 
     def getFieldSize: Int = field.getFieldSize
-    def getSpielbrettState: Status = spielbrett.state
+    def getSpielbrettState: Status = spielbrett.initialState
     def getControllerField: IField = field
     def getControllerGame: IGame = game
     override def getControllerGameInterface: IGame  = game
