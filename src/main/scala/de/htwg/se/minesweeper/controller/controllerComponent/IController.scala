@@ -6,6 +6,8 @@ import de.htwg.se.minesweeper.util.{Observable, Move}
 
 
 trait IController extends Observable{
+    def _spielBrett: String
+    def checkGame: String
     def doMove(b: Boolean, move: Move, game: IGame): IField
     def loadGame: Unit
     def saveGame: Unit
@@ -19,7 +21,6 @@ trait IController extends Observable{
     def newGameGUI: Unit
     def newGameField(optionString: Option[String]): Unit
     def newGame(side: Int, bombs: Int): Unit
-    def checkWinOrLost: Boolean
     def calWonOrLost: String
 
     def makeAndPublish(makeThis: (Boolean, Move, IGame) => IField, b: Boolean, move: Move, game: IGame): Unit

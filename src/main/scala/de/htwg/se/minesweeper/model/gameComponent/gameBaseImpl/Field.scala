@@ -20,6 +20,23 @@ case class Field(matrix: Matrix[Symbols], hidden: Matrix[Symbols]) extends IFiel
         if showInvisibleCell(y,x) == Symbols.Bomb then true else if spiel.calcWonOrLost(this.matrix, spiel.getBombs) then true else false
 
 
+    def proveMove(x: Int, y: Int, spiel: IGame): String = {
+        if (this.hidden.cell(y, x) == Symbols.Bomb){
+           val result = "lost"
+           result
+        } else if(spiel.calcWonOrLost(this.matrix, spiel.getBombs)){
+           val result = "won"
+           result
+
+        } else {
+            val result = "playing"
+            result
+
+        }
+
+        
+
+    }
     def open(x: Int, y: Int, spiel: IGame): IField =
         //if(this.hidden.cell(y, x) == Symbols.Bomb){spiel.handleGameState("Lost")} else if(spiel.calcWonOrLost(this.matrix, spiel.getBombs)){spiel.handleGameState("Won")}
         val extractedSymbol = this.showInvisibleCell(y, x)

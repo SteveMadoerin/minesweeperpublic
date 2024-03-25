@@ -11,10 +11,12 @@ import de.htwg.se.minesweeper.Default
 
 class Controller(using var game: IGame, var file: IFileIO) extends IController with Observable:
     var field: IField = game.getField
-    //var spielbrettState = game.getStatus
+    var spielBrett: String = "playing"
     var decider = new Decider()
     val undoRedoManager = new UndoRedoManager[IField]
     var actualMove = Move("empty", 0, 0)
+
+    def _spielBrett: String = spielBrett
     
     def doMove(b: Boolean, move: Move, game: IGame) =
         actualMove = move
@@ -73,9 +75,24 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
         field.reveal
         notifyObservers(Event.Cheat)
 
-    def checkGameOver = checkWinOrLost
+    def checkGame: String =
+        spielBrett
+
+    def checkGameOver = 
+        //field.checkActualMove(actualMove.x, actualMove.y, game)
+        spielBrett = field.proveMove(actualMove.x, actualMove.y, game)
+        if (spielBrett == "playing") {
+            false
+        } else if (spielBrett == "won") {
+            true
+        } else {
+            true
+        }
+
+        
 
     def newGameGUI =
+        spielBrett = "playing"
         notifyObservers(Event.Input)
 
     def newGameField(optionString: Option[String]) =
@@ -109,11 +126,14 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
         file.loadPlayerScores(filePath)
     }
 
-    def checkWinOrLost: Boolean = field.checkActualMove(actualMove.x, actualMove.y, game)
 
-    def calWonOrLost: String = game.calcWonOrLost(field._matrix, game.getBombs) match {
-        case true => "won"
-        case false => "lost"
+    def calWonOrLost: String = 
+        
+        val wonOrLost = game.calcWonOrLost(field._matrix, game.getBombs)
+    
+        wonOrLost match {
+            case true => "won"
+            case false => "lost"
     }
 
     def showVisibleCell(x: Int, y: Int): String = field.showVisibleCell(x,y).toString

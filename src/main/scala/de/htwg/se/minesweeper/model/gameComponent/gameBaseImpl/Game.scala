@@ -8,7 +8,7 @@ import scala.annotation.tailrec
 import de.htwg.se.minesweeper.Default.given
 
 
-case class Game (bombs : Int = 10, side: Int = 9) extends IGame:
+case class Game (var bombs : Int, var side: Int) extends IGame:
     private var hyperField: IField = _ 
     var time = 0
 

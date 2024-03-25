@@ -29,6 +29,8 @@ trait IGame {
     def getTime: Int
     def setTime(newTime: Int): Unit
 
+    
+
     // NEW
     def prepareBoard(s: Option[String]): IField
     def createField: IField
@@ -54,6 +56,8 @@ trait IField{
     def _matrix: Matrix[Symbols]
     def _hidden: Matrix[Symbols]
     def checkActualMove(x: Int, y: Int, game: IGame): Boolean
+
+    def proveMove(x: Int, y: Int, game: IGame): String
 
     def toString: String
 }

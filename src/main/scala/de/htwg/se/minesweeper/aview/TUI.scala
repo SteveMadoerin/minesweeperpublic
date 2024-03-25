@@ -95,9 +95,10 @@ class TUI(using var controller: IController) extends Observer:
             case _ => infoMessages(">> Invalid Input")
           }
 
-          println(controller.checkWinOrLost)
+          println(controller.checkGameOver)
+          println(controller.calWonOrLost)
       
-      if !controller.checkWinOrLost then parseInputandPrintLoop(stillFirstMove) else controller.gameOver; restart
+      if !controller.checkGameOver then parseInputandPrintLoop(stillFirstMove) else controller.gameOver; restart
     }
 
     def restart: Unit = 

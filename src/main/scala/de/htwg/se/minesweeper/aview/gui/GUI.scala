@@ -73,7 +73,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
             contents ++= flagCountDisplay.productIterator.map(digit => new DigitLabel(digit.asInstanceOf[ImageIcon]))
         }, BorderPanel.Position.West)
 
-        add(new SmileLabel(controller.calWonOrLost), BorderPanel.Position.Center)
+        add(new SmileLabel(controller._spielBrett), BorderPanel.Position.Center)
         
         val timerDigits = Seq(l, m, r).map(getDigits)
         add(new BoxPanel(Orientation.NoOrientation){
@@ -170,7 +170,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
                 stopTimer()
 
                 val saveScore: Int = calculateScore
-                val text = s"Game is ${controller.calWonOrLost} and your Score is ${calculateScore}"
+                val text = s"Game is ${controller._spielBrett} and your Score is ${calculateScore}"
                 
                 resetTimer()
                 showMessage(null, text, "GameOver", Message.Info)
@@ -323,7 +323,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
 
     def calculateScore: Int =
         val score = ((controller.getFieldSize * controller.getFieldSize)) * 10 - (l*100+m*10+r)
-        if controller.calWonOrLost == "won" then score else 0
+        if controller.checkGame == "won" then score else 0
     
     def resetTimer() = {
         clock.set(0)
@@ -357,7 +357,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
         maximumSize_=(new Dimension(40,40))
         listenTo(mouse.clicks)
         reactions += {
-            case e: MouseClicked if (controller.checkWinOrLost) =>
+            case e: MouseClicked if (controller.checkGameOver) =>
             
             case e: MouseClicked if e.peer.getButton == MouseEvent.BUTTON3 => 
                 if (controller.showVisibleCell(x,y) == "~"){
