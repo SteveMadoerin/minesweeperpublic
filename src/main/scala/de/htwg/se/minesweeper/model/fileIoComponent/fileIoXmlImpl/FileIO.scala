@@ -11,13 +11,6 @@ import java.io._
 
 class FileIO extends IFileIO {
 
-    def stateExtractor(state: String): Status = {
-        state match {
-            case "Playing" => Status.Playing
-            case "Won" => Status.Won
-            case "Lost" => Status.Lost
-        }
-    }
 
     def initGame(using game: IGame) = game
 
@@ -25,7 +18,7 @@ class FileIO extends IFileIO {
 
         var gameOption: Option[IGame] = None
         val file = scala.xml.XML.loadFile("C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\game.xml")
-        val status = stateExtractor((file \\ "game" \@ "status"))
+        val status =(file \\ "game" \@ "status")
         val bombs = (file \\ "bombs").text.toInt
         val side = (file \\ "side").text.toInt
         val time = (file \\ "time").text.toInt
@@ -44,7 +37,7 @@ class FileIO extends IFileIO {
     }
 
     def gameToXml(game: IGame) = {
-        <game status ={ game.getStatus.toString }>
+        <game status ={ game._board }>
             <bombs>{ game.getBombs }</bombs>
             <side>{ game.getSide }</side>
             <time>{ game.getTime }</time>

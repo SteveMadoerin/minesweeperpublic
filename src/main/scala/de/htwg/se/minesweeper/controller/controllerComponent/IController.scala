@@ -18,6 +18,7 @@ trait IController extends Observable{
     def checkGameOver: Boolean
     def newGameGUI: Unit
     def newGameField(optionString: Option[String]): Unit
+    //def newGameField(optionString: Option[String], spiel: IGame): Unit
     def newGame(side: Int, bombs: Int): Unit
 
     def makeAndPublish(makeThis: (Boolean, Move, IGame) => IField, b: Boolean, move: Move, game: IGame): Unit
@@ -30,7 +31,7 @@ trait IController extends Observable{
     def showVisibleCell(x: Int, y: Int): String
    
     def getFieldSize: Int
-    def getSpielbrettState: Status
+    def getSpielbrettState: String
     def getControllerField: IField
     def getControllerGame: IGame
 

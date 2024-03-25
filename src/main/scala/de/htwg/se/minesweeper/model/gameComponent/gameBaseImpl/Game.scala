@@ -8,15 +8,16 @@ import scala.annotation.tailrec
 import de.htwg.se.minesweeper.Default.given
 
 
-case class Game (var state: Status, bombs : Int = 10, side: Int = 9) extends IGame:
+case class Game (var bombs : Int = 10, var side: Int = 9) extends IGame:
     private var hyperField: IField = _ 
+    var board = "Playing"
     var time = 0
 
     def getField = hyperField
 
     def setSideAndBombs(side: Int, bombz: Int) = {
-        copy(side = side)
-        copy(bombs = bombz)
+        this.side = side
+        this.bombs = bombz
     }
 
     def createField: IField = {
@@ -36,12 +37,19 @@ case class Game (var state: Status, bombs : Int = 10, side: Int = 9) extends IGa
         }
     }
 
-    def prepareBoard(s: Option[String]): IField = {
+
+    def prepareBoard(s: Option[String], realGame: IGame): IField = {
+        realGame.setSideAndBombs(optionToList(s)(0), optionToList(s)(1))
+        val adjacentField = Playfield()
+        adjacentField.newField(optionToList(s)(0), realGame)
+    }
+
+/*     def prepareBoard(s: Option[String]): IField = {
         val (newSide, newBombs) = optionToList(s).splitAt(1)
         val updatedGame = this.copy(side = newSide.head, bombs = newBombs.head)
         val adjacentField = Playfield()
         adjacentField.newField(updatedGame.side, updatedGame)
-    }
+    } */
 
     def setField() = {
         hyperField = new Field(side, Symbols.Covered)
@@ -85,9 +93,7 @@ case class Game (var state: Status, bombs : Int = 10, side: Int = 9) extends IGa
     def getSide: Int = side
     def getBombs: Int = bombs
 
-    def getStatus: Status = {
-        state
-    }
+    def _board: String = board
 
     def openNew(x: Int, y: Int, field: IField): IField = {
         val extractedSymbol = field.showInvisibleCell(y, x)
@@ -162,15 +168,15 @@ case class Game (var state: Status, bombs : Int = 10, side: Int = 9) extends IGa
     def handleGameState(stateAsString: String) = 
         stateAsString match{
             case "Won" => {
-                this.state = Status.Won
+                this.board = "Won"
                 println("Game is won")
             }
             case "Lost" => {
-                this.state = Status.Lost
+                this.board = "Lost"
                 println("Game is lost")
             }
             case _ => {
-                this.state = Status.Playing
+                this.board = "Playing"
             }
         }
     
@@ -225,9 +231,9 @@ case class Game (var state: Status, bombs : Int = 10, side: Int = 9) extends IGa
         placeMines(matrix, 0)
     }
 
-    def setState(newState: Status) = copy(state = newState)
+    def setState(newBoard: String) = this.board = newBoard
     def setTime(time: Int) = this.time = time
     def getTime: Int = time
     
-    def checkExit = if this.state == Status.Lost || this.state == Status.Won then true else false
+    def checkExit = if this.board == "Lost" || this.board == "Won" then true else false
 

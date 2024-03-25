@@ -195,7 +195,13 @@ squareRoot.isDefinedAt(-2)
 
 
 var testGame1 = Default.prepareGame
-val status = testGame1.getStatus
+val status = testGame1._board
 testGame1.handleGameState("Lost")
 testGame1.handleGameState("Won")
-testGame1.getStatus
+testGame1._board
+testGame1.bombs
+testGame1.side
+testGame1.setSideAndBombs(11, 11)
+testGame1._board
+testGame1.bombs
+testGame1.side

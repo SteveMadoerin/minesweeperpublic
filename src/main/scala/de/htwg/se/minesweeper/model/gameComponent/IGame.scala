@@ -1,6 +1,6 @@
 package de.htwg.se.minesweeper.model.gameComponent
 
-import de.htwg.se.minesweeper.model.gameComponent.gameBaseImpl.{Symbols, Status, Matrix}
+import de.htwg.se.minesweeper.model.gameComponent.gameBaseImpl.{Symbols,Matrix}
 
 
 trait IGame {
@@ -8,7 +8,7 @@ trait IGame {
     def helpMessage: Unit
     def getSide: Int
     def getBombs: Int
-    def getStatus: Status
+    def _board: String
     
     def premierMove(x: Int, y: Int, field: IField): IField
     def openNew(x: Int, y: Int, field: IField): IField
@@ -28,14 +28,15 @@ trait IGame {
     def handleGameState(state: String): Unit
     def checkExit: Boolean
 
-    def setState(newState: Status): Unit
+    def setState(newBoard: String): Unit
     def setSideAndBombs(side: Int, bombs: Int): Unit
 
     def getTime: Int
     def setTime(newTime: Int): Unit
 
     // NEW
-    def prepareBoard(s: Option[String]): IField
+    def prepareBoard(s: Option[String], realGame: IGame): IField
+    //def prepareBoard(s: Option[String]): IField
     def createField: IField
     def getField: IField
     // NEW

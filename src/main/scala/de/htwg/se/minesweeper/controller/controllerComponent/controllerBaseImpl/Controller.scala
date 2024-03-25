@@ -11,7 +11,8 @@ import de.htwg.se.minesweeper.Default
 
 class Controller(using var game: IGame, var file: IFileIO) extends IController with Observable:
     var field: IField = game.getField
-    var spielbrettState = game.getStatus
+    //var spielbrettState = game._board
+    var spielbrettState = "Playing"
     var decider = new Decider()
     val undoRedoManager = new UndoRedoManager[IField]
     
@@ -81,12 +82,17 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
         notifyObservers(Event.Input)
 
     def newGameField(optionString: Option[String]) =
-        field = game.prepareBoard(optionString) // NEW
+        field = game.prepareBoard(optionString, game) // NEW
+
         notifyObservers(Event.NewGame)
 
     def newGame(side: Int, bombs: Int) =
         game.handleGameState("Playing")
-        game.setSideAndBombs(side, bombs)
+        val tempGame: Game = game.asInstanceOf[Game]
+        val gameCopy = tempGame.copy(side, bombs)
+        val newGame: IGame = gameCopy
+        game = newGame
+        //game.setSideAndBombs(side, bombs)
         field = game.createField
         notifyObservers(Event.NewGame)
 
@@ -115,7 +121,7 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
     def showVisibleCell(x: Int, y: Int): String = field.showVisibleCell(x,y).toString
 
     def getFieldSize: Int = field._matrix.size
-    def getSpielbrettState: Status = game.getStatus
+    def getSpielbrettState: String = game._board
     def getControllerField: IField = field
     def getControllerGame: IGame = game
     
@@ -124,3 +130,5 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
     def redo: IField = undoRedoManager.redoStep(field)
 
     override def toString = field.toString
+
+    //def checkExit = if this.spielbrettState == "Lost" || this.spielbrettState == "Won" then true else false

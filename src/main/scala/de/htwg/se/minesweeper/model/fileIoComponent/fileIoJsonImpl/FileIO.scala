@@ -24,7 +24,7 @@ class FileIO extends IFileIO{
         Json.prettyPrint(
             Json.obj(
                 "game" -> Json.obj(
-                    "status" -> game.getStatus.toString,
+                    "status" -> game._board,
                     "bombs" -> game.getBombs,
                     "side" -> game.getSide,
                     "time" -> game.getTime
