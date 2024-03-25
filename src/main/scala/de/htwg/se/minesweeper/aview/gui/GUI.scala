@@ -2,7 +2,6 @@ package de.htwg.se.minesweeper.aview.gui
 
 import de.htwg.se.minesweeper.controller.controllerComponent.IController
 import de.htwg.se.minesweeper.util.{Observer, Event, Move}
-import de.htwg.se.minesweeper.model.gameComponent.gameBaseImpl.{Status}
 import de.htwg.se.minesweeper.Default.{given}
 import de.htwg.se.minesweeper.Default
 import scala.swing.event.MouseClicked
@@ -74,7 +73,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
             contents ++= flagCountDisplay.productIterator.map(digit => new DigitLabel(digit.asInstanceOf[ImageIcon]))
         }, BorderPanel.Position.West)
 
-        add(new SmileLabel(s"${controller.getSpielbrettState}"), BorderPanel.Position.Center)
+        add(new SmileLabel(controller.calWonOrLost), BorderPanel.Position.Center)
         
         val timerDigits = Seq(l, m, r).map(getDigits)
         add(new BoxPanel(Orientation.NoOrientation){
@@ -171,7 +170,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
                 stopTimer()
 
                 val saveScore: Int = calculateScore
-                val text = s"Game is ${controller.getSpielbrettState} and your Score is ${calculateScore}"
+                val text = s"Game is ${controller.calWonOrLost} and your Score is ${calculateScore}"
                 
                 resetTimer()
                 showMessage(null, text, "GameOver", Message.Info)
@@ -324,7 +323,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
 
     def calculateScore: Int =
         val score = ((controller.getFieldSize * controller.getFieldSize)) * 10 - (l*100+m*10+r)
-        if controller.getSpielbrettState == Status.Won then score else 0
+        if controller.calWonOrLost == "won" then score else 0
     
     def resetTimer() = {
         clock.set(0)
@@ -358,7 +357,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
         maximumSize_=(new Dimension(40,40))
         listenTo(mouse.clicks)
         reactions += {
-            case e: MouseClicked if (controller.getSpielbrettState == Status.Won || controller.getSpielbrettState == Status.Lost) =>
+            case e: MouseClicked if (controller.checkWinOrLost) =>
             
             case e: MouseClicked if e.peer.getButton == MouseEvent.BUTTON3 => 
                 if (controller.showVisibleCell(x,y) == "~"){
@@ -385,9 +384,9 @@ class GUI(using var controller: IController) extends Frame with Observer:
 
     class SmileLabel(kind: String) extends Label():
         icon = kind match {
-            case "Playing" => getSmiley("smile")
-            case "Lost" => getSmiley("dead")
-            case "Won" => getSmiley("win") 
+            case "lost" => getSmiley("dead")
+            case "won" => getSmiley("win")
+            case _ => getSmiley("smile")
         }
 
     class DigitLabel(newIcon: ImageIcon) extends Label():

@@ -32,7 +32,7 @@ class TUI(using var controller: IController) extends Observer:
           true
         case Event.Start => infoMessages(controller.getControllerField.toString()); true
         case Event.Next => infoMessages(controller.getControllerField.toString()); true
-        case Event.GameOver => infoMessages(controller.getControllerField.toString()); true
+        case Event.GameOver => infoMessages(controller.getControllerField.toString(), controller.calWonOrLost); true
         case Event.Cheat => false
         case Event.Help => false
         case Event.Input => false
@@ -94,8 +94,10 @@ class TUI(using var controller: IController) extends Observer:
             case "help" => controller.helpMenu
             case _ => infoMessages(">> Invalid Input")
           }
+
+          println(controller.checkWinOrLost)
       
-      if !controller.checkGameOver then parseInputandPrintLoop(stillFirstMove) else controller.gameOver; restart
+      if !controller.checkWinOrLost then parseInputandPrintLoop(stillFirstMove) else controller.gameOver; restart
     }
 
     def restart: Unit = 

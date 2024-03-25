@@ -1,6 +1,6 @@
 package de.htwg.se.minesweeper.model.gameComponent
 
-import de.htwg.se.minesweeper.model.gameComponent.gameBaseImpl.{Symbols, Status, Matrix}
+import de.htwg.se.minesweeper.model.gameComponent.gameBaseImpl.{Symbols, Matrix}
 
 
 trait IGame {
@@ -8,7 +8,6 @@ trait IGame {
     def helpMessage: Unit
     def getSide: Int
     def getBombs: Int
-    def getStatus: Status
     
     def premierMove(x: Int, y: Int, field: IField): IField
     def openNew(x: Int, y: Int, field: IField): IField
@@ -25,10 +24,6 @@ trait IGame {
     def initializeAdjacentNumbers(matrix: Matrix[Symbols]): Matrix[Symbols]
     def intitializeBombs(matrix: Matrix[Symbols], bombs: Int): Matrix[Symbols]
 
-    def handleGameState(state: String): Unit
-    def checkExit: Boolean
-
-    def setState(newState: Status): Unit
     def setSideAndBombs(side: Int, bombs: Int): Unit
 
     def getTime: Int
@@ -58,6 +53,7 @@ trait IField{
     def recursiveMadness(x: Int, y: Int, field: IField): IField
     def _matrix: Matrix[Symbols]
     def _hidden: Matrix[Symbols]
+    def checkActualMove(x: Int, y: Int, game: IGame): Boolean
 
     def toString: String
 }

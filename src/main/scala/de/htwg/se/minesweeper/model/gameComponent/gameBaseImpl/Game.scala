@@ -8,7 +8,7 @@ import scala.annotation.tailrec
 import de.htwg.se.minesweeper.Default.given
 
 
-case class Game (var state: Status, bombs : Int = 10, side: Int = 9) extends IGame:
+case class Game (bombs : Int = 10, side: Int = 9) extends IGame:
     private var hyperField: IField = _ 
     var time = 0
 
@@ -85,9 +85,9 @@ case class Game (var state: Status, bombs : Int = 10, side: Int = 9) extends IGa
     def getSide: Int = side
     def getBombs: Int = bombs
 
-    def getStatus: Status = {
-        state
-    }
+    //def getStatus: Status = {
+    //    state
+    //}
 
     def openNew(x: Int, y: Int, field: IField): IField = {
         val extractedSymbol = field.showInvisibleCell(y, x)
@@ -158,7 +158,7 @@ case class Game (var state: Status, bombs : Int = 10, side: Int = 9) extends IGa
     }
 
     def calcWonOrLost(visibleMatrix: Matrix[Symbols], mines: Int): Boolean = (mines+1 - addCoveredAndFlag(visibleMatrix) == 0)
-
+    /*
     def handleGameState(stateAsString: String) = 
         stateAsString match{
             case "Won" => {
@@ -173,6 +173,7 @@ case class Game (var state: Status, bombs : Int = 10, side: Int = 9) extends IGa
                 this.state = Status.Playing
             }
         }
+    */
     
     def isMine(row: Int, col: Int, m: Matrix[Symbols]): Boolean = {if(m.cell(row, col) == Symbols.Bomb) true else false}
     def isValid(row: Int, col: Int, side: Int): Boolean = {row >= 0 && row <= side && col >= 0 && col <= side}
@@ -225,9 +226,9 @@ case class Game (var state: Status, bombs : Int = 10, side: Int = 9) extends IGa
         placeMines(matrix, 0)
     }
 
-    def setState(newState: Status) = copy(state = newState)
+    //def setState(newState: Status) = copy(state = newState)
     def setTime(time: Int) = this.time = time
     def getTime: Int = time
     
-    def checkExit = if this.state == Status.Lost || this.state == Status.Won then true else false
+    //def checkExit = if this.state == Status.Lost || this.state == Status.Won then true else false
 

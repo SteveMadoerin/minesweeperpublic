@@ -17,7 +17,7 @@ class FirstMove extends OpenStrategy{
 }
 
 class NormalMove extends OpenStrategy{
-    override def showField(x: Int, y: Int, field: IField, game: IGame): IField = 
+    override def showField(x: Int, y: Int, field: IField, game: IGame): IField =
         val feld = field.open(x, y, game)
         val elGame = game
         feld

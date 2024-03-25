@@ -11,11 +11,13 @@ import de.htwg.se.minesweeper.Default
 
 class Controller(using var game: IGame, var file: IFileIO) extends IController with Observable:
     var field: IField = game.getField
-    var spielbrettState = game.getStatus
+    //var spielbrettState = game.getStatus
     var decider = new Decider()
     val undoRedoManager = new UndoRedoManager[IField]
+    var actualMove = Move("empty", 0, 0)
     
-    def doMove(b: Boolean, move: Move, game: IGame) = 
+    def doMove(b: Boolean, move: Move, game: IGame) =
+        actualMove = move
         field = decider.evaluateStrategy(b, move.x, move.y, field, game)
         if(field.showInvisibleCell(move.y, move.x) == Symbols.Zero){field}
         else{undoRedoManager.doStep(field, DoCommand(move))}
@@ -27,7 +29,6 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
             case Some(game) => this.game = game
             case None =>
         }
-        game.handleGameState("Playing")
 
         val fieldOption = file.loadField2
         fieldOption match {
@@ -42,7 +43,6 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
         notifyObservers(Event.SaveTime)
         file.saveGame(game)
         file.saveField(field)
-        game.handleGameState("Playing")
         notifyObservers(Event.Save)
 
     def exit =
@@ -72,12 +72,10 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
     def cheat = 
         field.reveal
         notifyObservers(Event.Cheat)
-    
-    def checkGameOver =
-        game.checkExit
+
+    def checkGameOver = checkWinOrLost
 
     def newGameGUI =
-        game.handleGameState("Playing")
         notifyObservers(Event.Input)
 
     def newGameField(optionString: Option[String]) =
@@ -85,7 +83,6 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
         notifyObservers(Event.NewGame)
 
     def newGame(side: Int, bombs: Int) =
-        game.handleGameState("Playing")
         game.setSideAndBombs(side, bombs)
         field = game.createField
         notifyObservers(Event.NewGame)
@@ -112,10 +109,16 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
         file.loadPlayerScores(filePath)
     }
 
+    def checkWinOrLost: Boolean = field.checkActualMove(actualMove.x, actualMove.y, game)
+
+    def calWonOrLost: String = game.calcWonOrLost(field._matrix, game.getBombs) match {
+        case true => "won"
+        case false => "lost"
+    }
+
     def showVisibleCell(x: Int, y: Int): String = field.showVisibleCell(x,y).toString
 
     def getFieldSize: Int = field._matrix.size
-    def getSpielbrettState: Status = game.getStatus
     def getControllerField: IField = field
     def getControllerGame: IGame = game
     
