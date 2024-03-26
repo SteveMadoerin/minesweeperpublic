@@ -4,12 +4,7 @@ import de.htwg.se.minesweeper.model.gameComponent.gameBaseImpl.{Symbols,Matrix}
 
 
 trait IGame {
-    
-    def helpMessage: Unit
-    def getSide: Int
-    def getBombs: Int
-    def _board: String
-    
+        
     def premierMove(x: Int, y: Int, field: IField): IField
     def openNew(x: Int, y: Int, field: IField): IField
     def replaceBomb(x: Int, y: Int, field: IField): IField
@@ -29,19 +24,18 @@ trait IGame {
     def checkExit: Boolean
 
     def setState(newBoard: String): Unit
-    //def setSideAndBombs(side: Int, bombs: Int): Unit
 
-    def getTime: Int
-    def setTime(newTime: Int): Unit
+    def helpMessage: Unit
+    def updateTime(newTime: Int): Unit
 
-    // NEW
-    def prepareBoard(s: Option[String], game: IGame): (IField, IGame)
-    //def prepareBoard(s: Option[String]): (IField, IGame)
-    //def prepareBoard(s: Option[String], realGame: IGame): IField
-    //def prepareBoard(s: Option[String]): IField
-    def createField: IField
+    def _side: Int
+    def _bombs: Int
+    def _board: String
     def _field: IField
-    // NEW
+    def _time: Int
+
+    def prepareBoard(s: Option[String], game: IGame): (IField, IGame)
+    def createField: IField
 
 }
 

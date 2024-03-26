@@ -11,7 +11,7 @@ import de.htwg.se.minesweeper.Default.given
 case class Game (bombs : Int, side: Int) extends IGame:
     private var hyperField: IField = _ 
     var board = "Playing"
-    var time = 0
+    var time = Vector(0)
 
 
     def createField: IField = {
@@ -85,8 +85,8 @@ case class Game (bombs : Int, side: Int) extends IGame:
         var newVisibleMatrix = openNew(x, y, newReplacedbombHidMatrix)
         newVisibleMatrix
 
-    def getSide: Int = side
-    def getBombs: Int = bombs
+    def _side: Int = side
+    def _bombs: Int = bombs
 
     def _board: String = board
     def _field = hyperField
@@ -228,8 +228,8 @@ case class Game (bombs : Int, side: Int) extends IGame:
     }
 
     def setState(newBoard: String) = this.board = newBoard
-    def setTime(time: Int) = this.time = time
-    def getTime: Int = time
+    def updateTime(newTime: Int) = time.updated(0, newTime)
+    def _time: Int = time(0)
     
     def checkExit = if this.board == "Lost" || this.board == "Won" then true else false
 

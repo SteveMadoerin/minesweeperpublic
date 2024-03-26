@@ -34,9 +34,9 @@ class FileIO extends IFileIO {
 
     def gameToXml(game: IGame) = {
         <game status ={ game._board }>
-            <bombs>{ game.getBombs }</bombs>
-            <side>{ game.getSide }</side>
-            <time>{ game.getTime }</time>
+            <bombs>{ game._bombs}</bombs>
+            <side>{ game._side }</side>
+            <time>{ game._time }</time>
         </game>
     }
 

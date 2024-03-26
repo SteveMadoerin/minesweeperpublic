@@ -25,7 +25,6 @@ object Default{
     def scalableField(size: Int, filling: Symbols): IField = new Field(size, filling)
     def mergeMatrixToField(sichtbar: Matrix[Symbols], unsichtbar: Matrix[Symbols] ): IField = new Field(sichtbar, unsichtbar)
 
-    // NEW
     def prepareGame = {
         var realGame = new Game(10 , 9)
         realGame.board = "Playing"
@@ -36,12 +35,10 @@ object Default{
     def prepareGame(bombs: Int, size: Int, time : Int) : IGame = {
         var realGame = new Game(bombs, size)
         realGame.board = "Playing"
-        realGame.time = time
+        realGame.time = Vector(time)
         realGame.createField
         realGame
         
     }
-    // NEW
-    
 
 }

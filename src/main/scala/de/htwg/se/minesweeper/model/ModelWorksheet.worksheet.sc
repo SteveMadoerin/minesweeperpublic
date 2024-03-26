@@ -233,3 +233,14 @@ case class Settings(var side: Int, var bombs: Int)
 
 var testSettings1 = Settings(9, 10)
 val testSettings2 = testSettings1.bombs = 33
+
+var time = Vector(0)
+// update the time
+time.updated(0, 1)
+
+val zeit = Vector(0)
+
+zeit.updated(0, 1)
+
+// get the time
+zeit(0)

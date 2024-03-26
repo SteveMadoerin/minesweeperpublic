@@ -25,9 +25,9 @@ class FileIO extends IFileIO{
             Json.obj(
                 "game" -> Json.obj(
                     "status" -> game._board,
-                    "bombs" -> game.getBombs,
-                    "side" -> game.getSide,
-                    "time" -> game.getTime
+                    "bombs" -> game._bombs,
+                    "side" -> game._side,
+                    "time" -> game._time
                 )
             )
         )
