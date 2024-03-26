@@ -9,7 +9,7 @@ import de.htwg.se.minesweeper.Default.given
 
 
 case class Game (bombs : Int, side: Int) extends IGame:
-    private var hyperField: IField = _ 
+    private var hyperField: IField = new Field(side, Symbols.Covered)
     var board = "Playing"
     var time = Vector(0)
 
@@ -37,17 +37,6 @@ case class Game (bombs : Int, side: Int) extends IGame:
         val realGame = this.copy(optionToList(s)(1), optionToList(s)(0))
         val adjacentField = Playfield()
         (adjacentField.newField(optionToList(s)(0), realGame), realGame)
-    }
-
-/*     def prepareBoard(s: Option[String]): IField = {
-        val (newSide, newBombs) = optionToList(s).splitAt(1)
-        val updatedGame = this.copy(side = newSide.head, bombs = newBombs.head)
-        val adjacentField = Playfield()
-        adjacentField.newField(updatedGame.side, updatedGame)
-    } */
-
-    def setField() = {
-        hyperField = new Field(side, Symbols.Covered)
     }
 
     def helpMessage = 
