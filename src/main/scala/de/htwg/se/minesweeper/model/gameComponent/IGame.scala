@@ -29,16 +29,18 @@ trait IGame {
     def checkExit: Boolean
 
     def setState(newBoard: String): Unit
-    def setSideAndBombs(side: Int, bombs: Int): Unit
+    //def setSideAndBombs(side: Int, bombs: Int): Unit
 
     def getTime: Int
     def setTime(newTime: Int): Unit
 
     // NEW
-    def prepareBoard(s: Option[String], realGame: IGame): IField
+    def prepareBoard(s: Option[String], game: IGame): (IField, IGame)
+    //def prepareBoard(s: Option[String]): (IField, IGame)
+    //def prepareBoard(s: Option[String], realGame: IGame): IField
     //def prepareBoard(s: Option[String]): IField
     def createField: IField
-    def getField: IField
+    def _field: IField
     // NEW
 
 }

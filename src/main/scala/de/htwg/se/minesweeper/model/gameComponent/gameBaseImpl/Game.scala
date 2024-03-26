@@ -8,22 +8,16 @@ import scala.annotation.tailrec
 import de.htwg.se.minesweeper.Default.given
 
 
-case class Game (var bombs : Int = 10, var side: Int = 9) extends IGame:
+case class Game (bombs : Int, side: Int) extends IGame:
     private var hyperField: IField = _ 
     var board = "Playing"
     var time = 0
 
-    def getField = hyperField
-
-    def setSideAndBombs(side: Int, bombz: Int) = {
-        this.side = side
-        this.bombs = bombz
-    }
 
     def createField: IField = {
         val adjacentField = Playfield()
-        var dasFeld = adjacentField.newField(this.side, this)
-        hyperField = dasFeld
+        val dasFeld = adjacentField.newField(this.side, this)
+        hyperField = dasFeld // maybe replace
         dasFeld
     }
 
@@ -38,10 +32,11 @@ case class Game (var bombs : Int = 10, var side: Int = 9) extends IGame:
     }
 
 
-    def prepareBoard(s: Option[String], realGame: IGame): IField = {
-        realGame.setSideAndBombs(optionToList(s)(0), optionToList(s)(1))
+    def prepareBoard(s: Option[String], game: IGame): (IField, IGame) = {
+        hyperField = game._field
+        val realGame = this.copy(optionToList(s)(1), optionToList(s)(0))
         val adjacentField = Playfield()
-        adjacentField.newField(optionToList(s)(0), realGame)
+        (adjacentField.newField(optionToList(s)(0), realGame), realGame)
     }
 
 /*     def prepareBoard(s: Option[String]): IField = {
@@ -94,6 +89,7 @@ case class Game (var bombs : Int = 10, var side: Int = 9) extends IGame:
     def getBombs: Int = bombs
 
     def _board: String = board
+    def _field = hyperField
 
     def openNew(x: Int, y: Int, field: IField): IField = {
         val extractedSymbol = field.showInvisibleCell(y, x)

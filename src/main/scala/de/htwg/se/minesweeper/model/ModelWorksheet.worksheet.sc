@@ -194,7 +194,7 @@ squareRoot.isDefinedAt(-2)
 
 
 
-var testGame1 = Default.prepareGame
+/* var testGame1 = Default.prepareGame
 val status = testGame1._board
 testGame1.handleGameState("Lost")
 testGame1.handleGameState("Won")
@@ -204,4 +204,32 @@ testGame1.side
 testGame1.setSideAndBombs(11, 11)
 testGame1._board
 testGame1.bombs
-testGame1.side
+testGame1.side */
+
+trait Pizza {
+  val name: String
+}
+
+case class SmallPizza(name: String) extends Pizza
+
+val pizza = SmallPizza("small")
+val pizzaNameAsString = pizza.name
+
+val pizzaInterface: Pizza = SmallPizza("small")
+val pizzaInterfaceNameAsString = pizzaInterface.name
+
+case class Spiel(side : Int, bombs : Int)
+
+val testSpiel1 = Spiel(9, 10)
+val testSpiel2 = testSpiel1.copy(side = 11)
+// make change the side via setter
+// not possible heretestSpiel1.side = 33
+testSpiel1
+testSpiel2
+testSpiel1.side
+//val testSpiel4 = testSpiel13
+
+case class Settings(var side: Int, var bombs: Int)
+
+var testSettings1 = Settings(9, 10)
+val testSettings2 = testSettings1.bombs = 33

@@ -12,8 +12,6 @@ import java.io._
 class FileIO extends IFileIO {
 
 
-    def initGame(using game: IGame) = game
-
     override def loadGame: Option[IGame] = {
 
         var gameOption: Option[IGame] = None
@@ -23,10 +21,8 @@ class FileIO extends IFileIO {
         val side = (file \\ "side").text.toInt
         val time = (file \\ "time").text.toInt
 
-        var game = initGame
+        val game = Default.prepareGame(bombs, side, time)
 
-        game.setTime(time)
-        game.setSideAndBombs(side, bombs)
         gameOption = Some(game)
         
         gameOption match {

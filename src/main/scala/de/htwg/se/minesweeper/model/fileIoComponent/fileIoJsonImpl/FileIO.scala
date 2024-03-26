@@ -45,10 +45,7 @@ class FileIO extends IFileIO{
         val bombs = (json \ "game" \ "bombs").get.toString.toInt
         val side = (json \ "game" \ "side").get.toString.toInt
         val time = (json \ "game" \ "time").get.toString.toInt
-        var game = initGame
-
-        game.setTime(time)
-        game.setSideAndBombs(side, bombs)
+        val game = Default.prepareGame(bombs, side, time)
 
         gameOption = Some(game)
 

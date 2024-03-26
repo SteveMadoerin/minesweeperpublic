@@ -8,9 +8,9 @@ import de.htwg.se.minesweeper.Default
 abstract class FieldCreatorTemplate{
 
     def newField(side: Int, spiel: IGame): IField = 
-        var feld = createEmptyField(side)
-        feld = initialiseInvisibleMatrix(feld, spiel)
-        feld
+        val emptyField = createEmptyField(side)
+        val initialisedField = initialiseInvisibleMatrix(emptyField, spiel)
+        initialisedField
 
     protected def createEmptyField(side: Int ): IField = Default.scalableField(side, Symbols.Covered) // Dependency Injection
 
