@@ -29,14 +29,9 @@ trait IGame {
     def updateTime(newTime: Int): Unit
 
     def side: Int
-    //def _side: Int
-    // def _bombs: Int
     def bombs: Int
-    // def _board: String
     def board: String
-    /* def _field: IField */
     def hyperField: IField
-    //def _time: Int
     def time: Int
 
     def prepareBoard(s: Option[String], game: IGame): (IField, IGame)
@@ -60,9 +55,6 @@ trait IField{
     def recursiveMadness(x: Int, y: Int, field: IField): IField
     def matrix: Matrix[Symbols]
     def hidden: Matrix[Symbols]
-    //def _matrix: Matrix[Symbols]
-    //def _hidden: Matrix[Symbols]
-
     def toString: String
 }
 

@@ -63,22 +63,16 @@ case class Game (bombs : Int, side: Int) extends IGame:
     
     def premierMove(x: Int, y: Int, field: IField): IField = 
         val adjacent = Playfield()
-        var adjacentInitialised = adjacent.newField(side, this)
+        val adjacentInitialised = adjacent.newField(side, this)
         val newReplacedbombHidMatrix = if(adjacentInitialised.hidden.cell(y, x) == Symbols.Bomb){
-            var replacedHiddenMatrix = replaceBomb(x, y, adjacentInitialised)
+            val replacedHiddenMatrix = replaceBomb(x, y, adjacentInitialised)
             val replacedAdjacentHiddenField = Default.mergeMatrixToField(field.matrix, replacedHiddenMatrix.hidden) // Dependency Injection
             replacedAdjacentHiddenField
         } else {
             adjacentInitialised
         }
-        var newVisibleMatrix = openNew(x, y, newReplacedbombHidMatrix)
+        val newVisibleMatrix = openNew(x, y, newReplacedbombHidMatrix)
         newVisibleMatrix
-
-    //def _side: Int = side
-    //def _bombs: Int = bombs
-
-    //def _board: String = board
-    //def _field = hyperField
 
     def openNew(x: Int, y: Int, field: IField): IField = {
         val extractedSymbol = field.showInvisibleCell(y, x)
