@@ -149,7 +149,7 @@ class FileIO extends IFileIO {
 
         val pw = new PrintWriter(new File("C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\field.xml"))
         val prettyPrinter = new PrettyPrinter(120, 4)
-        val hiddenField = new Field(field._hidden)
+        val hiddenField = new Field(field.hidden)
         val visibleField = new Field(field.matrix)
         val xml = prettyPrinter.format(fieldToXml(field))
         pw.write(xml)

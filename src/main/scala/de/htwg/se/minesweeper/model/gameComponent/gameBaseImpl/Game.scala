@@ -64,9 +64,9 @@ case class Game (bombs : Int, side: Int) extends IGame:
     def premierMove(x: Int, y: Int, field: IField): IField = 
         val adjacent = Playfield()
         var adjacentInitialised = adjacent.newField(side, this)
-        val newReplacedbombHidMatrix = if(adjacentInitialised._hidden.cell(y, x) == Symbols.Bomb){
+        val newReplacedbombHidMatrix = if(adjacentInitialised.hidden.cell(y, x) == Symbols.Bomb){
             var replacedHiddenMatrix = replaceBomb(x, y, adjacentInitialised)
-            val replacedAdjacentHiddenField = Default.mergeMatrixToField(field.matrix, replacedHiddenMatrix._hidden) // Dependency Injection
+            val replacedAdjacentHiddenField = Default.mergeMatrixToField(field.matrix, replacedHiddenMatrix.hidden) // Dependency Injection
             replacedAdjacentHiddenField
         } else {
             adjacentInitialised
@@ -92,12 +92,12 @@ case class Game (bombs : Int, side: Int) extends IGame:
         val indices = 0 until size
         val result = indices
             .flatMap(col => indices.map(row => (row, col)))
-            .filter { case (row, col) => field._hidden.cell(row, col) != Symbols.Bomb }
+            .filter { case (row, col) => field.hidden.cell(row, col) != Symbols.Bomb }
 
         val rand = Random.nextInt(result.size)
         val (newX, newY) = result(rand)
 
-        val newHiddenMatrixWithBomb = field._hidden.replaceCell(newY, newX, Symbols.Bomb)
+        val newHiddenMatrixWithBomb = field.hidden.replaceCell(newY, newX, Symbols.Bomb)
         val newHiddenMatrixWithoutBomb = newHiddenMatrixWithBomb.replaceCell(y, x, Symbols.Empty)
         val newHiddenMatrixWithNumbers = initializeAdjacentNumbers(newHiddenMatrixWithoutBomb)
 

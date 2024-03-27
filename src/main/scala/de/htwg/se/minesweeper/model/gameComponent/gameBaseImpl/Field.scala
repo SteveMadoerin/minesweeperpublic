@@ -22,7 +22,7 @@ case class Field(matrix: Matrix[Symbols], hidden: Matrix[Symbols]) extends IFiel
         val returnField = this.put(extractedSymbol, y, x)
         returnField
     
-    def gameOverField: IField = new Field(this._hidden)
+    def gameOverField: IField = new Field(this.hidden)
     
     def reveal =
         val revMat = new Field(this.hidden)
@@ -35,7 +35,7 @@ case class Field(matrix: Matrix[Symbols], hidden: Matrix[Symbols]) extends IFiel
     def isValidF(row: Int, col: Int, side: Int): Boolean = {row >= 0 && row <= side && col >= 0 && col <= side}
     
     //def _matrix: Matrix[Symbols] = matrix
-    def _hidden: Matrix[Symbols] = hidden
+    //def _hidden: Matrix[Symbols] = hidden
 
     def openNewXXX(x: Int, y: Int, field: IField): IField =
         val extractedSymbol = field.showInvisibleCell(y, x)
