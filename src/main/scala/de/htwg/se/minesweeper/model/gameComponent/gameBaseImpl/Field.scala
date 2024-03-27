@@ -34,7 +34,7 @@ case class Field(matrix: Matrix[Symbols], hidden: Matrix[Symbols]) extends IFiel
     def showInvisibleCell(x: Int, y: Int): Symbols = hidden.cell(x, y)
     def isValidF(row: Int, col: Int, side: Int): Boolean = {row >= 0 && row <= side && col >= 0 && col <= side}
     
-    def _matrix: Matrix[Symbols] = matrix
+    //def _matrix: Matrix[Symbols] = matrix
     def _hidden: Matrix[Symbols] = hidden
 
     def openNewXXX(x: Int, y: Int, field: IField): IField =
@@ -53,7 +53,7 @@ case class Field(matrix: Matrix[Symbols], hidden: Matrix[Symbols]) extends IFiel
             case (dx, dy) :: tail =>
             val newX = x + dx
             val newY = y + dy
-            if (isValidF(newY, newX, currentField._matrix.size - 1)) {
+            if (isValidF(newY, newX, currentField.matrix.size - 1)) {
                 val currentCell = currentField.showVisibleCell(newY, newX)
                 val invisibleCell = currentField.showInvisibleCell(newY, newX)
                 val updatedField = if (currentCell == Symbols.Covered) {

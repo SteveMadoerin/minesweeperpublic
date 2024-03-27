@@ -244,3 +244,7 @@ zeit.updated(0, 1)
 
 // get the time
 zeit(0)
+
+def isPrime(n: Int) = 2 until n forall { n % _ != 0 }
+
+isPrime(31)

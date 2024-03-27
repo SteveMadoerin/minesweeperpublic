@@ -26,7 +26,7 @@ class Minefield extends FieldCreatorTemplate{
 
         val bombs = game.bombs
         val side = game.side
-        val sichtbareMatrix = field._matrix
+        val sichtbareMatrix = field.matrix
         val unsichtbareMatrix = Default.scalableMatrix(side, Symbols.Empty) // Dependency Injection
         val newUnsichtbareMatrix = game.intitializeBombs(unsichtbareMatrix, bombs)
         val newField = Default.mergeMatrixToField(sichtbareMatrix, newUnsichtbareMatrix) // Dependency Injection
@@ -41,7 +41,7 @@ class Playfield extends FieldCreatorTemplate{
 
         val bombs = game.bombs
         val side = game.side
-        val sichtbareMatrix = field._matrix
+        val sichtbareMatrix = field.matrix
         var unsichtbareMatrix = Default.scalableMatrix(side, Symbols.Empty) // Dependency Injection
         var newUnsichtbareMatrix = game.intitializeBombs(unsichtbareMatrix, bombs)
         val newUnsichtbareMatrixAdjacent = game.initializeAdjacentNumbers(newUnsichtbareMatrix)

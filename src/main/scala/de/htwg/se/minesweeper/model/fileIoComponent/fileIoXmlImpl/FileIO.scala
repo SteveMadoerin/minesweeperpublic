@@ -119,20 +119,20 @@ class FileIO extends IFileIO {
 
     def fieldToXml(field: IField) = {
 
-        <field size = {field._matrix.size.toString}>
+        <field size = {field.matrix.size.toString}>
             <matrix>
             {
                 for {
-                    row <- 0 until field._matrix.size
-                    col <- 0 until field._matrix.size
+                    row <- 0 until field.matrix.size
+                    col <- 0 until field.matrix.size
                 } yield cellToXmlVisible(field, row, col)
             }
             </matrix>
             <hidden>
             {
                 for {
-                    row <- 0 until field._matrix.size
-                    col <- 0 until field._matrix.size
+                    row <- 0 until field.matrix.size
+                    col <- 0 until field.matrix.size
                 } yield cellToXmlHidden(field, row, col)
             }
             </hidden>
@@ -150,7 +150,7 @@ class FileIO extends IFileIO {
         val pw = new PrintWriter(new File("C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\field.xml"))
         val prettyPrinter = new PrettyPrinter(120, 4)
         val hiddenField = new Field(field._hidden)
-        val visibleField = new Field(field._matrix)
+        val visibleField = new Field(field.matrix)
         val xml = prettyPrinter.format(fieldToXml(field))
         pw.write(xml)
         pw.close
