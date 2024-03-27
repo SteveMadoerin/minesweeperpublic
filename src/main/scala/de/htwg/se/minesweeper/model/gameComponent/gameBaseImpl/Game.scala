@@ -9,9 +9,9 @@ import de.htwg.se.minesweeper.Default.given
 
 
 case class Game (bombs : Int, side: Int) extends IGame:
-    private var hyperField: IField = new Field(side, Symbols.Covered)
+    var hyperField: IField = new Field(side, Symbols.Covered)
     var board = "Playing"
-    var time = Vector(0)
+    var time = 0
 
 
     def createField: IField = {
@@ -33,7 +33,7 @@ case class Game (bombs : Int, side: Int) extends IGame:
 
 
     def prepareBoard(s: Option[String], game: IGame): (IField, IGame) = {
-        hyperField = game._field
+        hyperField = game.hyperField
         val realGame = this.copy(optionToList(s)(1), optionToList(s)(0))
         val adjacentField = Playfield()
         (adjacentField.newField(optionToList(s)(0), realGame), realGame)
@@ -74,11 +74,11 @@ case class Game (bombs : Int, side: Int) extends IGame:
         var newVisibleMatrix = openNew(x, y, newReplacedbombHidMatrix)
         newVisibleMatrix
 
-    def _side: Int = side
-    def _bombs: Int = bombs
+    //def _side: Int = side
+    //def _bombs: Int = bombs
 
-    def _board: String = board
-    def _field = hyperField
+    //def _board: String = board
+    //def _field = hyperField
 
     def openNew(x: Int, y: Int, field: IField): IField = {
         val extractedSymbol = field.showInvisibleCell(y, x)
@@ -216,9 +216,8 @@ case class Game (bombs : Int, side: Int) extends IGame:
         placeMines(matrix, 0)
     }
 
-    def setState(newBoard: String) = this.board = newBoard
-    def updateTime(newTime: Int) = time.updated(0, newTime)
-    def _time: Int = time(0)
+    def setState(newBoard: String) = this.board = newBoard // has to be removed
+    def updateTime(newTime: Int) = this.time = newTime // has to be removed
     
     def checkExit = if this.board == "Lost" || this.board == "Won" then true else false
 

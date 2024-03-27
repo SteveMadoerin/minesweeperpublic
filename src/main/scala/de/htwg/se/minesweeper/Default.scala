@@ -12,7 +12,7 @@ import de.htwg.se.minesweeper.model.fileIoComponent.fileIoJsonImpl.{FileIO => Js
 object Default{
     // NEW
     given IGame = prepareGame
-    given IField = prepareGame._field
+    given IField = prepareGame.hyperField
     // NEW
     given IController = Controller()
     
@@ -35,7 +35,7 @@ object Default{
     def prepareGame(bombs: Int, size: Int, time : Int) : IGame = {
         var realGame = new Game(bombs, size)
         realGame.board = "Playing"
-        realGame.time = Vector(time)
+        realGame.time = time
         realGame.createField
         realGame
         

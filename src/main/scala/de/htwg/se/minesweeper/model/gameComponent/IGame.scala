@@ -28,11 +28,16 @@ trait IGame {
     def helpMessage: Unit
     def updateTime(newTime: Int): Unit
 
-    def _side: Int
-    def _bombs: Int
-    def _board: String
-    def _field: IField
-    def _time: Int
+    def side: Int
+    //def _side: Int
+    // def _bombs: Int
+    def bombs: Int
+    // def _board: String
+    def board: String
+    /* def _field: IField */
+    def hyperField: IField
+    //def _time: Int
+    def time: Int
 
     def prepareBoard(s: Option[String], game: IGame): (IField, IGame)
     def createField: IField

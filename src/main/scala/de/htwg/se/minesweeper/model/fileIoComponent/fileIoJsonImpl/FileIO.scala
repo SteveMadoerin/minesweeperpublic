@@ -24,10 +24,10 @@ class FileIO extends IFileIO{
         Json.prettyPrint(
             Json.obj(
                 "game" -> Json.obj(
-                    "status" -> game._board,
-                    "bombs" -> game._bombs,
-                    "side" -> game._side,
-                    "time" -> game._time
+                    "status" -> game.board,
+                    "bombs" -> game.bombs,
+                    "side" -> game.side,
+                    "time" -> game.time
                 )
             )
         )

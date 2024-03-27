@@ -33,10 +33,10 @@ class FileIO extends IFileIO {
     }
 
     def gameToXml(game: IGame) = {
-        <game status ={ game._board }>
-            <bombs>{ game._bombs}</bombs>
-            <side>{ game._side }</side>
-            <time>{ game._time }</time>
+        <game status ={ game.board }>
+            <bombs>{ game.bombs}</bombs>
+            <side>{ game.side }</side>
+            <time>{ game.time }</time>
         </game>
     }
 

@@ -74,7 +74,7 @@ class TUI(using var controller: IController) extends Observer:
           }
 
           val validCoordinates: Option[Move] = coordinates match {
-            case Some(i) => {if game._side > i._1 && game._side > i._2 then Some(Move(action, i._1, i._2)) else { infoMessages(">> Invalid Move: Coordinates out of bounds"); None}}
+            case Some(i) => {if game.side > i._1 && game.side > i._2 then Some(Move(action, i._1, i._2)) else { infoMessages(">> Invalid Move: Coordinates out of bounds"); None}}
             case None => None
           }
           validCoordinates

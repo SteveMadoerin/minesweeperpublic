@@ -10,7 +10,7 @@ import de.htwg.se.minesweeper.model.fileIoComponent.IFileIO
 import de.htwg.se.minesweeper.Default
 
 class Controller(using var game: IGame, var file: IFileIO) extends IController with Observable:
-    var field: IField = game._field
+    var field: IField = game.hyperField
     //var spielbrettState = game._board
     var spielbrettState = "Playing"
     var decider = new Decider()
@@ -127,7 +127,7 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
     def showVisibleCell(x: Int, y: Int): String = field.showVisibleCell(x,y).toString
 
     def getFieldSize: Int = field.matrix.size
-    def getSpielbrettState: String = game._board
+    def getSpielbrettState: String = game.board
     def getControllerField: IField = field
     def getControllerGame: IGame = game
     

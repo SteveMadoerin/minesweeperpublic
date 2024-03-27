@@ -158,7 +158,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
             case Event.Next =>
                 
                 if(!timerStarted){
-                    restartTimer(new AtomicInteger(controller.getControllerGame._time))
+                    restartTimer(new AtomicInteger(controller.getControllerGame.time))
                 } else{
                     contents = updateContents
                     repaint()
@@ -212,7 +212,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
             
             case Event.Load =>
 
-                setLoadedTimer(new AtomicInteger(controller.getControllerGame._time))
+                setLoadedTimer(new AtomicInteger(controller.getControllerGame.time))
                 timeLoaded = true
                 boardBounds = controller.getFieldSize -1
                 contents = updateContents
@@ -221,7 +221,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
             
             case Event.Save =>
                 
-                restartTimer(new AtomicInteger(controller.getControllerGame._time))
+                restartTimer(new AtomicInteger(controller.getControllerGame.time))
                 true
             
             case Event.SaveTime =>
