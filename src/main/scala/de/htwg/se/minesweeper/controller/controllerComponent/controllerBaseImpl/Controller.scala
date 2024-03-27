@@ -137,4 +137,9 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
 
     override def toString = field.toString
 
+    def saveTime(currentTime: Int) = 
+        val tempGame: Game = game.asInstanceOf[Game]
+        val gameCopy = tempGame.copy(time = currentTime)
+        val newGame: IGame = gameCopy
+        game = gameCopy
     //def checkExit = if this.spielbrettState == "Lost" || this.spielbrettState == "Won" then true else false

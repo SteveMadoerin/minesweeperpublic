@@ -26,7 +26,7 @@ trait IGame {
     def setState(newBoard: String): Unit
 
     def helpMessage: Unit
-    def updateTime(newTime: Int): Unit
+    //def updateTime(newTime: Int): Unit
 
     def side: Int
     def bombs: Int

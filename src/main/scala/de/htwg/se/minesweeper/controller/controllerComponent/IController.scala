@@ -39,4 +39,6 @@ trait IController extends Observable{
     def redo: IField
 
     def exit: Unit
+
+    def saveTime(currentTime: Int): Unit
 }

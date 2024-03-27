@@ -8,10 +8,10 @@ import scala.annotation.tailrec
 import de.htwg.se.minesweeper.Default.given
 
 
-case class Game (bombs : Int, side: Int) extends IGame:
+case class Game (bombs : Int, side: Int, time: Int) extends IGame:
     var hyperField: IField = new Field(side, Symbols.Covered)
     var board = "Playing"
-    var time = 0
+    //var time = 0
 
 
     def createField: IField = {
@@ -211,7 +211,7 @@ case class Game (bombs : Int, side: Int) extends IGame:
     }
 
     def setState(newBoard: String) = this.board = newBoard // has to be removed
-    def updateTime(newTime: Int) = this.time = newTime // has to be removed
+    //def updateTime(newTime: Int) = this.time = newTime // has to be removed
     
     def checkExit = if this.board == "Lost" || this.board == "Won" then true else false
 
