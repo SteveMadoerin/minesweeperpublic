@@ -143,37 +143,6 @@ case class Game (bombs : Int, side: Int, time: Int, board : String) extends IGam
     }
 
     def calcWonOrLost(visibleMatrix: Matrix[Symbols], mines: Int): Boolean = (mines+1 - addCoveredAndFlag(visibleMatrix) == 0)
-
-    // put function in tui
-/*     def handleGameState(stateAsString: String): Unit = 
-        stateAsString match{
-            case "Won" => {
-                this.board = "Won"
-                //println("Game is won")
-            }
-            case "Lost" => {
-                this.board = "Lost"
-                //println("Game is lost")
-            }
-            case _ => {
-                this.board = "Playing"
-            }
-    } */
-
-/*     def handleGameState(stateAsString: String) = 
-        stateAsString match{
-            case "Won" => {
-                this.board = "Won"
-                println("Game is won")
-            }
-            case "Lost" => {
-                this.board = "Lost"
-                println("Game is lost")
-            }
-            case _ => {
-                this.board = "Playing"
-            }
-        } */
     
     def isMine(row: Int, col: Int, m: Matrix[Symbols]): Boolean = {if(m.cell(row, col) == Symbols.Bomb) true else false}
     def isValid(row: Int, col: Int, side: Int): Boolean = {row >= 0 && row <= side && col >= 0 && col <= side}
