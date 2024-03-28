@@ -10,10 +10,9 @@ import de.htwg.se.minesweeper.model.fileIoComponent.fileIoJsonImpl.{FileIO => Js
 
 
 object Default{
-    // NEW
+    
     given IGame = prepareGame
     given IField = createField(prepareGame)
-    // NEW
     given IController = Controller()
     
 /*     given IFileIO = new JsonFileIO() //choose Implementation here
@@ -27,18 +26,12 @@ object Default{
 
     def prepareGame = {
         val realGame = new Game(10 , 9, 0, "Playing")
-        //realGame.board = "Playing"
-        //realGame.createField
         realGame
     }
 
     def prepareGame(bombs: Int, size: Int, time : Int) : IGame = {
         val realGame = new Game(bombs, size, time, "Playing")
-        //realGame.board = "Playing"
-        //realGame.time = time
-        //realGame.createField
         realGame
-        
     }
 
     def createField(leGame: IGame): IField = {

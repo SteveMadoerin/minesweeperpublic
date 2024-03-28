@@ -11,8 +11,7 @@ import java.io._
 
 class FileIO extends IFileIO {
 
-
-    override def loadGame: Option[IGame] = {
+/*     override def loadGame: Option[IGame] = {
 
         var gameOption: Option[IGame] = None
         val file = scala.xml.XML.loadFile("C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\game.xml")
@@ -29,6 +28,18 @@ class FileIO extends IFileIO {
             case Some(game) => gameOption = Some(game)
             case None =>
         }
+        gameOption
+    } */
+
+    override def loadGame: Option[IGame] = {
+        val file = scala.xml.XML.loadFile("C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\game.xml")
+        val status = (file \\ "game" \@ "status")
+        val bombs = (file \\ "bombs").text.toInt
+        val side = (file \\ "side").text.toInt
+        val time = (file \\ "time").text.toInt
+
+        val game = Default.prepareGame(bombs, side, time)
+        val gameOption: Option[IGame] = Some(game)
         gameOption
     }
 
@@ -62,7 +73,7 @@ class FileIO extends IFileIO {
         }
     }
 
-    override def loadField2: Option[IField] = {
+/*     override def loadField2: Option[IField] = {
         var fieldOption: Option[IField] = None
         var matrixOption: Option[Matrix[Symbols]] = None
         var hiddenOption: Option[Matrix[Symbols]] = None
@@ -115,6 +126,35 @@ class FileIO extends IFileIO {
 
         fieldOption
 
+    } */
+
+    override def loadField2: Option[IField] = {
+        val file = scala.xml.XML.loadFile("C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\field.xml")
+        val size = (file \\ "field" \@ "size").toInt
+
+        val matrixOption = Some(Default.scalableMatrix(size, Symbols.Covered))
+        val hiddenOption = Some(Default.scalableMatrix(size, Symbols.Covered))
+        val fieldOption = Some(Default.scalableField(size, Symbols.Covered))
+
+        val cellNodesVisible: NodeSeq = (file \\ "field" \\ "matrix" \\ "cell")
+        val matrix = cellNodesVisible.foldLeft(matrixOption.get) { (m, cell) =>
+            val row: Int = (cell \ "@row").text.toInt
+            val col: Int = (cell \ "@col").text.toInt
+            val symbol = stringToSymbols(cell.text.trim)
+            m.replaceCell(row, col, symbol)
+        }
+
+        val cellNodesHidden: NodeSeq = (file \\ "field" \\ "hidden" \\ "cell")
+        val hidden = cellNodesHidden.foldLeft(hiddenOption.get) { (h, cell) =>
+            val row: Int = (cell \ "@row").text.toInt
+            val col: Int = (cell \ "@col").text.toInt
+            val symbol = stringToSymbols(cell.text.trim)
+            h.replaceCell(row, col, symbol)
+        }
+
+        fieldOption.map { f =>
+            Default.mergeMatrixToField(matrix, hidden)
+        }
     }
 
     def fieldToXml(field: IField) = {
@@ -195,7 +235,7 @@ class FileIO extends IFileIO {
         try {
             writer.write(printer.format(updatedRootElem))
         } finally {
-            writer.close() // Ensure the writer is closed to flush the output
+            writer.close()
         }
     }
     

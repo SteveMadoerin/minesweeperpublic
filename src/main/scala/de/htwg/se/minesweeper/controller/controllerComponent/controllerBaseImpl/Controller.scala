@@ -11,8 +11,6 @@ import de.htwg.se.minesweeper.Default
 
 class Controller(using var game: IGame, var file: IFileIO) extends IController with Observable:
     var field: IField = Default.createField(game)
-    //var spielbrettState = game.board
-    
     var decider = new Decider()
     val undoRedoManager = new UndoRedoManager[IField]
     
@@ -20,7 +18,6 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
         val (tempGame, tempField) = decider.evaluateStrategy(b, move.x, move.y, field, game)
         field = tempField 
         this.game = tempGame
-        //field = decider.evaluateStrategy(b, move.x, move.y, field, game) // maybe change name of game here
         if(field.showInvisibleCell(move.y, move.x) == Symbols.Zero){field}
         else{undoRedoManager.doStep(field, DoCommand(move))}
 
@@ -31,7 +28,6 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
             case Some(game) => this.game = game
             case None =>
         }
-        //game = game.handleGameState("Playing")
         val tempGame: Game = game.asInstanceOf[Game]
         val gameCopy = tempGame.copy(tempGame.bombs, tempGame.side, tempGame.time, "Playing")
         val newGame: IGame = gameCopy
@@ -55,7 +51,6 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
         val gameCopy = tempGame.copy(tempGame.bombs, tempGame.side, tempGame.time, "Playing")
         val newGame: IGame = gameCopy
         game = newGame
-        //game = game.handleGameState("Playing")
         notifyObservers(Event.Save)
 
     def exit =
@@ -86,13 +81,9 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
         field.reveal
         notifyObservers(Event.Cheat)
     
-    def checkGameOver(status: String) =
-        //game.checkExit
-        //game.checkExit(game.board)
-        game.checkExit(status)
+    def checkGameOver(status: String) = game.checkExit(status)
 
     def newGameGUI =
-        //game = game.copy("Playing")
         val tempGame: Game = game.asInstanceOf[Game]
         val gameCopy = tempGame.copy(tempGame.bombs, tempGame.side, tempGame.time, "Playing")
         val newGame: IGame = gameCopy
@@ -106,11 +97,9 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
         val gameCopy = tempGame.copy(tempGame.bombs, tempGame.side, tempGame.time, "Playing")
         val newGame: IGame = gameCopy
         game = newGame
-        //game = game.handleGameState("Playing")
         val (feld, spiel) = game.prepareBoard(optionString, game)
         field = feld
         game = spiel
-        //field = game.prepareBoard(optionString, game) // NEW
 
         notifyObservers(Event.NewGame)
 
@@ -119,7 +108,6 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
         val gameCopy = tempGame.copy(bombs, side, tempGame.time, "Playing")
         val newGame: IGame = gameCopy
         game = newGame
-        //game.setSideAndBombs(side, bombs)
         field = Default.createField(newGame)
         notifyObservers(Event.NewGame)
 
@@ -165,4 +153,5 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
         val gameCopy = tempGame.copy(time = currentTime)
         val newGame: IGame = gameCopy
         game = gameCopy
-    //def checkExit = if this.spielbrettState == "Lost" || this.spielbrettState == "Won" then true else false
+    
+end Controller

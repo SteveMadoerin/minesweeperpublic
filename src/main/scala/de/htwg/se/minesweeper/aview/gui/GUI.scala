@@ -228,7 +228,6 @@ class GUI(using var controller: IController) extends Frame with Observer:
 
                 pauseTimer()
                 controller.saveTime(clock.get())
-                //controller.getControllerGame.updateTime(clock.get())
                 contents = updateContents
                 repaint()
                 true

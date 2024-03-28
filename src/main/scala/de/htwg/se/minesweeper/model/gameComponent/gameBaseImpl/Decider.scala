@@ -14,12 +14,4 @@ class Decider():
         }
     }
 
-    // def evaluateStrategyX(expression: Boolean, x: Int, y: Int, field: IField, game: IGame): IField = {
-    //     if (expression) {
-    //         val strategy: OpenStrategy = new FirstMove
-    //         strategy.show(x, y, field, game)
-    //     } else {
-    //         val strategy: OpenStrategy  = new NormalMove
-    //         strategy.show(x, y, field, game)
-    //     }
-    // }
+end Decider

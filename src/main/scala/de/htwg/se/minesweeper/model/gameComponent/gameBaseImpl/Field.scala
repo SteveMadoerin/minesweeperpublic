@@ -18,16 +18,14 @@ case class Field(matrix: Matrix[Symbols], hidden: Matrix[Symbols]) extends IFiel
 
     def open(x: Int, y: Int, spiel: IGame): (IGame, IField) =
         val currentGame: Game = spiel.asInstanceOf[Game]
-        val gameStatus = if(this.hidden.cell(y, x) == Symbols.Bomb){
+        // put a switch case here
+        val gameStatus = if(this.hidden.cell(y, x) == Symbols.Bomb) {
             
             val tempGame = currentGame.copy(board = "Lost")
             tempGame
-            //spiel.handleGameState("Lost")
-        } else if(spiel.calcWonOrLost(this.matrix, spiel.bombs))
-        {
+        } else if(spiel.calcWonOrLost(this.matrix, spiel.bombs)) {
             val tempGame = currentGame.copy(board = "Won")
             tempGame
-            //spiel.handleGameState("Won")
         } else {
             spiel
         }

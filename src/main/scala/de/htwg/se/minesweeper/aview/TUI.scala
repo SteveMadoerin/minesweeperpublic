@@ -16,7 +16,6 @@ class TUI(using var controller: IController) extends Observer:
     
     controller.add(this)
 
-    //var game = controller.getControllerGame // no var game
     var isFirstMove = true
 
     def run = 
@@ -99,11 +98,10 @@ class TUI(using var controller: IController) extends Observer:
         case false =>
           parseInputandPrintLoop(stillFirstMove)
         case true =>
-          //infoMessages(s"The Game is ${controller.getControllerGame.board} !") // Move this line to the event
           controller.gameOver
           restart
       }
-      //if !controller.checkGameOver(controller.getControllerGame.board) then parseInputandPrintLoop(stillFirstMove) else infoMessages(s"The Game is ${controller.getControllerGame.board} !"); controller.gameOver; restart // check for game over
+      //if !controller.checkGameOver(controller.getControllerGame.board) then parseInputandPrintLoop(stillFirstMove) else  controller.gameOver; restart // check for game over
     }
       
 

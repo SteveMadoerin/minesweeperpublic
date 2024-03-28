@@ -9,18 +9,6 @@ import de.htwg.se.minesweeper.Default.given
 
 
 case class Game (bombs : Int, side: Int, time: Int, board : String) extends IGame:
-    //var hyperField: IField = new Field(side, Symbols.Covered)
-    //var board = "Playing"
-    //var time = 0
-
-
-/*     def createField: IField = {
-        val adjacentField = Playfield()
-        val dasFeld = adjacentField.newField(this.side, this)
-        hyperField = dasFeld // maybe replace
-        dasFeld
-    } */
-
     
     def optionToList(s: Option[String]): List[Int] = {
         s match{
@@ -31,10 +19,8 @@ case class Game (bombs : Int, side: Int, time: Int, board : String) extends IGam
             case _ => List(9, 10)
         }
     }
-
-
+    
     def prepareBoard(s: Option[String], game: IGame): (IField, IGame) = {
-        //hyperField = game.hyperField
         val realGame = this.copy(optionToList(s)(1), optionToList(s)(0))
         val adjacentField = Playfield()
         (adjacentField.newField(optionToList(s)(0), realGame), realGame)
@@ -198,5 +184,6 @@ case class Game (bombs : Int, side: Int, time: Int, board : String) extends IGam
 
 
     def checkExit(status: String) = if status== "Lost" || status == "Won" then true else false
-    //def checkExit = if this.board == "Lost" || this.board == "Won" then true else false
+
+end Game
 
