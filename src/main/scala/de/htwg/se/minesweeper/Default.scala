@@ -12,7 +12,7 @@ import de.htwg.se.minesweeper.model.fileIoComponent.fileIoJsonImpl.{FileIO => Js
 object Default{
     // NEW
     given IGame = prepareGame
-    given IField = prepareGame.hyperField
+    given IField = createField(prepareGame)
     // NEW
     given IController = Controller()
     
@@ -26,19 +26,26 @@ object Default{
     def mergeMatrixToField(sichtbar: Matrix[Symbols], unsichtbar: Matrix[Symbols] ): IField = new Field(sichtbar, unsichtbar)
 
     def prepareGame = {
-        var realGame = new Game(10 , 9, 0, "Playing")
+        val realGame = new Game(10 , 9, 0, "Playing")
         //realGame.board = "Playing"
-        realGame.createField
+        //realGame.createField
         realGame
     }
 
     def prepareGame(bombs: Int, size: Int, time : Int) : IGame = {
-        var realGame = new Game(bombs, size, time, "Playing")
+        val realGame = new Game(bombs, size, time, "Playing")
         //realGame.board = "Playing"
         //realGame.time = time
-        realGame.createField
+        //realGame.createField
         realGame
         
+    }
+
+    def createField(leGame: IGame): IField = {
+        val adjacentField = Playfield()
+        val tempGame: Game = leGame.asInstanceOf[Game]
+        val dasFeld = adjacentField.newField(leGame.side, tempGame)
+        dasFeld
     }
 
 }

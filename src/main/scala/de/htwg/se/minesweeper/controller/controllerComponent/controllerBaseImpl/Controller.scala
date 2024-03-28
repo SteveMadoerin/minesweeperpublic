@@ -10,7 +10,7 @@ import de.htwg.se.minesweeper.model.fileIoComponent.IFileIO
 import de.htwg.se.minesweeper.Default
 
 class Controller(using var game: IGame, var file: IFileIO) extends IController with Observable:
-    var field: IField = game.hyperField
+    var field: IField = Default.createField(game)
     //var spielbrettState = game.board
     
     var decider = new Decider()
@@ -120,7 +120,7 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
         val newGame: IGame = gameCopy
         game = newGame
         //game.setSideAndBombs(side, bombs)
-        field = game.createField
+        field = Default.createField(newGame)
         notifyObservers(Event.NewGame)
 
 

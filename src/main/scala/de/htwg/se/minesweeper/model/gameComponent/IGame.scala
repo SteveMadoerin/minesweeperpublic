@@ -32,11 +32,11 @@ trait IGame {
     def side: Int
     def bombs: Int
     def board: String
-    def hyperField: IField
+    //def hyperField: IField
     def time: Int
 
     def prepareBoard(s: Option[String], game: IGame): (IField, IGame)
-    def createField: IField
+    //def createField: IField
 
 }
 
