@@ -16,11 +16,24 @@ case class Field(matrix: Matrix[Symbols], hidden: Matrix[Symbols]) extends IFiel
     def putFlag(x: Int, y: Int) = copy(matrix.replaceCell(y, x, Symbols.F))
     def removeFlag(x: Int, y: Int) = copy(matrix.replaceCell(y, x, Symbols.Covered))
 
-    def open(x: Int, y: Int, spiel: IGame): IField =
-        if(this.hidden.cell(y, x) == Symbols.Bomb){spiel.handleGameState("Lost")} else if(spiel.calcWonOrLost(this.matrix, spiel.bombs)){spiel.handleGameState("Won")}
+    def open(x: Int, y: Int, spiel: IGame): (IGame, IField) =
+        val currentGame: Game = spiel.asInstanceOf[Game]
+        val gameStatus = if(this.hidden.cell(y, x) == Symbols.Bomb){
+            
+            val tempGame = currentGame.copy(board = "Lost")
+            tempGame
+            //spiel.handleGameState("Lost")
+        } else if(spiel.calcWonOrLost(this.matrix, spiel.bombs))
+        {
+            val tempGame = currentGame.copy(board = "Won")
+            tempGame
+            //spiel.handleGameState("Won")
+        } else {
+            spiel
+        }
         val extractedSymbol = this.showInvisibleCell(y, x)
         val returnField = this.put(extractedSymbol, y, x)
-        returnField
+        (gameStatus, returnField)
     
     def gameOverField: IField = new Field(this.hidden)
     

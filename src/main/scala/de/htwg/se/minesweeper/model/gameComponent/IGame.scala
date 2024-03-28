@@ -20,10 +20,11 @@ trait IGame {
     def initializeAdjacentNumbers(matrix: Matrix[Symbols]): Matrix[Symbols]
     def intitializeBombs(matrix: Matrix[Symbols], bombs: Int): Matrix[Symbols]
 
-    def handleGameState(state: String): Unit
-    def checkExit: Boolean
+    //def handleGameState(state: String): Unit // hopefully it works 
+    def checkExit(status: String): Boolean
+    //def checkExit: Boolean
 
-    def setState(newBoard: String): Unit
+    //def setState(newBoard: String): Unit
 
     def helpMessage: Unit
     //def updateTime(newTime: Int): Unit
@@ -43,7 +44,8 @@ trait IField{
 
     def putFlag(x: Int, y: Int): IField
     def removeFlag(x: Int, y: Int): IField
-    def open(x: Int, y: Int, spiel: IGame): IField
+    //def open(x: Int, y: Int, spiel: IGame): IField
+    def open(x: Int, y: Int, spiel: IGame): (IGame, IField)
     def gameOverField: IField
     def reveal: IField
 

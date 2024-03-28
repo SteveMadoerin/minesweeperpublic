@@ -3,8 +3,8 @@ package de.htwg.se.minesweeper.model.gameComponent.gameBaseImpl
 import de.htwg.se.minesweeper.model.gameComponent._
 
 class Decider():
-
-    def evaluateStrategy(expression: Boolean, x: Int, y: Int, field: IField, game: IGame): IField = {
+    
+    def evaluateStrategy(expression: Boolean, x: Int, y: Int, field: IField, game: IGame): (IGame, IField) = {
         if (expression) {
             val strategy: OpenStrategy = new FirstMove
             strategy.show(x, y, field, game)
@@ -13,3 +13,13 @@ class Decider():
             strategy.show(x, y, field, game)
         }
     }
+
+    // def evaluateStrategyX(expression: Boolean, x: Int, y: Int, field: IField, game: IGame): IField = {
+    //     if (expression) {
+    //         val strategy: OpenStrategy = new FirstMove
+    //         strategy.show(x, y, field, game)
+    //     } else {
+    //         val strategy: OpenStrategy  = new NormalMove
+    //         strategy.show(x, y, field, game)
+    //     }
+    // }

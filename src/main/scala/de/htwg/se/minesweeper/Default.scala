@@ -26,15 +26,15 @@ object Default{
     def mergeMatrixToField(sichtbar: Matrix[Symbols], unsichtbar: Matrix[Symbols] ): IField = new Field(sichtbar, unsichtbar)
 
     def prepareGame = {
-        var realGame = new Game(10 , 9, 0)
-        realGame.board = "Playing"
+        var realGame = new Game(10 , 9, 0, "Playing")
+        //realGame.board = "Playing"
         realGame.createField
         realGame
     }
 
     def prepareGame(bombs: Int, size: Int, time : Int) : IGame = {
-        var realGame = new Game(bombs, size, time)
-        realGame.board = "Playing"
+        var realGame = new Game(bombs, size, time, "Playing")
+        //realGame.board = "Playing"
         //realGame.time = time
         realGame.createField
         realGame

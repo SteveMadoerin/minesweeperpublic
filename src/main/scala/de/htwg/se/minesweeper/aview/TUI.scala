@@ -16,7 +16,7 @@ class TUI(using var controller: IController) extends Observer:
     
     controller.add(this)
 
-    var game = controller.getControllerGame
+    //var game = controller.getControllerGame // no var game
     var isFirstMove = true
 
     def run = 
@@ -74,7 +74,7 @@ class TUI(using var controller: IController) extends Observer:
           }
 
           val validCoordinates: Option[Move] = coordinates match {
-            case Some(i) => {if game.side > i._1 && game.side > i._2 then Some(Move(action, i._1, i._2)) else { infoMessages(">> Invalid Move: Coordinates out of bounds"); None}}
+            case Some(i) => {if controller.getControllerGame.side > i._1 && controller.getControllerGame.side > i._2 then Some(Move(action, i._1, i._2)) else { infoMessages(">> Invalid Move: Coordinates out of bounds"); None}} // no var game
             case None => None
           }
           validCoordinates
@@ -88,14 +88,14 @@ class TUI(using var controller: IController) extends Observer:
         case None => if firstMoveCheck == true then stillFirstMove = true
         case Some(move) => 
           move.value match {
-            case "open" => controller.makeAndPublish(controller.doMove, firstMoveCheck, move, game)
+            case "open" => controller.makeAndPublish(controller.doMove, firstMoveCheck, move, controller.getControllerGame); // no var game
             case "flag" => controller.makeAndPublish(controller.put, move)
             case "unflag" => controller.makeAndPublish(controller.put, move)
             case "help" => controller.helpMenu
             case _ => infoMessages(">> Invalid Input")
           }
       
-      if !controller.checkGameOver then parseInputandPrintLoop(stillFirstMove) else controller.gameOver; restart
+      if !controller.checkGameOver(controller.getControllerGame.board) then parseInputandPrintLoop(stillFirstMove) else controller.gameOver; restart // check for game over
     }
 
     def restart: Unit = 

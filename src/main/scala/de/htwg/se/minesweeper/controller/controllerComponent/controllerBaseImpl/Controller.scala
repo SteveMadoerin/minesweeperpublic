@@ -11,13 +11,16 @@ import de.htwg.se.minesweeper.Default
 
 class Controller(using var game: IGame, var file: IFileIO) extends IController with Observable:
     var field: IField = game.hyperField
-    //var spielbrettState = game._board
-    var spielbrettState = "Playing"
+    //var spielbrettState = game.board
+    
     var decider = new Decider()
     val undoRedoManager = new UndoRedoManager[IField]
     
     def doMove(b: Boolean, move: Move, game: IGame) = 
-        field = decider.evaluateStrategy(b, move.x, move.y, field, game)
+        val (tempGame, tempField) = decider.evaluateStrategy(b, move.x, move.y, field, game)
+        field = tempField 
+        this.game = tempGame
+        //field = decider.evaluateStrategy(b, move.x, move.y, field, game) // maybe change name of game here
         if(field.showInvisibleCell(move.y, move.x) == Symbols.Zero){field}
         else{undoRedoManager.doStep(field, DoCommand(move))}
 
@@ -28,7 +31,11 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
             case Some(game) => this.game = game
             case None =>
         }
-        game.handleGameState("Playing")
+        //game = game.handleGameState("Playing")
+        val tempGame: Game = game.asInstanceOf[Game]
+        val gameCopy = tempGame.copy(tempGame.bombs, tempGame.side, tempGame.time, "Playing")
+        val newGame: IGame = gameCopy
+        game = newGame
 
         val fieldOption = file.loadField2
         fieldOption match {
@@ -43,7 +50,12 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
         notifyObservers(Event.SaveTime)
         file.saveGame(game)
         file.saveField(field)
-        game.handleGameState("Playing")
+        // make a function here
+        val tempGame: Game = game.asInstanceOf[Game]
+        val gameCopy = tempGame.copy(tempGame.bombs, tempGame.side, tempGame.time, "Playing")
+        val newGame: IGame = gameCopy
+        game = newGame
+        //game = game.handleGameState("Playing")
         notifyObservers(Event.Save)
 
     def exit =
@@ -74,17 +86,27 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
         field.reveal
         notifyObservers(Event.Cheat)
     
-    def checkGameOver =
-        game.checkExit
+    def checkGameOver(status: String) =
+        //game.checkExit
+        //game.checkExit(game.board)
+        game.checkExit(status)
 
     def newGameGUI =
-        game.handleGameState("Playing")
+        //game = game.copy("Playing")
+        val tempGame: Game = game.asInstanceOf[Game]
+        val gameCopy = tempGame.copy(tempGame.bombs, tempGame.side, tempGame.time, "Playing")
+        val newGame: IGame = gameCopy
+        game = newGame
         notifyObservers(Event.Input)
 
     
     //for GUI
     def newGameField(optionString: Option[String]) =
-        game.handleGameState("Playing")
+        val tempGame: Game = game.asInstanceOf[Game]
+        val gameCopy = tempGame.copy(tempGame.bombs, tempGame.side, tempGame.time, "Playing")
+        val newGame: IGame = gameCopy
+        game = newGame
+        //game = game.handleGameState("Playing")
         val (feld, spiel) = game.prepareBoard(optionString, game)
         field = feld
         game = spiel
@@ -93,17 +115,18 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
         notifyObservers(Event.NewGame)
 
     def newGame(side: Int, bombs: Int) =
-        game.handleGameState("Playing")
         val tempGame: Game = game.asInstanceOf[Game]
-        val gameCopy = tempGame.copy(side, bombs)
+        val gameCopy = tempGame.copy(bombs, side, tempGame.time, "Playing")
         val newGame: IGame = gameCopy
         game = newGame
         //game.setSideAndBombs(side, bombs)
         field = game.createField
         notifyObservers(Event.NewGame)
 
+
+    // doMove wird von TUI als parameter übergeben hierzu wird game und field in der TUI Klasse angegeben
     def makeAndPublish(makeThis: (Boolean, Move, IGame) => IField, b: Boolean, move: Move, game: IGame): Unit =
-        field = makeThis(b, move, game)
+        field = makeThis(b, move, game)  // doMove
         if (field.showInvisibleCell(move.y, move.x) == Symbols.Zero){field = openRec(move.x,move.y,field)}
         val firstOrNext = if (b) Event.Start else Event.Next
         notifyObservers(firstOrNext)

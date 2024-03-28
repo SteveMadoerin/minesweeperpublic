@@ -15,7 +15,9 @@ trait IController extends Observable{
     def openRec(x: Int, y: Int, field: IField): IField
     def helpMenu: Unit
     def cheat: Unit
-    def checkGameOver: Boolean
+    
+    def checkGameOver(status: String): Boolean
+    //def checkGameOver: Boolean
     def newGameGUI: Unit
     def newGameField(optionString: Option[String]): Unit
     def newGame(side: Int, bombs: Int): Unit

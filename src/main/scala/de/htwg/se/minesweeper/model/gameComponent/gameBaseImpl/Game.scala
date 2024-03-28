@@ -8,9 +8,9 @@ import scala.annotation.tailrec
 import de.htwg.se.minesweeper.Default.given
 
 
-case class Game (bombs : Int, side: Int, time: Int) extends IGame:
+case class Game (bombs : Int, side: Int, time: Int, board : String) extends IGame:
     var hyperField: IField = new Field(side, Symbols.Covered)
-    var board = "Playing"
+    //var board = "Playing"
     //var time = 0
 
 
@@ -144,7 +144,23 @@ case class Game (bombs : Int, side: Int, time: Int) extends IGame:
 
     def calcWonOrLost(visibleMatrix: Matrix[Symbols], mines: Int): Boolean = (mines+1 - addCoveredAndFlag(visibleMatrix) == 0)
 
-    def handleGameState(stateAsString: String) = 
+    // put function in tui
+/*     def handleGameState(stateAsString: String): Unit = 
+        stateAsString match{
+            case "Won" => {
+                this.board = "Won"
+                //println("Game is won")
+            }
+            case "Lost" => {
+                this.board = "Lost"
+                //println("Game is lost")
+            }
+            case _ => {
+                this.board = "Playing"
+            }
+    } */
+
+/*     def handleGameState(stateAsString: String) = 
         stateAsString match{
             case "Won" => {
                 this.board = "Won"
@@ -157,7 +173,7 @@ case class Game (bombs : Int, side: Int, time: Int) extends IGame:
             case _ => {
                 this.board = "Playing"
             }
-        }
+        } */
     
     def isMine(row: Int, col: Int, m: Matrix[Symbols]): Boolean = {if(m.cell(row, col) == Symbols.Bomb) true else false}
     def isValid(row: Int, col: Int, side: Int): Boolean = {row >= 0 && row <= side && col >= 0 && col <= side}
@@ -210,8 +226,7 @@ case class Game (bombs : Int, side: Int, time: Int) extends IGame:
         placeMines(matrix, 0)
     }
 
-    def setState(newBoard: String) = this.board = newBoard // has to be removed
-    //def updateTime(newTime: Int) = this.time = newTime // has to be removed
-    
-    def checkExit = if this.board == "Lost" || this.board == "Won" then true else false
+
+    def checkExit(status: String) = if status== "Lost" || status == "Won" then true else false
+    //def checkExit = if this.board == "Lost" || this.board == "Won" then true else false
 

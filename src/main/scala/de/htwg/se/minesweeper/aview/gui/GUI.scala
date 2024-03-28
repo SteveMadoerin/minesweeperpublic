@@ -360,7 +360,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
         maximumSize_=(new Dimension(40,40))
         listenTo(mouse.clicks)
         reactions += {
-            case e: MouseClicked if (controller.getSpielbrettState == "Won" || controller.getSpielbrettState == "Lost") =>
+            case e: MouseClicked if (controller.getControllerGame.board == "Won" || controller.getSpielbrettState == "Lost") =>
             
             case e: MouseClicked if e.peer.getButton == MouseEvent.BUTTON3 => 
                 if (controller.showVisibleCell(x,y) == "~"){
@@ -377,9 +377,9 @@ class GUI(using var controller: IController) extends Frame with Observer:
                     if (first) {startTimer()}
                     controller.makeAndPublish(controller.doMove, first, Move("open", y, x), controller.getControllerGame)
                     if (first) {
-                        controller.checkGameOver  
+                        controller.checkGameOver(controller.getControllerGame.board)  // check this
                     } else {
-                        if(controller.checkGameOver){controller.gameOver}
+                        if(controller.checkGameOver(controller.getControllerGame.board)){controller.gameOver}
                     }
                 }
         }
