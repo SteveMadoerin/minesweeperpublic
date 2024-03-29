@@ -33,7 +33,8 @@ trait IController extends Observable{
     def getFieldSize: Int
     def getSpielbrettState: String
     def getControllerField: IField
-    def getControllerGame: IGame
+    //def getControllerGame: IGame
+    def game: IGame
 
     def put(move: Move): IField
     def undo: IField

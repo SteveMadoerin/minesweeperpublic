@@ -158,7 +158,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
             case Event.Next =>
                 
                 if(!timerStarted){
-                    restartTimer(new AtomicInteger(controller.getControllerGame.time))
+                    restartTimer(new AtomicInteger(controller.game.time))
                 } else{
                     contents = updateContents
                     repaint()
@@ -212,7 +212,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
             
             case Event.Load =>
 
-                setLoadedTimer(new AtomicInteger(controller.getControllerGame.time))
+                setLoadedTimer(new AtomicInteger(controller.game.time))
                 timeLoaded = true
                 boardBounds = controller.getFieldSize -1
                 contents = updateContents
@@ -221,7 +221,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
             
             case Event.Save =>
                 
-                restartTimer(new AtomicInteger(controller.getControllerGame.time))
+                restartTimer(new AtomicInteger(controller.game.time))
                 true
             
             case Event.SaveTime =>
@@ -333,7 +333,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
         timerStarted = false
     }
 
-    def calcFlagCount: Int = controller.getControllerGame.calcMineAndFlag(controller.getControllerField.matrix)
+    def calcFlagCount: Int = controller.game.calcMineAndFlag(controller.getControllerField.matrix)
 
     def setFlagCountDisplay: (ImageIcon, ImageIcon, ImageIcon) =
         val leftDigit =  calcFlagCount / 100
@@ -359,7 +359,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
         maximumSize_=(new Dimension(40,40))
         listenTo(mouse.clicks)
         reactions += {
-            case e: MouseClicked if (controller.getControllerGame.board == "Won" || controller.getSpielbrettState == "Lost") =>
+            case e: MouseClicked if (controller.game.board == "Won" || controller.getSpielbrettState == "Lost") =>
             
             case e: MouseClicked if e.peer.getButton == MouseEvent.BUTTON3 => 
                 if (controller.showVisibleCell(x,y) == "~"){
@@ -374,11 +374,11 @@ class GUI(using var controller: IController) extends Frame with Observer:
             case e: MouseClicked if e.peer.getButton == MouseEvent.BUTTON1 => 
                 synchronized{
                     if (first) {startTimer()}
-                    controller.makeAndPublish(controller.doMove, first, Move("open", y, x), controller.getControllerGame)
+                    controller.makeAndPublish(controller.doMove, first, Move("open", y, x), controller.game)
                     if (first) {
-                        controller.checkGameOver(controller.getControllerGame.board)  // check this
+                        controller.checkGameOver(controller.game.board)  // check this
                     } else {
-                        if(controller.checkGameOver(controller.getControllerGame.board)){controller.gameOver}
+                        if(controller.checkGameOver(controller.game.board)){controller.gameOver}
                     }
                 }
         }

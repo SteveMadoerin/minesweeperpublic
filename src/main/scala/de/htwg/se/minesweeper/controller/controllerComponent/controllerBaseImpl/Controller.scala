@@ -137,10 +137,9 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
 
     def showVisibleCell(x: Int, y: Int): String = field.showVisibleCell(x,y).toString
 
-    def getFieldSize: Int = field.matrix.size
-    def getSpielbrettState: String = game.board
-    def getControllerField: IField = field
-    def getControllerGame: IGame = game
+    def getFieldSize: Int = field.matrix.size // needs to be changed
+    def getSpielbrettState: String = game.board // needs to be changed
+    def getControllerField: IField = field // needs to be changed
     
     def put(move: Move): IField = undoRedoManager.doStep(field, DoCommand(move))
     def undo: IField = undoRedoManager.undoStep(field)

@@ -31,7 +31,7 @@ class TUI(using var controller: IController) extends Observer:
           true
         case Event.Start => infoMessages(controller.getControllerField.toString()); true
         case Event.Next => infoMessages(controller.getControllerField.toString()); true
-        case Event.GameOver => infoMessages(s"The Game is ${controller.getControllerGame.board} !", controller.getControllerField.toString()); true
+        case Event.GameOver => infoMessages(s"The Game is ${controller.game.board} !", controller.getControllerField.toString()); true
         case Event.Cheat => false
         case Event.Help => false
         case Event.Input => false
@@ -73,7 +73,7 @@ class TUI(using var controller: IController) extends Observer:
           }
 
           val validCoordinates: Option[Move] = coordinates match {
-            case Some(i) => {if controller.getControllerGame.side > i._1 && controller.getControllerGame.side > i._2 then Some(Move(action, i._1, i._2)) else { infoMessages(">> Invalid Move: Coordinates out of bounds"); None}} // no var game
+            case Some(i) => {if controller.game.side > i._1 && controller.game.side > i._2 then Some(Move(action, i._1, i._2)) else { infoMessages(">> Invalid Move: Coordinates out of bounds"); None}} // no var game
             case None => None
           }
           validCoordinates
@@ -87,14 +87,14 @@ class TUI(using var controller: IController) extends Observer:
         case None => if firstMoveCheck == true then stillFirstMove = true
         case Some(move) => 
           move.value match {
-            case "open" => controller.makeAndPublish(controller.doMove, firstMoveCheck, move, controller.getControllerGame); // no var game
+            case "open" => controller.makeAndPublish(controller.doMove, firstMoveCheck, move, controller.game); // no var game
             case "flag" => controller.makeAndPublish(controller.put, move)
             case "unflag" => controller.makeAndPublish(controller.put, move)
             case "help" => controller.helpMenu
             case _ => infoMessages(">> Invalid Input")
           }
       
-      controller.checkGameOver(controller.getControllerGame.board) match {
+      controller.checkGameOver(controller.game.board) match {
         case false =>
           parseInputandPrintLoop(stillFirstMove)
         case true =>

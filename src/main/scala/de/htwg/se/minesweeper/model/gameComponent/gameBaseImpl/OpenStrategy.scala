@@ -13,15 +13,11 @@ abstract class OpenStrategy{
 
 class FirstMove extends OpenStrategy{
     override def showField(x: Int, y: Int, field: IField, game: IGame): (IGame, IField) = 
-
-        (game, game.premierMove(x, y, field)) // if something went wrong check here
-
+        (game, game.premierMove(x, y, field))
 }
 
 class NormalMove extends OpenStrategy{
     override def showField(x: Int, y: Int, field: IField, game: IGame): (IGame, IField) =
-        val (elGame, feld) = field.open(x, y, game) // here we have to change 
-
+        val (elGame, feld) = field.open(x, y, game)
         (elGame, feld)
-
 }

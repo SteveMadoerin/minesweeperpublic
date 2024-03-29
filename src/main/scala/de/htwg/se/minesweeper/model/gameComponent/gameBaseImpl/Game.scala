@@ -125,7 +125,6 @@ case class Game (bombs : Int, side: Int, time: Int, board : String) extends IGam
             (row + 1, col - 1) // SOUTH-WEST
         )
 
-        // Count the number of neighboring cells that contain a mine
         neighbors.count { case (r, c) => isValid(r, c, side) && isMine(r, c, invisibleMatrix) }
     }
 

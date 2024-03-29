@@ -42,8 +42,8 @@ class Playfield extends FieldCreatorTemplate{
         val bombs = game.bombs
         val side = game.side
         val sichtbareMatrix = field.matrix
-        var unsichtbareMatrix = Default.scalableMatrix(side, Symbols.Empty)
-        var newUnsichtbareMatrix = game.intitializeBombs(unsichtbareMatrix, bombs)
+        val unsichtbareMatrix = Default.scalableMatrix(side, Symbols.Empty)
+        val newUnsichtbareMatrix = game.intitializeBombs(unsichtbareMatrix, bombs)
         val newUnsichtbareMatrixAdjacent = game.initializeAdjacentNumbers(newUnsichtbareMatrix)
         val newField = Default.mergeMatrixToField(sichtbareMatrix, newUnsichtbareMatrixAdjacent)
         newField
