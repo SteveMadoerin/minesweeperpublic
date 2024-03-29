@@ -34,11 +34,10 @@ class FileIO extends IFileIO{
         
     }
 
-    def initGame(using game: IGame) = game
+    //def initGame(using game: IGame) = game
 
     override def loadGame: Option[IGame] = 
         import java.io._
-        var gameOption: Option[IGame] = None
         val source: String = Source.fromFile("C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\game.json").getLines.mkString
         val json: JsValue = Json.parse(source)
         val status = (json \ "game" \ "status").get.toString
@@ -47,10 +46,10 @@ class FileIO extends IFileIO{
         val time = (json \ "game" \ "time").get.toString.toInt
         val game = Default.prepareGame(bombs, side, time)
 
-        gameOption = Some(game)
+        val gameOption: Option[IGame] = Some(game)
 
-        gameOption match {
-            case Some(game) => gameOption = Some(game)
+        val newGameOption = gameOption match {
+            case Some(game) => Some(game)
             case None =>
         }
         gameOption
@@ -118,60 +117,54 @@ class FileIO extends IFileIO{
 
     override def loadField2: Option[IField] = {
 
-        var fieldOption: Option[IField] = None
-        var matrixOption: Option[Matrix[Symbols]] = None
-        var hiddenOption: Option[Matrix[Symbols]] = None
-
         val source: String = Source.fromFile("C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\field.json").getLines.mkString
         val json: JsValue = Json.parse(source)
         val size = (json \ "field" \ "size").get.toString.toInt
 
-        size match{
-            case _ => 
-                matrixOption = Some(Default.scalableMatrix(size, Symbols.E))
-                hiddenOption = Some(Default.scalableMatrix(size, Symbols.E))
-                fieldOption = Some(Default.scalableField(size, Symbols.E))
-        }
+        val fieldOption: Option[IField] = Some(Default.scalableField(size, Symbols.E))
+        val matrixOption: Option[Matrix[Symbols]] = Some(Default.scalableMatrix(size, Symbols.E))
+        val hiddenOption: Option[Matrix[Symbols]] = Some(Default.scalableMatrix(size, Symbols.E))
 
-        var matrix = matrixOption match{
+
+        val matrix1 = matrixOption match{
             case Some(matrix) => matrix
             case None => println("Matrix is not valid"); Default.scalableMatrix(size, Symbols.E)
         }
 
-        var _matrix = matrix
-        for(index <- 0 until size * size){
-            val row = (json \ "field" \ "matrix" \\ "row")(index).as[Int]
-            val col = (json \ "field" \ "matrix" \\ "col")(index).as[Int]
-            val cell = (json \ "field" \ "matrix" \\ "cell")(index).as[String]
-            _matrix = _matrix.replaceCell(row, col, stringToSymbols(cell))
+        val updatedMatrix: Matrix[Symbols] = (0 until size * size).foldLeft(matrix1) {
+            case (currentMatrix, index) =>
+                val row = (json \ "field" \ "matrix" \\ "row")(index).as[Int]
+                val col = (json \ "field" \ "matrix" \\ "col")(index).as[Int]
+                val cell = (json \ "field" \ "matrix" \\ "cell")(index).as[String]
+                currentMatrix.replaceCell(row, col, stringToSymbols(cell))
         }
 
-        var hidden = hiddenOption match{
+        val hidden1 = hiddenOption match{
             case Some(m) => m
             case None => println("Hidden is not valid"); Default.scalableMatrix(size, Symbols.E)
         }
 
-        var _hidden = hidden
-        for(index <- 0 until (size * size)){
-            val row = (json \ "field" \ "hidden" \\ "row")(index).as[Int]
-            val col = (json \ "field" \ "hidden" \\ "col")(index).as[Int]
-            val cell = (json \ "field" \ "hidden" \\ "cell")(index).as[String]
-            _hidden = _hidden.replaceCell(row, col, stringToSymbols(cell))
+        val updatedHidden: Matrix[Symbols] = (0 until size * size).foldLeft(hidden1) {
+            case (currentHidden, index) =>
+                val row = (json \ "field" \ "hidden" \\ "row")(index).as[Int]
+                val col = (json \ "field" \ "hidden" \\ "col")(index).as[Int]
+                val cell = (json \ "field" \ "hidden" \\ "cell")(index).as[String]
+                currentHidden.replaceCell(row, col, stringToSymbols(cell))
         }
 
-        fieldOption match{
-            case Some(f) => fieldOption = Some(Default.mergeMatrixToField(_matrix, _hidden))
-            case None => println("Field is not valid")
+        val finalFieldOption = fieldOption match{
+            case Some(f) => Some(Default.mergeMatrixToField(updatedMatrix, updatedHidden))
+            case None => println("Field is not valid"); None
         }
 
-        fieldOption
+        finalFieldOption
     }
 
     def loadPlayerScores(filePath: String): Seq[(String, Int)] = {
         val file = new File(filePath)
-        var scores: Seq[(String, Int)] = Seq.empty
+        //var scores: Seq[(String, Int)] = Seq.empty
 
-        if (file.exists() && file.length() != 0) {
+        val finalScores: Seq[(String, Int)] = if (file.exists() && file.length() != 0) {
             val source = Source.fromFile(file)
             val scoresJson = try {
                 Json.parse(source.mkString)
@@ -179,16 +172,18 @@ class FileIO extends IFileIO{
                 source.close()
             }
 
-            scores = scoresJson.as[JsArray].value.flatMap { scoreJson =>
+            val scores = scoresJson.as[JsArray].value.flatMap { scoreJson =>
             for {
                 playerName <- (scoreJson \ "player").validate[String].asOpt
                 score <- (scoreJson \ "score").validate[Int].asOpt
             } yield (playerName, score)
             }.toSeq
+            scores
         } else {
-            scores = Seq.empty
+            val scores = Seq.empty
+            scores
         }
-        scores
+        finalScores
     }
 
     def savePlayerScore(playerName: String, score: Int, filePath: String): Unit = {
