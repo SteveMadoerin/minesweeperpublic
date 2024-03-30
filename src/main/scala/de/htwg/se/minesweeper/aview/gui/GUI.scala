@@ -26,12 +26,12 @@ class GUI(using var controller: IController) extends Frame with Observer:
 
     controller.add(this)
     private var boardBounds = controller.field.matrix.size -1
-    var firstMoveControl = new AtomicBoolean(true)
+    private var firstMoveControl = new AtomicBoolean(true)
     private var timerStarted: Boolean = false
-    var timeLoaded: Boolean = false
-    var l = 0
-    var m = 0
-    var r = 0
+    private var timeLoaded: Boolean = false
+    private var left = 0
+    private var middle = 0
+    private var right = 0
     var clock = new AtomicInteger(0)
     val timer = new Timer()
     var task: Option[TimerTask] = None // was null before
@@ -71,7 +71,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
 
         add(new SmileLabel(s"${controller.game.board}"), BorderPanel.Position.Center)
         
-        val timerDigits = Seq(l, m, r).map(getDigits)
+        val timerDigits = Seq(left, middle, right).map(getDigits)
         add(new BoxPanel(Orientation.NoOrientation){
             contents ++= timerDigits.map(new DigitLabel(_))
         }, BorderPanel.Position.East)
@@ -131,7 +131,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
             case Event.NewGame =>
                 firstMoveControl.set(true)
                 boardBounds = controller.field.matrix.size -1
-                if(r>0){
+                if(right>0){
                     stopTimer()
                     resetTimer()
                 }
@@ -295,9 +295,9 @@ class GUI(using var controller: IController) extends Frame with Observer:
     }
     
     def setTime = synchronized {
-        l = clock.get()/100
-        m = (clock.get()%100)/10
-        r = clock.get()%10
+        left = clock.get()/100
+        middle = (clock.get()%100)/10
+        right = clock.get()%10
     }
 
     def restartTimer(loadedTime: AtomicInteger) ={
@@ -319,7 +319,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
     }
 
     def calculateScore: Int =
-        val score = ((controller.field.matrix.size * controller.field.matrix.size)) * 10 - (l*100+m*10+r)
+        val score = ((controller.field.matrix.size * controller.field.matrix.size)) * 10 - (left*100+middle*10+right)
         if controller.game.board == "Won" then score else 0
     
     def resetTimer() = {

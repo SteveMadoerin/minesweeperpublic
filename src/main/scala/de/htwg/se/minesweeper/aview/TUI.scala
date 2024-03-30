@@ -12,22 +12,22 @@ import scala.util.matching.Regex
 
 import de.htwg.se.minesweeper.Default.{given}
 
-class TUI(using var controller: IController) extends Observer:
+class TUI(using controller: IController) extends Observer:
     
     controller.add(this)
 
-    var isFirstMove = true
+    //var isFirstMove = true
 
     def run = 
         infoMessages("Welcome to Minesweeper")
         resize
-        parseInputandPrintLoop(isFirstMove)
+        parseInputandPrintLoop(firstMoveCheck = true) // initialFirstMove
         
     override def update(e: Event): Boolean = 
         e match
             case Event.NewGame => 
                 infoMessages(controller.field.toString())
-                isFirstMove = true
+                //isFirstMove = true
                 true
             
             case Event.Start => infoMessages(controller.field.toString()); true
@@ -86,17 +86,21 @@ class TUI(using var controller: IController) extends Observer:
     
     def parseInputandPrintLoop(firstMoveCheck: Boolean): Unit = {
         infoMessages("Enter your move (<action><x><y>, eg. o0102, q to quit, h for help):")
-        var stillFirstMove = false
-        userInX(readLine) match
-            case None => if firstMoveCheck == true then stillFirstMove = true
-            case Some(move) => 
-                move.value match {
+        //var stillFirstMove = false
+        val stillFirstMove = userInX(readLine) match {
+            //case None => if firstMoveCheck == true then stillFirstMove = true
+            case None => firstMoveCheck
+            case Some(move) =>
+                processMove(move, firstMoveCheck)
+                false
+        }
+/*                 move.value match {
                     case "open" => controller.makeAndPublish(controller.doMove, firstMoveCheck, move, controller.game); // no var game
                     case "flag" => controller.makeAndPublish(controller.put, move)
                     case "unflag" => controller.makeAndPublish(controller.put, move)
                     case "help" => controller.helpMenu
                     case _ => infoMessages(">> Invalid Input")
-                }
+                } */
         
         controller.checkGameOver(controller.game.board) match {
             case false =>
@@ -105,8 +109,20 @@ class TUI(using var controller: IController) extends Observer:
                 controller.gameOver
                 restart
         }
-
     }
+    
+
+    def processMove(move: Move, firstMoveCheck: Boolean): Unit = {
+        move.value match {
+            case "open" => controller.makeAndPublish(controller.doMove, firstMoveCheck, move, controller.game)
+            case "flag" => controller.makeAndPublish(controller.put, move)
+            case "unflag" => controller.makeAndPublish(controller.put, move)
+            case "help" => controller.helpMenu
+            case _ => infoMessages(">> Invalid Input")
+        }
+    }
+
+    
 
     def restart: Unit = 
         infoMessages("Do you want to play again? (yes/no)")
