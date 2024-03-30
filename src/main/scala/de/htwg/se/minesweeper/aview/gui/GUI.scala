@@ -34,27 +34,10 @@ class GUI(using var controller: IController) extends Frame with Observer:
     var r = 0
     var clock = new AtomicInteger(0)
     val timer = new Timer()
-    //var task: TimerTask = _
     var task: Option[TimerTask] = None // was null before
-
-/*     def startTimer(): Unit = {
-        if(task != null){
-            task.cancel()
-        }
-        task = new TimerTask {
-            def run: Unit = {
-                clock.incrementAndGet()
-                setTime
-                contents = updateContents
-                repaint()
-            }
-        }
-        timerStarted = true
-        timer.schedule(task, 1000L, 1000L)
-    } */
-
+    
     def startTimer(): Unit = {
-        task.foreach(_.cancel()) // Cancel the current task if it exists
+        task.foreach(_.cancel())
         task = Some(new TimerTask {
             def run(): Unit = {
                 clock.incrementAndGet()
@@ -67,17 +50,8 @@ class GUI(using var controller: IController) extends Frame with Observer:
         timer.schedule(task.get, 1000L, 1000L)
     }
 
-/*     def stopTimer(): Unit = {
-        
-        if (task != null) {
-            task.cancel()
-            task = null // Indicate task is no longer scheduled
-            timerStarted = false
-        }
-    } */
-
     def stopTimer(): Unit = {
-        task.foreach(_.cancel()) // Cancel the current task if it exists
+        task.foreach(_.cancel())
         task = None // Indicate task is no longer scheduled -> was null before
         timerStarted = false
     }

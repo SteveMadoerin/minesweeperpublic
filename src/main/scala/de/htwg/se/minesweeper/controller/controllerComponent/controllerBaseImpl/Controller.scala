@@ -91,11 +91,13 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
         game = spiel
 
         notifyObservers(Event.NewGame)
-
+        
     def newGame(side: Int, bombs: Int) =
-        val newGame = copyInterface(game, "Playing")
+        val tempGame: Game = game.asInstanceOf[Game]
+        val gameCopy = tempGame.copy(bombs, side, tempGame.time, "Playing")
+        val newGame: IGame = gameCopy
         game = newGame
-        field = Default.createField(newGame)
+        field = Default.createField(game)
         notifyObservers(Event.NewGame)
     
     // doMove wird von TUI als parameter übergeben hierzu wird game und field in der TUI Klasse angegeben
