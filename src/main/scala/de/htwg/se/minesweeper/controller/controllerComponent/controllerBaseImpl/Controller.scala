@@ -28,9 +28,7 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
             case Some(game) => this.game = game
             case None =>
         }
-/*         val tempGame: Game = game.asInstanceOf[Game]
-        val gameCopy = tempGame.copy(tempGame.bombs, tempGame.side, tempGame.time, "Playing")
-        val newGame: IGame = gameCopy */
+
         game = copyInterface(game, "Playing")
 
         val fieldOption = file.loadField2
@@ -46,13 +44,7 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
         notifyObservers(Event.SaveTime)
         file.saveGame(game)
         file.saveField(field)
-        
-        // make a function here
-/*         val tempGame: Game = game.asInstanceOf[Game]
-        val gameCopy = tempGame.copy(tempGame.bombs, tempGame.side, tempGame.time, "Playing")
-        val newGame: IGame = gameCopy */
-        // until here
-        //game = newGame
+
         game = copyInterface(game, "Playing")
         notifyObservers(Event.Save)
     
@@ -87,20 +79,12 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
     def checkGameOver(status: String) = game.checkExit(status)
 
     def newGameGUI =
-/*         val tempGame: Game = game.asInstanceOf[Game]
-        val gameCopy = tempGame.copy(tempGame.bombs, tempGame.side, tempGame.time, "Playing")
-        val newGame: IGame = gameCopy
-        game = newGame */
         game = copyInterface(game, "Playing")
-        notifyObservers(Event.Input)
 
+        notifyObservers(Event.Input)
     
     //for GUI
     def newGameField(optionString: Option[String]) =
-/*         val tempGame: Game = game.asInstanceOf[Game]
-        val gameCopy = tempGame.copy(tempGame.bombs, tempGame.side, tempGame.time, "Playing")
-        val newGame: IGame = gameCopy */
-        //game = newGame
         game = copyInterface(game, "Playing")
         val (feld, spiel) = game.prepareBoard(optionString, game)
         field = feld
@@ -109,16 +93,11 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
         notifyObservers(Event.NewGame)
 
     def newGame(side: Int, bombs: Int) =
-/*         val tempGame: Game = game.asInstanceOf[Game]
-        val gameCopy = tempGame.copy(bombs, side, tempGame.time, "Playing")
-        val newGame: IGame = gameCopy
-        game = newGame */
         val newGame = copyInterface(game, "Playing")
         game = newGame
         field = Default.createField(newGame)
         notifyObservers(Event.NewGame)
-
-
+    
     // doMove wird von TUI als parameter übergeben hierzu wird game und field in der TUI Klasse angegeben
     def makeAndPublish(makeThis: (Boolean, Move, IGame) => IField, b: Boolean, move: Move, game: IGame): Unit =
         field = makeThis(b, move, game)  // doMove
