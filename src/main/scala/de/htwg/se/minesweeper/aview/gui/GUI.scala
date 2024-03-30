@@ -29,9 +29,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
     private var firstMoveControl = new AtomicBoolean(true)
     private var timerStarted: Boolean = false
     private var timeLoaded: Boolean = false
-    private var left = 0
-    private var middle = 0
-    private var right = 0
+    private var digitBar = new DigitDisplay(0, 0, 0)
     var clock = new AtomicInteger(0)
     val timer = new Timer()
     var task: Option[TimerTask] = None // was null before
@@ -71,7 +69,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
 
         add(new SmileLabel(s"${controller.game.board}"), BorderPanel.Position.Center)
         
-        val timerDigits = Seq(left, middle, right).map(getDigits)
+        val timerDigits = Seq(digitBar.leftDigit, digitBar.middleDigit, digitBar.rightDigit).map(getDigits)
         add(new BoxPanel(Orientation.NoOrientation){
             contents ++= timerDigits.map(new DigitLabel(_))
         }, BorderPanel.Position.East)
@@ -131,7 +129,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
             case Event.NewGame =>
                 firstMoveControl.set(true)
                 boardBounds = controller.field.matrix.size -1
-                if(right>0){
+                if(digitBar.rightDigit>0){
                     stopTimer()
                     resetTimer()
                 }
@@ -295,9 +293,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
     }
     
     def setTime = synchronized {
-        left = clock.get()/100
-        middle = (clock.get()%100)/10
-        right = clock.get()%10
+        digitBar = DigitDisplay(clock.get()/100, (clock.get()%100)/10, clock.get()%10)
     }
 
     def restartTimer(loadedTime: AtomicInteger) ={
@@ -319,8 +315,12 @@ class GUI(using var controller: IController) extends Frame with Observer:
     }
 
     def calculateScore: Int =
-        val score = ((controller.field.matrix.size * controller.field.matrix.size)) * 10 - (left*100+middle*10+right)
+        val score = ((controller.field.matrix.size * controller.field.matrix.size)) * 10 - (digitBar.leftDigit*100+digitBar.middleDigit*10+digitBar.rightDigit)
         if controller.game.board == "Won" then score else 0
+
+/*     def calculateScore(leftDi: Int, middleDi: Int, rightDi: Int): Int =
+        val score = ((controller.field.matrix.size * controller.field.matrix.size)) * 10 - (leftDi*100+middleDi*10+rightDi)
+        if controller.game.board == "Won" then score else 0 */
     
     def resetTimer() = {
         clock.set(0)
@@ -388,3 +388,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
 
     class DigitLabel(newIcon: ImageIcon) extends Label():
         icon = newIcon
+    
+    case class DigitDisplay(leftDigit: Int, middleDigit: Int, rightDigit: Int)
+
+end GUI
