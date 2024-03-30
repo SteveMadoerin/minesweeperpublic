@@ -35,7 +35,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
     var clock = new AtomicInteger(0)
     val timer = new Timer()
     //var task: TimerTask = _
-    var task: Option[TimerTask] = None
+    var task: Option[TimerTask] = None // was null before
 
 /*     def startTimer(): Unit = {
         if(task != null){
@@ -64,7 +64,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
             }
         })
         timerStarted = true
-        timer.schedule(task.get, 1000L, 1000L) // Schedule the new task
+        timer.schedule(task.get, 1000L, 1000L)
     }
 
 /*     def stopTimer(): Unit = {
@@ -78,7 +78,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
 
     def stopTimer(): Unit = {
         task.foreach(_.cancel()) // Cancel the current task if it exists
-        task = None // Indicate task is no longer scheduled
+        task = None // Indicate task is no longer scheduled -> was null before
         timerStarted = false
     }
 
@@ -196,7 +196,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
                 val text = s"Game is ${controller.game.board} and your Score is ${calculateScore}"
                 
                 resetTimer()
-                showMessage(null, text, "GameOver", Message.Info)
+                showMessage(None.orNull, text, "GameOver", Message.Info) // was null before
 
                 saveScoreNew(saveScore)
                 loadScoreNew
@@ -205,7 +205,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
             case Event.Cheat =>
 
                 val text = s"${controller.field.gameOverField}"
-                showMessage(null, text, "Cheat Menu", Message.Plain)
+                showMessage(None.orNull, text, "Cheat Menu", Message.Plain) // was null before
                 false
             
             case Event.Help =>
@@ -222,7 +222,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
                     |                                                   
                     |""".stripMargin
     
-                showMessage(null, text, "Help Menu", Message.Info)
+                showMessage(None.orNull, text, "Help Menu", Message.Info) // was null before
                 false
             
             case Event.Input =>
@@ -274,7 +274,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
         val resizedImg = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB)
         val g2: Graphics2D = resizedImg.createGraphics()
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
-        g2.drawImage(srcImg, 0, 0, w, h, null)
+        g2.drawImage(srcImg, 0, 0, w, h, None.orNull) // was null before
         g2.dispose()
         resizedImg
     }
@@ -292,11 +292,11 @@ class GUI(using var controller: IController) extends Frame with Observer:
     
 
     def getGraphicalInput: Option[String] = {
-        showInput(null, "Choose Difficulty", "NewGame", Message.Info, Swing.EmptyIcon, List("SuperEasy","Easy", "Medium", "Hard"), "Easy")
+        showInput(None.orNull, "Choose Difficulty", "NewGame", Message.Info, Swing.EmptyIcon, List("SuperEasy","Easy", "Medium", "Hard"), "Easy") // was null before
     }
     
     def saveScoreNew(saveScore: Int): Unit = {
-        val playerName =  showInput(null, "Enter your Name to save your score!", "Save Score", Message.Info, Swing.EmptyIcon, Nil, "Sly").getOrElse("Default")
+        val playerName =  showInput(None.orNull, "Enter your Name to save your score!", "Save Score", Message.Info, Swing.EmptyIcon, Nil, "Sly").getOrElse("Default") // was null before
         val filePath = Default.filePathHighScore
         controller.saveScoreAndPlayerName(playerName, saveScore, Default.filePathHighScore)
     }
@@ -310,7 +310,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
             s"${index + 1}. $name: $score"
         }.mkString("\n")
 
-        showMessage(null, message, "Top 10 High Scores", Message.Info)
+        showMessage(None.orNull, message, "Top 10 High Scores", Message.Info) // was null before
     }
     
     class CellPanel(x: Int, y: Int, bounds: Int, first: Boolean) extends GridPanel(x,y) {
