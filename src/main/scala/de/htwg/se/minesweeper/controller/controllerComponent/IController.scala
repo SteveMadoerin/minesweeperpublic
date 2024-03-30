@@ -30,9 +30,10 @@ trait IController extends Observable{
 
     def showVisibleCell(x: Int, y: Int): String
    
-    def getFieldSize: Int
-    def getSpielbrettState: String
-    def getControllerField: IField
+    //def getFieldSize: Int
+    //def getSpielbrettState: String
+    def field: IField
+    //def getControllerField: IField
     //def getControllerGame: IGame
     def game: IGame
 

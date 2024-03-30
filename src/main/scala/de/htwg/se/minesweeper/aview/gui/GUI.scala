@@ -25,7 +25,7 @@ import java.io.{File, PrintWriter, FileWriter}
 class GUI(using var controller: IController) extends Frame with Observer:
 
     controller.add(this)
-    private var boardBounds = controller.getFieldSize -1
+    private var boardBounds = controller.field.matrix.size -1
     var firstMoveControl = new AtomicBoolean(true)
     private var timerStarted: Boolean = false
     var timeLoaded: Boolean = false
@@ -74,7 +74,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
             contents ++= flagCountDisplay.productIterator.map(digit => new DigitLabel(digit.asInstanceOf[ImageIcon]))
         }, BorderPanel.Position.West)
 
-        add(new SmileLabel(s"${controller.getSpielbrettState}"), BorderPanel.Position.Center)
+        add(new SmileLabel(s"${controller.game.board}"), BorderPanel.Position.Center)
         
         val timerDigits = Seq(l, m, r).map(getDigits)
         add(new BoxPanel(Orientation.NoOrientation){
@@ -135,7 +135,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
 
             case Event.NewGame =>
                 firstMoveControl.set(true)
-                boardBounds = controller.getFieldSize -1
+                boardBounds = controller.field.matrix.size -1
                 if(r>0){
                     stopTimer()
                     resetTimer()
@@ -172,7 +172,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
                 stopTimer()
 
                 val saveScore: Int = calculateScore
-                val text = s"Game is ${controller.getSpielbrettState} and your Score is ${calculateScore}"
+                val text = s"Game is ${controller.game.board} and your Score is ${calculateScore}"
                 
                 resetTimer()
                 showMessage(null, text, "GameOver", Message.Info)
@@ -183,7 +183,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
             
             case Event.Cheat =>
 
-                val text = s"${controller.getControllerField.gameOverField}"
+                val text = s"${controller.field.gameOverField}"
                 showMessage(null, text, "Cheat Menu", Message.Plain)
                 false
             
@@ -214,7 +214,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
 
                 setLoadedTimer(new AtomicInteger(controller.game.time))
                 timeLoaded = true
-                boardBounds = controller.getFieldSize -1
+                boardBounds = controller.field.matrix.size -1
                 contents = updateContents
                 repaint()
                 true
@@ -324,8 +324,8 @@ class GUI(using var controller: IController) extends Frame with Observer:
     }
 
     def calculateScore: Int =
-        val score = ((controller.getFieldSize * controller.getFieldSize)) * 10 - (l*100+m*10+r)
-        if controller.getSpielbrettState == "Won" then score else 0
+        val score = ((controller.field.matrix.size * controller.field.matrix.size)) * 10 - (l*100+m*10+r)
+        if controller.game.board == "Won" then score else 0
     
     def resetTimer() = {
         clock.set(0)
@@ -333,7 +333,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
         timerStarted = false
     }
 
-    def calcFlagCount: Int = controller.game.calcMineAndFlag(controller.getControllerField.matrix)
+    def calcFlagCount: Int = controller.game.calcMineAndFlag(controller.field.matrix)
 
     def setFlagCountDisplay: (ImageIcon, ImageIcon, ImageIcon) =
         val leftDigit =  calcFlagCount / 100
@@ -359,7 +359,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
         maximumSize_=(new Dimension(40,40))
         listenTo(mouse.clicks)
         reactions += {
-            case e: MouseClicked if (controller.game.board == "Won" || controller.getSpielbrettState == "Lost") =>
+            case e: MouseClicked if (controller.game.board == "Won" || controller.game.board == "Lost") =>
             
             case e: MouseClicked if e.peer.getButton == MouseEvent.BUTTON3 => 
                 if (controller.showVisibleCell(x,y) == "~"){

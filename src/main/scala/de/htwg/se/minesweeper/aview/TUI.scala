@@ -26,16 +26,16 @@ class TUI(using var controller: IController) extends Observer:
     override def update(e: Event): Boolean = 
       e match
         case Event.NewGame => 
-          infoMessages(controller.getControllerField.toString())
+          infoMessages(controller.field.toString())
           isFirstMove = true
           true
-        case Event.Start => infoMessages(controller.getControllerField.toString()); true
-        case Event.Next => infoMessages(controller.getControllerField.toString()); true
-        case Event.GameOver => infoMessages(s"The Game is ${controller.game.board} !", controller.getControllerField.toString()); true
+        case Event.Start => infoMessages(controller.field.toString()); true
+        case Event.Next => infoMessages(controller.field.toString()); true
+        case Event.GameOver => infoMessages(s"The Game is ${controller.game.board} !", controller.field.toString()); true
         case Event.Cheat => false
         case Event.Help => false
         case Event.Input => false
-        case Event.Load => infoMessages(controller.getControllerField.toString()); true
+        case Event.Load => infoMessages(controller.field.toString()); true
         case Event.Save => false
         case Event.SaveTime => false
         case Event.Exit => System.exit(0); false
