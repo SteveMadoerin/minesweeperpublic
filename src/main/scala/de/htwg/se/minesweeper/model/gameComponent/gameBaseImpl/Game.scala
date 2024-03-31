@@ -20,7 +20,14 @@ case class Game (bombs : Int, side: Int, time: Int, board : String) extends IGam
         }
     }
     
-    def prepareBoard(s: Option[String], game: IGame): (IField, IGame) = {
+/*     def prepareBoard(s: Option[String], game: IGame): (IField, IGame) = {
+        val realGame = this.copy(optionToList(s)(1), optionToList(s)(0))
+        val adjacentField = Playfield()
+        (adjacentField.newField(optionToList(s)(0), realGame), realGame)
+    } */
+
+    // currying
+    def prepareBoard(s: Option[String])(game: IGame): (IField, IGame) = {
         val realGame = this.copy(optionToList(s)(1), optionToList(s)(0))
         val adjacentField = Playfield()
         (adjacentField.newField(optionToList(s)(0), realGame), realGame)
@@ -53,19 +60,19 @@ case class Game (bombs : Int, side: Int, time: Int, board : String) extends IGam
         val adjacentInitialised = adjacent.newField(side, this)
         val newReplacedbombHidMatrix = if(adjacentInitialised.hidden.cell(y, x) == Symbols.Bomb){
             val replacedHiddenMatrix = replaceBomb(x, y, adjacentInitialised)
-            val replacedAdjacentHiddenField = Default.mergeMatrixToField(field.matrix, replacedHiddenMatrix.hidden) // Dependency Injection
+            val replacedAdjacentHiddenField = Default.mergeMatrixToField(field.matrix, replacedHiddenMatrix.hidden)
             replacedAdjacentHiddenField
         } else {
             adjacentInitialised
         }
-        val newVisibleMatrix = openNew(x, y, newReplacedbombHidMatrix)
+        val newVisibleMatrix = newReplacedbombHidMatrix.openNew(x, y, newReplacedbombHidMatrix)
         newVisibleMatrix
 
-    def openNew(x: Int, y: Int, field: IField): IField = {
+/*     def openNew(x: Int, y: Int, field: IField): IField = {
         val extractedSymbol = field.showInvisibleCell(y, x)
         val returnField = field.put(extractedSymbol, y, x)
         returnField
-    }
+    } */
 
 
     def replaceBomb(x: Int, y: Int, field: IField): IField = {
@@ -112,6 +119,9 @@ case class Game (bombs : Int, side: Int, time: Int, board : String) extends IGam
 
     def calcMineAndFlag(visibleMatrix: Matrix[Symbols]): Int = (this.bombs - calcFlag(visibleMatrix))
 
+    def calcWonOrLost(visibleMatrix: Matrix[Symbols], mines: Int): Boolean = (mines+1 - addCoveredAndFlag(visibleMatrix) == 0)
+    
+    // try to implement function chaining here
     def calcAdjacentMines(row: Int, col: Int, side: Int, invisibleMatrix: Matrix[Symbols]): Int = {
 
         val neighbors = List(
@@ -127,11 +137,9 @@ case class Game (bombs : Int, side: Int, time: Int, board : String) extends IGam
 
         neighbors.count { case (r, c) => isValid(r, c, side) && isMine(r, c, invisibleMatrix) }
     }
-
-    def calcWonOrLost(visibleMatrix: Matrix[Symbols], mines: Int): Boolean = (mines+1 - addCoveredAndFlag(visibleMatrix) == 0)
     
-    def isMine(row: Int, col: Int, m: Matrix[Symbols]): Boolean = {if(m.cell(row, col) == Symbols.Bomb) true else false}
-    def isValid(row: Int, col: Int, side: Int): Boolean = {row >= 0 && row <= side && col >= 0 && col <= side}
+    def isMine(row: Int, col: Int, m: Matrix[Symbols]): Boolean = {if(m.cell(row, col) == Symbols.Bomb) true else false} // fc
+    def isValid(row: Int, col: Int, side: Int): Boolean = {row >= 0 && row <= side && col >= 0 && col <= side} // fc
 
     def initializeAdjacentNumbers(matrix: Matrix[Symbols]): Matrix[Symbols] =
         val si = matrix.size - 1
@@ -162,6 +170,7 @@ case class Game (bombs : Int, side: Int, time: Int, board : String) extends IGam
         val sizze = matrix.size - 1
         val random = new Random()
 
+        // recursion
         @tailrec
         def placeMines(ma: Matrix[Symbols], minesPlaced: Int): Matrix[Symbols] = {
             if (minesPlaced >= bombs) ma
@@ -171,9 +180,9 @@ case class Game (bombs : Int, side: Int, time: Int, board : String) extends IGam
 
                 if (ma.cell(row, col) != Symbols.Bomb) {
                     val updatedMatrix = ma.replaceCell(row, col, Symbols.Bomb)
-                    placeMines(updatedMatrix, minesPlaced + 1)
+                    placeMines(updatedMatrix, minesPlaced + 1) // recursion
                 } else {
-                    placeMines(ma, minesPlaced)
+                    placeMines(ma, minesPlaced) // recursion
                 }
             }
         }

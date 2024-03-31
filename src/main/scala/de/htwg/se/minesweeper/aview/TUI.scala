@@ -16,8 +16,6 @@ class TUI(using controller: IController) extends Observer:
     
     controller.add(this)
 
-    //var isFirstMove = true
-
     def run = 
         infoMessages("Welcome to Minesweeper")
         resize
@@ -27,7 +25,6 @@ class TUI(using controller: IController) extends Observer:
         e match
             case Event.NewGame => 
                 infoMessages(controller.field.toString())
-                //isFirstMove = true
                 true
             
             case Event.Start => infoMessages(controller.field.toString()); true
@@ -59,7 +56,7 @@ class TUI(using controller: IController) extends Observer:
             case "y" => controller.makeAndPublish(controller.redo); None
             case "s" => controller.saveGame; None
             case "l" => controller.loadGame; None
-            case "e" => None // for testing
+            case "e" => None
             case _ => {
                 val charAccumulator = input.toCharArray()
                 
@@ -83,24 +80,15 @@ class TUI(using controller: IController) extends Observer:
         
     }
 
-    
+    // recursion
     def parseInputandPrintLoop(firstMoveCheck: Boolean): Unit = {
         infoMessages("Enter your move (<action><x><y>, eg. o0102, q to quit, h for help):")
-        //var stillFirstMove = false
         val stillFirstMove = userInX(readLine) match {
-            //case None => if firstMoveCheck == true then stillFirstMove = true
             case None => firstMoveCheck
             case Some(move) =>
                 processMove(move, firstMoveCheck)
                 false
         }
-/*                 move.value match {
-                    case "open" => controller.makeAndPublish(controller.doMove, firstMoveCheck, move, controller.game); // no var game
-                    case "flag" => controller.makeAndPublish(controller.put, move)
-                    case "unflag" => controller.makeAndPublish(controller.put, move)
-                    case "help" => controller.helpMenu
-                    case _ => infoMessages(">> Invalid Input")
-                } */
         
         controller.checkGameOver(controller.game.board) match {
             case false =>

@@ -22,7 +22,7 @@ class DoCommand(move: Move) extends Command[IField]:
                 returnField
             case "recursion" => 
                 saveFieldUndo = field
-                val returnRecField = field.recursiveMadness(move.x,move.y,field)
+                val returnRecField = field.recursiveOpen(move.x,move.y,field)
                 saveFieldRedo = returnRecField
                 returnRecField
             

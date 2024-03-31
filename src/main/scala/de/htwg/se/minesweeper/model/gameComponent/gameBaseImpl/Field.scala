@@ -1,6 +1,7 @@
 package de.htwg.se.minesweeper.model.gameComponent.gameBaseImpl
 
 import de.htwg.se.minesweeper.model.gameComponent._
+import util.chaining.scalaUtilChainingOps
 
 case class Field(matrix: Matrix[Symbols], hidden: Matrix[Symbols]) extends IField:
     val size = matrix.size
@@ -18,45 +19,50 @@ case class Field(matrix: Matrix[Symbols], hidden: Matrix[Symbols]) extends IFiel
 
     def open(x: Int, y: Int, spiel: IGame): (IGame, IField) =
         val currentGame: Game = spiel.asInstanceOf[Game]
-        // put a switch case here
-        val gameStatus = if(this.hidden.cell(y, x) == Symbols.Bomb) {
-            
-            val tempGame = currentGame.copy(board = "Lost")
-            tempGame
-        } else if(spiel.calcWonOrLost(this.matrix, spiel.bombs)) {
-            val tempGame = currentGame.copy(board = "Won")
-            tempGame
-        } else {
-            spiel
+        val hiddenCell = this.hidden.cell(y, x)
+        
+        val gameStatus = hiddenCell match {
+            case Symbols.Bomb =>
+                currentGame.copy(board = "Lost")
+            case _ if spiel.calcWonOrLost(this.matrix, currentGame.bombs) =>
+                currentGame.copy(board = "Won")
+            case _ =>
+                spiel
         }
+
         val extractedSymbol = this.showInvisibleCell(y, x)
         val returnField = this.put(extractedSymbol, y, x)
         (gameStatus, returnField)
     
     def gameOverField: IField = new Field(this.hidden)
     
-    def reveal =
+/*     def reveal =
         val revMat = new Field(this.hidden)
         println(revMat.toString())
-        revMat
+        revMat */
+    def reveal = new Field(this.hidden).tap(y => println(y.toString())) // function chaining
 
     def put(symbol: Symbols, x: Int, y: Int) = copy(matrix.replaceCell(x, y, symbol))
     def showVisibleCell(x: Int, y: Int): Symbols = matrix.cell(x, y)
     def showInvisibleCell(x: Int, y: Int): Symbols = hidden.cell(x, y)
     def isValidF(row: Int, col: Int, side: Int): Boolean = {row >= 0 && row <= side && col >= 0 && col <= side}
 
-    def openNewXXX(x: Int, y: Int, field: IField): IField =
+/*     def openNew(x: Int, y: Int, field: IField): IField =
         val extractedSymbol = field.showInvisibleCell(y, x)
         val returnField = field.put(extractedSymbol, y, x)
-        returnField
+        returnField */
+    def openNew(x: Int, y: Int, field: IField): IField = field.put(field.showInvisibleCell(y, x), y, x) // function chaining
 
-    def recursiveMadness(x: Int, y: Int, field: IField): IField = {
+    
+    // recursion
+    def recursiveOpen(x: Int, y: Int, field: IField): IField = {
         val directions = List(
             (-1, -1), (-1, 0), (-1, 1),
             (0, -1),          (0, 1),
             (1, -1), (1, 0), (1, 1)
         )
-    
+
+        // recursive function
         def exploreDirections(currentField: IField, remainingDirections: List[(Int, Int)]): IField = remainingDirections match {
             case (dx, dy) :: tail =>
             val newX = x + dx
@@ -65,8 +71,8 @@ case class Field(matrix: Matrix[Symbols], hidden: Matrix[Symbols]) extends IFiel
                 val currentCell = currentField.showVisibleCell(newY, newX)
                 val invisibleCell = currentField.showInvisibleCell(newY, newX)
                 val updatedField = if (currentCell == Symbols.Covered) {
-                val openedField = openNewXXX(newX, newY, currentField)
-                if (invisibleCell == Symbols.Zero) recursiveMadness(newX, newY, openedField)
+                val openedField = openNew(newX, newY, currentField)
+                if (invisibleCell == Symbols.Zero) recursiveOpen(newX, newY, openedField)
                 else openedField
                 } else currentField
                 exploreDirections(updatedField, tail)

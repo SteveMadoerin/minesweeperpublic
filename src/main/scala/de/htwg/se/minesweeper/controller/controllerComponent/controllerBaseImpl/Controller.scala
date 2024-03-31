@@ -48,8 +48,7 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
         game = copyInterface(game, "Playing")
         notifyObservers(Event.Save)
     
-    def exit =
-        notifyObservers(Event.Exit)
+    def exit = notifyObservers(Event.Exit)
 
     def gameOver =
         field = field.gameOverField
@@ -86,7 +85,9 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
     //for GUI
     def newGameField(optionString: Option[String]) =
         game = copyInterface(game, "Playing")
-        val (feld, spiel) = game.prepareBoard(optionString, game)
+        val prepareWithDifficulty = game.prepareBoard(optionString)_ // partially applied and get a function
+        val (feld, spiel) = prepareWithDifficulty(game)// complete preparation with game instance
+        //val (feld, spiel) = game.prepareBoard(optionString, game)
         field = feld
         game = spiel
 
