@@ -20,12 +20,6 @@ case class Game (bombs : Int, side: Int, time: Int, board : String) extends IGam
         }
     }
     
-/*     def prepareBoard(s: Option[String], game: IGame): (IField, IGame) = {
-        val realGame = this.copy(optionToList(s)(1), optionToList(s)(0))
-        val adjacentField = Playfield()
-        (adjacentField.newField(optionToList(s)(0), realGame), realGame)
-    } */
-
     // currying
     def prepareBoard(s: Option[String])(game: IGame): (IField, IGame) = {
         val realGame = this.copy(optionToList(s)(1), optionToList(s)(0))
@@ -67,14 +61,7 @@ case class Game (bombs : Int, side: Int, time: Int, board : String) extends IGam
         }
         val newVisibleMatrix = newReplacedbombHidMatrix.openNew(x, y, newReplacedbombHidMatrix)
         newVisibleMatrix
-
-/*     def openNew(x: Int, y: Int, field: IField): IField = {
-        val extractedSymbol = field.showInvisibleCell(y, x)
-        val returnField = field.put(extractedSymbol, y, x)
-        returnField
-    } */
-
-
+    
     def replaceBomb(x: Int, y: Int, field: IField): IField = {
         val size = field.matrix.size
         val indices = 0 until size
@@ -120,7 +107,7 @@ case class Game (bombs : Int, side: Int, time: Int, board : String) extends IGam
     def calcMineAndFlag(visibleMatrix: Matrix[Symbols]): Int = (this.bombs - calcFlag(visibleMatrix))
 
     def calcWonOrLost(visibleMatrix: Matrix[Symbols], mines: Int): Boolean = (mines+1 - addCoveredAndFlag(visibleMatrix) == 0)
-    
+
     // try to implement function chaining here
     def calcAdjacentMines(row: Int, col: Int, side: Int, invisibleMatrix: Matrix[Symbols]): Int = {
 

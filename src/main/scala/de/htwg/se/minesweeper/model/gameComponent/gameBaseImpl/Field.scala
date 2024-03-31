@@ -20,7 +20,7 @@ case class Field(matrix: Matrix[Symbols], hidden: Matrix[Symbols]) extends IFiel
     def open(x: Int, y: Int, spiel: IGame): (IGame, IField) =
         val currentGame: Game = spiel.asInstanceOf[Game]
         val hiddenCell = this.hidden.cell(y, x)
-        
+
         val gameStatus = hiddenCell match {
             case Symbols.Bomb =>
                 currentGame.copy(board = "Lost")
@@ -36,23 +36,13 @@ case class Field(matrix: Matrix[Symbols], hidden: Matrix[Symbols]) extends IFiel
     
     def gameOverField: IField = new Field(this.hidden)
     
-/*     def reveal =
-        val revMat = new Field(this.hidden)
-        println(revMat.toString())
-        revMat */
     def reveal = new Field(this.hidden).tap(y => println(y.toString())) // function chaining
 
     def put(symbol: Symbols, x: Int, y: Int) = copy(matrix.replaceCell(x, y, symbol))
     def showVisibleCell(x: Int, y: Int): Symbols = matrix.cell(x, y)
     def showInvisibleCell(x: Int, y: Int): Symbols = hidden.cell(x, y)
     def isValidF(row: Int, col: Int, side: Int): Boolean = {row >= 0 && row <= side && col >= 0 && col <= side}
-
-/*     def openNew(x: Int, y: Int, field: IField): IField =
-        val extractedSymbol = field.showInvisibleCell(y, x)
-        val returnField = field.put(extractedSymbol, y, x)
-        returnField */
     def openNew(x: Int, y: Int, field: IField): IField = field.put(field.showInvisibleCell(y, x), y, x) // function chaining
-
     
     // recursion
     def recursiveOpen(x: Int, y: Int, field: IField): IField = {

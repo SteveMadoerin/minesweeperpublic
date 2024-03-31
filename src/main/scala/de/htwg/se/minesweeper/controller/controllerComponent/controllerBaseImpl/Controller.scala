@@ -87,7 +87,6 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
         game = copyInterface(game, "Playing")
         val prepareWithDifficulty = game.prepareBoard(optionString)_ // partially applied and get a function
         val (feld, spiel) = prepareWithDifficulty(game)// complete preparation with game instance
-        //val (feld, spiel) = game.prepareBoard(optionString, game)
         field = feld
         game = spiel
 

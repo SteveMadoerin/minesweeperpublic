@@ -62,14 +62,14 @@ class GUI(using var controller: IController) extends Frame with Observer:
     
     def statusbar = new BorderPanel{
 
-        val flagCountDisplay = setFlagCountDisplay
+        val flagCountDisplay = buildFlagCountDisplay
         add(new BoxPanel(Orientation.NoOrientation){
             contents ++= flagCountDisplay.productIterator.map(digit => new DigitLabel(digit.asInstanceOf[ImageIcon]))
         }, BorderPanel.Position.West)
 
         add(new SmileLabel(s"${controller.game.board}"), BorderPanel.Position.Center)
         
-        val timerDigits = Seq(digitBar.leftDigit, digitBar.middleDigit, digitBar.rightDigit).map(getDigits)
+        val timerDigits = Seq(digitBar.leftDigit, digitBar.middleDigit, digitBar.rightDigit).map(showDigits)
         add(new BoxPanel(Orientation.NoOrientation){
             contents ++= timerDigits.map(new DigitLabel(_))
         }, BorderPanel.Position.East)
@@ -199,7 +199,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
             
             case Event.Input =>
 
-                val x = getGraphicalInput
+                val x = showGraphicalInput
                 controller.newGameField(x)
                 true
             
@@ -238,11 +238,11 @@ class GUI(using var controller: IController) extends Frame with Observer:
         val imagePath = imagePaths.getOrElse(kind, "src/main/resources/0.png")
         val icon: ImageIcon = new ImageIcon(imagePath)
         val image2: Image = icon.getImage()
-        val result = new ImageIcon(getScaledImage(image2, 40, 40))
+        val result = new ImageIcon(showScaledImage(image2, 40, 40))
         result
     }
 
-    def getScaledImage(srcImg: Image, w: Int, h: Int): Image = {
+    def showScaledImage(srcImg: Image, w: Int, h: Int): Image = {
         val resizedImg = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB)
         val g2: Graphics2D = resizedImg.createGraphics()
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
@@ -251,19 +251,19 @@ class GUI(using var controller: IController) extends Frame with Observer:
         resizedImg
     }
 
-    def getDigits(kind: Int): ImageIcon = {
+    def showDigits(kind: Int): ImageIcon = {
         val imagePaths = (0 to 9).map(i => i -> s"src/main/resources/time$i.jpeg").toMap
         val imagePath = imagePaths.getOrElse(kind, "src/main/resources/time-.jpeg")
         new ImageIcon(imagePath)
     }
 
-    def getSmiley(kind: String): ImageIcon =
+    def showSmiley(kind: String): ImageIcon =
         val imagePath = s"src/main/resources/face$kind.jpeg"
         val icon: ImageIcon = new ImageIcon(imagePath)
         icon
     
 
-    def getGraphicalInput: Option[String] = {
+    def showGraphicalInput: Option[String] = {
         showInput(None.orNull, "Choose Difficulty", "NewGame", Message.Info, Swing.EmptyIcon, List("SuperEasy","Easy", "Medium", "Hard"), "Easy") // was null before
     }
     
@@ -317,10 +317,6 @@ class GUI(using var controller: IController) extends Frame with Observer:
     def calculateScore: Int =
         val score = ((controller.field.matrix.size * controller.field.matrix.size)) * 10 - (digitBar.leftDigit*100+digitBar.middleDigit*10+digitBar.rightDigit)
         if controller.game.board == "Won" then score else 0
-
-/*     def calculateScore(leftDi: Int, middleDi: Int, rightDi: Int): Int =
-        val score = ((controller.field.matrix.size * controller.field.matrix.size)) * 10 - (leftDi*100+middleDi*10+rightDi)
-        if controller.game.board == "Won" then score else 0 */
     
     def resetTimer() = {
         clock.set(0)
@@ -330,7 +326,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
 
     def calcFlagCount: Int = controller.game.calcMineAndFlag(controller.field.matrix)
 
-    def setFlagCountDisplay: (ImageIcon, ImageIcon, ImageIcon) =
+    def buildFlagCountDisplay: (ImageIcon, ImageIcon, ImageIcon) =
         val leftDigit =  calcFlagCount / 100
         val middleDigit = calcFlagCount / 10
         val rightDigit = calcFlagCount % 10
@@ -340,9 +336,9 @@ class GUI(using var controller: IController) extends Frame with Observer:
                 val corrRight = (calcFlagCount * -1)%10
                 val corrMiddle = (calcFlagCount * -1)/10
                 val corrLeft = -1
-                (getDigits(corrLeft), getDigits(corrMiddle), getDigits(corrRight))
-            } else if (calcFlagCount > 999) {(getDigits(9), getDigits(9), getDigits(9))
-            } else {(getDigits(leftDigit), getDigits(middleDigit), getDigits(rightDigit))}
+                (showDigits(corrLeft), showDigits(corrMiddle), showDigits(corrRight))
+            } else if (calcFlagCount > 999) {(showDigits(9), showDigits(9), showDigits(9))
+            } else {(showDigits(leftDigit), showDigits(middleDigit), showDigits(rightDigit))}
         
         (resLeft, resMiddle, resRight)
     
@@ -381,9 +377,9 @@ class GUI(using var controller: IController) extends Frame with Observer:
 
     class SmileLabel(kind: String) extends Label():
         icon = kind match {
-            case "Playing" => getSmiley("smile")
-            case "Lost" => getSmiley("dead")
-            case "Won" => getSmiley("win") 
+            case "Playing" => showSmiley("smile")
+            case "Lost" => showSmiley("dead")
+            case "Won" => showSmiley("win") 
         }
 
     class DigitLabel(newIcon: ImageIcon) extends Label():
