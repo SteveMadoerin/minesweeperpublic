@@ -21,13 +21,13 @@ class ControllerSpec extends AnyWordSpec{
 
 
     "The Controller when created" should {
-        val game1: IGame = Default.prepareGame
-        val startField = game1.getField
+        val game1: IGame = Default.prepareGame(10, 9, 0)
+        val startField = Default.createField(game1)
 
         val controller1 = new Controller(using game1)
         
         "have a game and field" in{
-            controller1.getControllerGame should be(game1)
+            controller1.game should be(game1)
         }
 
         "have no observers" in {
@@ -36,8 +36,8 @@ class ControllerSpec extends AnyWordSpec{
     }
     
     "performing a first move" should {
-        var game2 = Default.prepareGame
-        val emptyField2 = game2.getField
+        var game2 = Default.prepareGame(10, 9, 0)
+        val emptyField2 = Default.createField(game2)
 
         val move2 = Move("open", 0 ,0)
 
@@ -53,14 +53,14 @@ class ControllerSpec extends AnyWordSpec{
 
         "update the field after firstMove" in {
             controller2.doMove(true, move2, game2)
-            game2.state should be (Status.Playing)
+            game2.board should be ("Playing")
         }
 
     }   
 
     "flagging a field" should {
-        var game = Default.prepareGame
-        val emptyField = game.getField
+        var game = Default.prepareGame(10, 9, 0)
+        val emptyField = Default.createField(game)
 
         val controller = new Controller(using game)
         val observer = new Observer {
@@ -73,13 +73,13 @@ class ControllerSpec extends AnyWordSpec{
 
         "update the field" in {
             controller.flag(2, 2)
-            controller.getControllerField._matrix.cell(2,2) should be (Symbols.F)
+            controller.field.matrix.cell(2,2) should be (Symbols.F)
         }
     }
 
     "unflagging a field" should {
-        var game = Default.prepareGame
-        val emptyField = game.getField
+        var game = Default.prepareGame(10, 9, 0)
+        val emptyField = Default.createField(game)
 
         val controller = new Controller(using game)
         val observer = new Observer {
@@ -92,14 +92,14 @@ class ControllerSpec extends AnyWordSpec{
 
         "update the field" in {
             controller.unflag(2, 2)
-            controller.getControllerField._matrix.cell(2,2) should be (Symbols.Covered)
+            controller.field.matrix.cell(2,2) should be (Symbols.Covered)
       }
 
     }
 
     "def helpMenue" should {
-        var game = Default.prepareGame
-        val emptyField = game.getField
+        var game = Default.prepareGame(10, 9, 0)
+        val emptyField = Default.createField(game)
 
         val controller5 = new Controller(using game)
         val observer = new Observer {
@@ -141,8 +141,8 @@ class ControllerSpec extends AnyWordSpec{
     }
 
     "cheat" should{
-        val game4 = new Game(Status.Playing, 3, 3)
-        game4.setField()
+        val game4 = Game(3, 3, 0, "Playing")
+        val newField = Default.createField(game4)
         val spielfeld = Playfield()
         val testfield = spielfeld.newField(3, game4)
 

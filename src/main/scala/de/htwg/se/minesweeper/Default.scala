@@ -11,8 +11,8 @@ import de.htwg.se.minesweeper.model.fileIoComponent.fileIoJsonImpl.{FileIO => Js
 
 object Default{
     
-    given IGame = prepareGame
-    given IField = createField(prepareGame)
+    given IGame = prepareGame(10, 9, 0)
+    given IField = createField(prepareGame(10, 9, 0))
     given IController = Controller()
     
 /*     given IFileIO = new JsonFileIO() //choose Implementation here
@@ -23,11 +23,6 @@ object Default{
     def scalableMatrix(size: Int, filling: Symbols): Matrix[Symbols] = new Matrix(size, filling)
     def scalableField(size: Int, filling: Symbols): IField = new Field(size, filling)
     def mergeMatrixToField(sichtbar: Matrix[Symbols], unsichtbar: Matrix[Symbols] ): IField = new Field(sichtbar, unsichtbar)
-
-    def prepareGame = {
-        val realGame = new Game(10 , 9, 0, "Playing")
-        realGame
-    }
 
     def prepareGame(bombs: Int, size: Int, time : Int) : IGame = {
         val realGame = new Game(bombs, size, time, "Playing")
@@ -40,5 +35,5 @@ object Default{
         val dasFeld = adjacentField.newField(leGame.side, tempGame)
         dasFeld
     }
-
+    
 }

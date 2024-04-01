@@ -11,26 +11,6 @@ import java.io._
 
 class FileIO extends IFileIO {
 
-/*     override def loadGame: Option[IGame] = {
-
-        var gameOption: Option[IGame] = None
-        val file = scala.xml.XML.loadFile("C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\game.xml")
-        val status =(file \\ "game" \@ "status")
-        val bombs = (file \\ "bombs").text.toInt
-        val side = (file \\ "side").text.toInt
-        val time = (file \\ "time").text.toInt
-
-        val game = Default.prepareGame(bombs, side, time)
-
-        gameOption = Some(game)
-        
-        gameOption match {
-            case Some(game) => gameOption = Some(game)
-            case None =>
-        }
-        gameOption
-    } */
-
     override def loadGame: Option[IGame] = {
         val file = scala.xml.XML.loadFile("C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\game.xml")
         val status = (file \\ "game" \@ "status")
@@ -72,63 +52,8 @@ class FileIO extends IFileIO {
             case _ => Symbols.E
         }
     }
-
-/*     override def loadField2: Option[IField] = {
-        var fieldOption: Option[IField] = None
-        var matrixOption: Option[Matrix[Symbols]] = None
-        var hiddenOption: Option[Matrix[Symbols]] = None
-
-        val file = scala.xml.XML.loadFile("C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\field.xml")
-        val size = (file \\ "field" \@ "size").toInt
-
-        size match{
-            case _ => 
-                matrixOption = Some(Default.scalableMatrix(size, Symbols.Covered))
-                hiddenOption = Some(Default.scalableMatrix(size, Symbols.Covered))
-                fieldOption = Some(Default.scalableField(size, Symbols.Covered)) 
-        }
-
-        val cellNodesVisible: NodeSeq = (file \\ "field" \\ "matrix" \\ "cell")
-        var matrix = matrixOption match{
-            case Some(m) => m
-            case None => println("Matrix is not valid"); Default.scalableMatrix(size, Symbols.E)
-        }
-   
-        var _matrix = matrix
-        for(cell <- cellNodesVisible){
-            val row: Int = (cell \ "@row").text.toInt
-            val col: Int = (cell \ "@col").text.toInt
-            val symbols: String = cell.text.trim
-            _matrix = _matrix.replaceCell(row, col, stringToSymbols(symbols))
-        }
-
-        val cellNodesHidden :NodeSeq = (file \\ "field" \\ "hidden" \\ "cell")
-        var hidden = matrixOption match{
-            case Some(m) => m
-            case None => println("hidden is not Valid"); Default.scalableMatrix(size, Symbols.E)
-        }
-
-        var _hidden = hidden
-        for(cell <- cellNodesHidden){
-            val row: Int = (cell \"@row").text.toInt
-            val col: Int = (cell \ "@col").text.toInt
-            val symbols: String = cell.text.trim
-            _hidden = _hidden.replaceCell(row, col, stringToSymbols(symbols))
-        }
-        
-        fieldOption match{
-            case Some(f) =>{
-                var field = Default.mergeMatrixToField(_matrix, _hidden)
-                fieldOption = Some(field)
-            }
-            case None => println("field is not Valid");
-        }
-
-        fieldOption
-
-    } */
-
-    override def loadField2: Option[IField] = {
+    
+    override def loadField: Option[IField] = {
         val file = scala.xml.XML.loadFile("C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\field.xml")
         val size = (file \\ "field" \@ "size").toInt
 

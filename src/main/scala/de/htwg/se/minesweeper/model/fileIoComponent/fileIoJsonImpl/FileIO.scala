@@ -33,9 +33,7 @@ class FileIO extends IFileIO{
         )
         
     }
-
-    //def initGame(using game: IGame) = game
-
+    
     override def loadGame: Option[IGame] = 
         import java.io._
         val source: String = Source.fromFile("C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\game.json").getLines.mkString
@@ -115,7 +113,7 @@ class FileIO extends IFileIO{
         }
     }
 
-    override def loadField2: Option[IField] = {
+    override def loadField: Option[IField] = {
 
         val source: String = Source.fromFile("C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\field.json").getLines.mkString
         val json: JsValue = Json.parse(source)
@@ -162,7 +160,6 @@ class FileIO extends IFileIO{
 
     def loadPlayerScores(filePath: String): Seq[(String, Int)] = {
         val file = new File(filePath)
-        //var scores: Seq[(String, Int)] = Seq.empty
 
         val finalScores: Seq[(String, Int)] = if (file.exists() && file.length() != 0) {
             val source = Source.fromFile(file)

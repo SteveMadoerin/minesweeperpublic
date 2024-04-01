@@ -31,7 +31,7 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
 
         game = copyInterface(game, "Playing")
 
-        val fieldOption = file.loadField2
+        val fieldOption = file.loadField
         fieldOption match {
             case Some(field) => this.field = field
             case None =>
