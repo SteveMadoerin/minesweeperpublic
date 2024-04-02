@@ -1,7 +1,7 @@
 package de.htwg.se.minesweeper.model.gameComponent.gameBaseImpl
 
 import de.htwg.se.minesweeper.model.gameComponent._
-import de.htwg.se.minesweeper.Default // Dependency Injection
+import de.htwg.se.minesweeper.Default
 import scala.io.StdIn.readLine
 import scala.util.{Random, Try}
 import scala.annotation.tailrec
@@ -86,6 +86,7 @@ case class Game (bombs : Int, side: Int, time: Int, board : String) extends IGam
             case _ => field 
         }
     }
+
     // currying
     def calcX(symbols:Symbols)(visibleMatrix: Matrix[Symbols]): Int = {
         val sizze = visibleMatrix.size -1
@@ -112,7 +113,6 @@ case class Game (bombs : Int, side: Int, time: Int, board : String) extends IGam
             (row + 1, col + 1), // SOUTH-EAST
             (row + 1, col - 1) // SOUTH-WEST
         )
-
         neighbors.count { case (r, c) => isValid(r, c, side) && isMine(r, c, invisibleMatrix) }
     }
 
@@ -144,7 +144,6 @@ case class Game (bombs : Int, side: Int, time: Int, board : String) extends IGam
                     matr.replaceCell(row, col, symb)
                 } else matr
             }
-
     
     def intitializeBombs(matrix: Matrix[Symbols], bombs: Int): Matrix[Symbols] = {
         val sizze = matrix.size - 1
@@ -166,11 +165,11 @@ case class Game (bombs : Int, side: Int, time: Int, board : String) extends IGam
                 }
             }
         }
-
         placeMines(matrix, 0)
     }
     
     def checkExit(status: String) = if status == "Lost" || status == "Won" then true else false
+
 
 end Game
 
