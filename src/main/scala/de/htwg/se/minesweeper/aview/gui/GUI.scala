@@ -374,7 +374,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
                 }
         }
     }
-
+    
     class SmileLabel(kind: String) extends Label():
         icon = kind match {
             case "Playing" => showSmiley("smile")
