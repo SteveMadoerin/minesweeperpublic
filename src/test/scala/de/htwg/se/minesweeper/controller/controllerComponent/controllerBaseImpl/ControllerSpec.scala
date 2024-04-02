@@ -408,7 +408,7 @@ class ControllerSpec extends AnyWordSpec{
         val game38:IGame = new Game(3, 3, 0, "Playing")
         val startField38 = Default.createField(game38)
 
-        val controller21 = new Controller(using game38)
+        val controller21 = new Controller()
         val observer = new Observer {
         var notified = false
         override def update(e: Event): Boolean = 
@@ -421,14 +421,10 @@ class ControllerSpec extends AnyWordSpec{
         }
 
     }
+    
+    "def controllerSaveGame" should{
 
-    // TODO: refactor controllerSaveGame
-
-/*     "def controllerSaveGame" should{
-        var game39 = new Game(3, 2, 0, "Playing")
-        val emptyField = new Field(3, Symbols.Empty)
-
-        val controller22 = new Controller(using game39)
+        val controller22 = new Controller()
         val observer = new Observer {
         var notified = false
         override def update(e: Event): Boolean = 
@@ -439,7 +435,7 @@ class ControllerSpec extends AnyWordSpec{
         "make and publish a move" in {
             controller22.saveGame
         }
-    } */
+    }
 
     // refactore saveScoreAndPlayerName
 
