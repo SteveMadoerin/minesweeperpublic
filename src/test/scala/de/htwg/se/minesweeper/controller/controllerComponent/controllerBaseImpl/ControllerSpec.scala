@@ -98,13 +98,8 @@ class ControllerSpec extends AnyWordSpec{
 
     }
 
-    // TODO: refactor helMenue test
-
-/*     "def helpMenue" should {
-        var game = Default.prepareGame(10, 9, 0)
-        val emptyField = Default.createField(game)
-
-        val controller5 = new Controller(using game)
+    "def helpMenue" should {
+        val controller5 = new Controller()
         val observer = new Observer {
         var notified = false
         override def update(e: Event): Boolean = 
@@ -113,35 +108,11 @@ class ControllerSpec extends AnyWordSpec{
         }
         controller5.add(observer)
 
-
-        "def HelpMenue" in {
-
+        "print the helpMenue" in {
             controller5.helpMenu
-
-            val testHelpMsg =
-                """******************************************************************************
-                  |* This is Minesweeper HELP - MENU                                            *
-                  |* Enter your move (<action><x><y>, eg. o0002, q to quit, h for help):        *
-                  |*                                                                            *
-                  |* Possible moves: o0003 ----> opens cell on coordinates x=0, y=3             *
-                  |*                 f0202 ----> flags cell on coordinates x=2, y=2             *
-                  |*                 u0202 ----> removes flag at cell on coordinates x=2, y=2   *
-                  |*                 z   ----> undo Move                                        *
-                  |*                 y   ----> redo Move                                        *
-                  |*                 r   ----> reaveals field                                   *
-                  |*                 h   ----> help                                             *
-                  |*                 q   ----> quits game                                       *
-                  |*                                                                            *
-                  |* Copyright: Steve Madoerin                                                  *
-                  |*                                                                            *
-                  |******************************************************************************""".stripMargin('|')
-            val consoleOutput = new ByteArrayOutputStream()
-            Console.withOut(consoleOutput){
-                game.helpMessage
-            }
-            assert(consoleOutput.toString.trim == testHelpMsg.trim)
         }
-    } */
+
+    }
 
     "cheat" should{
         val game4 = Game(3, 3, 0, "Playing")
@@ -421,7 +392,7 @@ class ControllerSpec extends AnyWordSpec{
         }
 
     }
-    
+
     "def controllerSaveGame" should{
 
         val controller22 = new Controller()
@@ -437,11 +408,8 @@ class ControllerSpec extends AnyWordSpec{
         }
     }
 
-    // refactore saveScoreAndPlayerName
-
-/*     "def saveScoreAndPlayerName" should{
-        val game41 = new Game(3, 2, 0, "Playing")
-        val emptyField = new Field(3, Symbols.Empty)
+    "def saveScoreAndPlayerName" should{
+        val game41 = new Game( 10, 9, 0, "Playing")
 
         val controller24 = new Controller(using game41)
         val observer = new Observer {
@@ -456,7 +424,7 @@ class ControllerSpec extends AnyWordSpec{
             val score = 10
             controller24.saveScoreAndPlayerName("playerName", score, filePathHighScore)
         }
-    } */
+    }
 
     // below refactor:
 
