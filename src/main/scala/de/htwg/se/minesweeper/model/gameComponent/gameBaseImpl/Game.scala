@@ -86,8 +86,7 @@ case class Game (bombs : Int, side: Int, time: Int, board : String) extends IGam
             case _ => field 
         }
     }
-
-
+    // currying
     def calcX(symbols:Symbols)(visibleMatrix: Matrix[Symbols]): Int = {
         val sizze = visibleMatrix.size -1
         val multiIndex = 0 to sizze

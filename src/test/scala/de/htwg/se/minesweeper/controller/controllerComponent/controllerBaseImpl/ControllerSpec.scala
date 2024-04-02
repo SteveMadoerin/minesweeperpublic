@@ -1,4 +1,4 @@
-/* package de.htwg.se.minesweeper.controller.controllerComponent.controllerBaseImpl
+package de.htwg.se.minesweeper.controller.controllerComponent.controllerBaseImpl
 
 
 import org.scalatest.matchers.should.Matchers._
@@ -34,6 +34,7 @@ class ControllerSpec extends AnyWordSpec{
             controller1.subscribers should be (empty)
         }
     }
+
     
     "performing a first move" should {
         var game2 = Default.prepareGame(10, 9, 0)
@@ -56,7 +57,7 @@ class ControllerSpec extends AnyWordSpec{
             game2.board should be ("Playing")
         }
 
-    }   
+    }
 
     "flagging a field" should {
         var game = Default.prepareGame(10, 9, 0)
@@ -97,7 +98,9 @@ class ControllerSpec extends AnyWordSpec{
 
     }
 
-    "def helpMenue" should {
+    // TODO: refactor helMenue test
+
+/*     "def helpMenue" should {
         var game = Default.prepareGame(10, 9, 0)
         val emptyField = Default.createField(game)
 
@@ -138,7 +141,7 @@ class ControllerSpec extends AnyWordSpec{
             }
             assert(consoleOutput.toString.trim == testHelpMsg.trim)
         }
-    }
+    } */
 
     "cheat" should{
         val game4 = Game(3, 3, 0, "Playing")
@@ -256,7 +259,6 @@ class ControllerSpec extends AnyWordSpec{
     "def gameOver" should {
         val game27 = new Game(3, 3, 0, "Playing")	
         val emptyField = new Field(3, Symbols.Empty)
-        //game27.setField()
 
         val controller10 = new Controller(using game27)
         val observer = new Observer {
@@ -350,7 +352,7 @@ class ControllerSpec extends AnyWordSpec{
     }
 
 
-    "def showVisibleCell" should {
+    /*"def showVisibleCell" should {
         val game34: IGame = Default.prepareGame(10, 9, 0)
         val startField = Default.createField(game34)
 
@@ -454,9 +456,11 @@ class ControllerSpec extends AnyWordSpec{
             val score = 10
             controller24.saveScoreAndPlayerName("playerName", score, filePathHighScore)
         }
-    }
+    } */
 
-    "def loadPlayerScores" should{
+    // below refactor:
+
+/*     "def loadPlayerScores" should{
         val game42 = new Game(3, 2, 0, "Playing")
         val emptyField = new Field(3, Symbols.Empty)
 
@@ -473,9 +477,9 @@ class ControllerSpec extends AnyWordSpec{
             val filePathHighScore = Default.filePathHighScore
             controller25.loadPlayerScores(filePathHighScore)
         }
-    }
+    } */
 
-    "def Controller.loadGame" should{
+/*     "def Controller.loadGame" should{
         val game43 = new Game(3, 2, 0, "Playing")
         val emptyField = new Field(3, Symbols.Empty)
 
@@ -491,6 +495,6 @@ class ControllerSpec extends AnyWordSpec{
         "make and publish a move" in {
             controller26.loadGame
         }
-    }
+    } */
 
-} */
+}
