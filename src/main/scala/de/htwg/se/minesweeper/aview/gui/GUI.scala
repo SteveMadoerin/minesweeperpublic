@@ -51,7 +51,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
         timerStarted = true
         timer.schedule(task, 1000L, 1000L)
     }
-
+    
     def stopTimer(): Unit = {
         
         if (task != null) {
