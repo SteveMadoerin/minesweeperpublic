@@ -61,7 +61,7 @@ case class Game (bombs : Int, side: Int, time: Int, board : String) extends IGam
         }
         val newVisibleMatrix = newReplacedbombHidMatrix.openNew(x, y, newReplacedbombHidMatrix)
         newVisibleMatrix
-
+    
     def replaceBomb(x: Int, y: Int, field: IField): IField = {
         val size = field.matrix.size
         val indices = 0 until size
@@ -169,9 +169,8 @@ case class Game (bombs : Int, side: Int, time: Int, board : String) extends IGam
 
         placeMines(matrix, 0)
     }
-
-
-    def checkExit(status: String) = if status== "Lost" || status == "Won" then true else false
+    
+    def checkExit(status: String) = if status == "Lost" || status == "Won" then true else false
 
 end Game
 
