@@ -1,8 +1,8 @@
 package de.htwg.se.minesweeper.aview.gui
 
 import de.htwg.se.minesweeper.controller.controllerComponent.IController
-import de.htwg.se.minesweeper.util.{Observer, NewEvent, Move}
-import de.htwg.se.minesweeper.model.gameComponent.gameBaseImpl.{Status, GameState}
+import de.htwg.se.minesweeper.util.{Observer, Event, Move}
+
 import de.htwg.se.minesweeper.Default.{given}
 import de.htwg.se.minesweeper.Default
 import scala.swing.event.MouseClicked
@@ -25,40 +25,33 @@ import java.io.{File, PrintWriter, FileWriter}
 class GUI(using var controller: IController) extends Frame with Observer:
 
     controller.add(this)
-    private var boardBounds = controller.getFieldSize -1
-    var firstMoveControl = new AtomicBoolean(true)
+    private var boardBounds = controller.field.matrix.size -1
+    private var firstMoveControl = new AtomicBoolean(true)
     private var timerStarted: Boolean = false
-    var timeLoaded: Boolean = false
-    var l = 0
-    var m = 0
-    var r = 0
+    private var timeLoaded: Boolean = false
+    private var digitBar = new DigitDisplay(0, 0, 0)
     var clock = new AtomicInteger(0)
     val timer = new Timer()
-    var task: TimerTask = _
-
+    var task: Option[TimerTask] = None // was null before
+    
     def startTimer(): Unit = {
-        if(task != null){
-            task.cancel()
-        }
-        task = new TimerTask {
-            def run: Unit = {
+        task.foreach(_.cancel())
+        task = Some(new TimerTask {
+            def run(): Unit = {
                 clock.incrementAndGet()
                 setTime
                 contents = updateContents
                 repaint()
             }
-        }
+        })
         timerStarted = true
-        timer.schedule(task, 1000L, 1000L)
+        timer.schedule(task.get, 1000L, 1000L)
     }
 
     def stopTimer(): Unit = {
-        
-        if (task != null) {
-            task.cancel()
-            task = null // Indicate task is no longer scheduled
-            timerStarted = false
-        }
+        task.foreach(_.cancel())
+        task = None // Indicate task is no longer scheduled -> was null before
+        timerStarted = false
     }
 
     def cells(first: Boolean) = {
@@ -69,14 +62,14 @@ class GUI(using var controller: IController) extends Frame with Observer:
     
     def statusbar = new BorderPanel{
 
-        val flagCountDisplay = setFlagCountDisplay
+        val flagCountDisplay = buildFlagCountDisplay
         add(new BoxPanel(Orientation.NoOrientation){
             contents ++= flagCountDisplay.productIterator.map(digit => new DigitLabel(digit.asInstanceOf[ImageIcon]))
         }, BorderPanel.Position.West)
 
-        add(new SmileLabel(s"${controller.getSpielbrettState}"), BorderPanel.Position.Center)
+        add(new SmileLabel(s"${controller.game.board}"), BorderPanel.Position.Center)
         
-        val timerDigits = Seq(l, m, r).map(getDigits)
+        val timerDigits = Seq(digitBar.leftDigit, digitBar.middleDigit, digitBar.rightDigit).map(showDigits)
         add(new BoxPanel(Orientation.NoOrientation){
             contents ++= timerDigits.map(new DigitLabel(_))
         }, BorderPanel.Position.East)
@@ -119,6 +112,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
     }
 
     def updateContents = {
+        
         val firstCheck = firstMoveControl.get()
         val temp = new BorderPanel{
             add(statusbar, BorderPanel.Position.North)
@@ -129,13 +123,13 @@ class GUI(using var controller: IController) extends Frame with Observer:
 
     }
 
-    override def update(e: NewEvent): Boolean = {
+    override def update(e: Event): Boolean = {
         e match {
 
-            case NewEvent.NewGame =>
+            case Event.NewGame =>
                 firstMoveControl.set(true)
-                boardBounds = controller.getFieldSize -1
-                if(r>0){
+                boardBounds = controller.field.matrix.size -1
+                if(digitBar.rightDigit>0){
                     stopTimer()
                     resetTimer()
                 }
@@ -144,7 +138,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
                 repaint()
                 true
             
-            case NewEvent.Start =>
+            case Event.Start =>
 
                 if(!timerStarted){
                     startTimer()
@@ -154,39 +148,39 @@ class GUI(using var controller: IController) extends Frame with Observer:
                 }
                 true
             
-            case NewEvent.Next =>
+            case Event.Next =>
                 
                 if(!timerStarted){
-                    restartTimer(new AtomicInteger(controller.getControllerGame.getTime))
+                    restartTimer(new AtomicInteger(controller.game.time))
                 } else{
                     contents = updateContents
                     repaint()
                 }
                 true
             
-            case NewEvent.GameOver =>
+            case Event.GameOver =>
 
                 contents = updateContents
                 repaint()
                 stopTimer()
 
                 val saveScore: Int = calculateScore
-                val text = s"Game is ${controller.getSpielbrettState} and your Score is ${calculateScore}"
+                val text = s"Game is ${controller.game.board} and your Score is ${calculateScore}"
                 
                 resetTimer()
-                showMessage(null, text, "GameOver", Message.Info)
+                showMessage(None.orNull, text, "GameOver", Message.Info) // was null before
 
                 saveScoreNew(saveScore)
                 loadScoreNew
                 true
             
-            case NewEvent.Cheat =>
+            case Event.Cheat =>
 
-                val text = s"${controller.getControllerField.gameOverField}"
-                showMessage(null, text, "Cheat Menu", Message.Plain)
+                val text = s"${controller.field.gameOverField}"
+                showMessage(None.orNull, text, "Cheat Menu", Message.Plain) // was null before
                 false
             
-            case NewEvent.Help =>
+            case Event.Help =>
                 val text = 
                     """This is Minesweeper Help - Menu
                     |                                                                                                    
@@ -200,38 +194,38 @@ class GUI(using var controller: IController) extends Frame with Observer:
                     |                                                   
                     |""".stripMargin
     
-                showMessage(null, text, "Help Menu", Message.Info)
+                showMessage(None.orNull, text, "Help Menu", Message.Info) // was null before
                 false
             
-            case NewEvent.Input =>
+            case Event.Input =>
 
-                val x = getGraphicalInput
+                val x = showGraphicalInput
                 controller.newGameField(x)
                 true
             
-            case NewEvent.Load =>
+            case Event.Load =>
 
-                setLoadedTimer(new AtomicInteger(controller.getControllerGame.getTime))
+                setLoadedTimer(new AtomicInteger(controller.game.time))
                 timeLoaded = true
-                boardBounds = controller.getFieldSize -1
+                boardBounds = controller.field.matrix.size -1
                 contents = updateContents
                 repaint()
                 true
             
-            case NewEvent.Save =>
+            case Event.Save =>
                 
-                restartTimer(new AtomicInteger(controller.getControllerGame.getTime))
+                restartTimer(new AtomicInteger(controller.game.time))
                 true
             
-            case NewEvent.SaveTime =>
+            case Event.SaveTime =>
 
                 pauseTimer()
-                controller.getControllerGame.setTime(clock.get())
+                controller.saveTime(clock.get())
                 contents = updateContents
                 repaint()
                 true
             
-            case NewEvent.Exit => false
+            case Event.Exit => false
         }
     }
 
@@ -244,37 +238,37 @@ class GUI(using var controller: IController) extends Frame with Observer:
         val imagePath = imagePaths.getOrElse(kind, "src/main/resources/0.png")
         val icon: ImageIcon = new ImageIcon(imagePath)
         val image2: Image = icon.getImage()
-        val result = new ImageIcon(getScaledImage(image2, 40, 40))
+        val result = new ImageIcon(showScaledImage(image2, 40, 40))
         result
     }
 
-    def getScaledImage(srcImg: Image, w: Int, h: Int): Image = {
+    def showScaledImage(srcImg: Image, w: Int, h: Int): Image = {
         val resizedImg = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB)
         val g2: Graphics2D = resizedImg.createGraphics()
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
-        g2.drawImage(srcImg, 0, 0, w, h, null)
+        g2.drawImage(srcImg, 0, 0, w, h, None.orNull) // was null before
         g2.dispose()
         resizedImg
     }
 
-    def getDigits(kind: Int): ImageIcon = {
+    def showDigits(kind: Int): ImageIcon = {
         val imagePaths = (0 to 9).map(i => i -> s"src/main/resources/time$i.jpeg").toMap
         val imagePath = imagePaths.getOrElse(kind, "src/main/resources/time-.jpeg")
         new ImageIcon(imagePath)
     }
 
-    def getSmiley(kind: String): ImageIcon =
+    def showSmiley(kind: String): ImageIcon =
         val imagePath = s"src/main/resources/face$kind.jpeg"
         val icon: ImageIcon = new ImageIcon(imagePath)
         icon
     
 
-    def getGraphicalInput: Option[String] = {
-        showInput(null, "Choose Difficulty", "NewGame", Message.Info, Swing.EmptyIcon, List("SuperEasy","Easy", "Medium", "Hard"), "Easy")
+    def showGraphicalInput: Option[String] = {
+        showInput(None.orNull, "Choose Difficulty", "NewGame", Message.Info, Swing.EmptyIcon, List("SuperEasy","Easy", "Medium", "Hard"), "Easy") // was null before
     }
     
     def saveScoreNew(saveScore: Int): Unit = {
-        val playerName =  showInput(null, "Enter your Name to save your score!", "Save Score", Message.Info, Swing.EmptyIcon, Nil, "Sly").getOrElse("Default")
+        val playerName =  showInput(None.orNull, "Enter your Name to save your score!", "Save Score", Message.Info, Swing.EmptyIcon, Nil, "Sly").getOrElse("Default") // was null before
         val filePath = Default.filePathHighScore
         controller.saveScoreAndPlayerName(playerName, saveScore, Default.filePathHighScore)
     }
@@ -288,20 +282,18 @@ class GUI(using var controller: IController) extends Frame with Observer:
             s"${index + 1}. $name: $score"
         }.mkString("\n")
 
-        showMessage(null, message, "Top 10 High Scores", Message.Info)
+        showMessage(None.orNull, message, "Top 10 High Scores", Message.Info) // was null before
     }
     
     class CellPanel(x: Int, y: Int, bounds: Int, first: Boolean) extends GridPanel(x,y) {
         (for(
             x <- 0 to bounds;
             y <- 0 to bounds
-            ) yield(x,y, controller.getVisible(x,y))).foreach(t => contents += new CellButton(t._1, t._2, t._3, first))
+            ) yield(x,y, controller.showVisibleCell(x,y))).foreach(t => contents += new CellButton(t._1, t._2, t._3, first))
     }
     
     def setTime = synchronized {
-        l = clock.get()/100
-        m = (clock.get()%100)/10
-        r = clock.get()%10
+        digitBar = DigitDisplay(clock.get()/100, (clock.get()%100)/10, clock.get()%10)
     }
 
     def restartTimer(loadedTime: AtomicInteger) ={
@@ -323,8 +315,8 @@ class GUI(using var controller: IController) extends Frame with Observer:
     }
 
     def calculateScore: Int =
-        val score = ((controller.getFieldSize * controller.getFieldSize)) * 10 - (l*100+m*10+r)
-        if controller.getSpielbrettState == Status.Won then score else 0
+        val score = ((controller.field.matrix.size * controller.field.matrix.size)) * 10 - (digitBar.leftDigit*100+digitBar.middleDigit*10+digitBar.rightDigit)
+        if controller.game.board == "Won" then score else 0
     
     def resetTimer() = {
         clock.set(0)
@@ -332,9 +324,9 @@ class GUI(using var controller: IController) extends Frame with Observer:
         timerStarted = false
     }
 
-    def calcFlagCount: Int = controller.getControllerGame.calcMineAndFlag(controller.getControllerField.getVisibleMatrix)
+    def calcFlagCount: Int = controller.game.calcMineAndFlag(controller.field.matrix)
 
-    def setFlagCountDisplay: (ImageIcon, ImageIcon, ImageIcon) =
+    def buildFlagCountDisplay: (ImageIcon, ImageIcon, ImageIcon) =
         val leftDigit =  calcFlagCount / 100
         val middleDigit = calcFlagCount / 10
         val rightDigit = calcFlagCount % 10
@@ -344,9 +336,9 @@ class GUI(using var controller: IController) extends Frame with Observer:
                 val corrRight = (calcFlagCount * -1)%10
                 val corrMiddle = (calcFlagCount * -1)/10
                 val corrLeft = -1
-                (getDigits(corrLeft), getDigits(corrMiddle), getDigits(corrRight))
-            } else if (calcFlagCount > 999) {(getDigits(9), getDigits(9), getDigits(9))
-            } else {(getDigits(leftDigit), getDigits(middleDigit), getDigits(rightDigit))}
+                (showDigits(corrLeft), showDigits(corrMiddle), showDigits(corrRight))
+            } else if (calcFlagCount > 999) {(showDigits(9), showDigits(9), showDigits(9))
+            } else {(showDigits(leftDigit), showDigits(middleDigit), showDigits(rightDigit))}
         
         (resLeft, resMiddle, resRight)
     
@@ -358,12 +350,12 @@ class GUI(using var controller: IController) extends Frame with Observer:
         maximumSize_=(new Dimension(40,40))
         listenTo(mouse.clicks)
         reactions += {
-            case e: MouseClicked if (controller.getSpielbrettState == Status.Won || controller.getSpielbrettState == Status.Lost) =>
+            case e: MouseClicked if (controller.game.board == "Won" || controller.game.board == "Lost") =>
             
             case e: MouseClicked if e.peer.getButton == MouseEvent.BUTTON3 => 
-                if (controller.get(x,y) == "~"){
+                if (controller.showVisibleCell(x,y) == "~"){
                     controller.makeAndPublish(controller.put, Move("flag", y, x))
-                } else if (controller.get(x,y) == "F"){
+                } else if (controller.showVisibleCell(x,y) == "F"){
                     controller.makeAndPublish(controller.put, Move("unflag", y, x))
                 } else {
                     println(">> You can't flag an open field")
@@ -373,11 +365,11 @@ class GUI(using var controller: IController) extends Frame with Observer:
             case e: MouseClicked if e.peer.getButton == MouseEvent.BUTTON1 => 
                 synchronized{
                     if (first) {startTimer()}
-                    controller.makeAndPublish(controller.doMove, first, Move("open", y, x), controller.getControllerGame)
+                    controller.makeAndPublish(controller.doMove, first, Move("open", y, x), controller.game)
                     if (first) {
-                        controller.checkGameOver  
+                        controller.checkGameOver(controller.game.board)  // check this
                     } else {
-                        if(controller.checkGameOver){controller.gameOver}
+                        if(controller.checkGameOver(controller.game.board)){controller.gameOver}
                     }
                 }
         }
@@ -385,10 +377,14 @@ class GUI(using var controller: IController) extends Frame with Observer:
 
     class SmileLabel(kind: String) extends Label():
         icon = kind match {
-            case "Playing" => getSmiley("smile")
-            case "Lost" => getSmiley("dead")
-            case "Won" => getSmiley("win") 
+            case "Playing" => showSmiley("smile")
+            case "Lost" => showSmiley("dead")
+            case "Won" => showSmiley("win") 
         }
 
     class DigitLabel(newIcon: ImageIcon) extends Label():
         icon = newIcon
+    
+    case class DigitDisplay(leftDigit: Int, middleDigit: Int, rightDigit: Int)
+
+end GUI

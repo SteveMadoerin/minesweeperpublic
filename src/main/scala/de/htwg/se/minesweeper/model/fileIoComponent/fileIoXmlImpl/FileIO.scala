@@ -1,7 +1,7 @@
 package de.htwg.se.minesweeper.model.fileIoComponent.fileIoXmlImpl
 
 import de.htwg.se.minesweeper.model.fileIoComponent.IFileIO
-import de.htwg.se.minesweeper.model.gameComponent.{IGame, IField, IMatrix}
+import de.htwg.se.minesweeper.model.gameComponent.{IGame, IField}
 import de.htwg.se.minesweeper.model.gameComponent.gameBaseImpl._
 import de.htwg.se.minesweeper.Default.{given}
 import de.htwg.se.minesweeper.Default
@@ -11,44 +11,23 @@ import java.io._
 
 class FileIO extends IFileIO {
 
-    def stateExtractor(state: String): Status = {
-        state match {
-            case "Playing" => Status.Playing
-            case "Won" => Status.Won
-            case "Lost" => Status.Lost
-        }
-    }
-
-    def initGame(using game: IGame) = game
-
     override def loadGame: Option[IGame] = {
-
-        var gameOption: Option[IGame] = None
         val file = scala.xml.XML.loadFile("C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\game.xml")
-        val status = stateExtractor((file \\ "game" \@ "status"))
+        val status = (file \\ "game" \@ "status")
         val bombs = (file \\ "bombs").text.toInt
         val side = (file \\ "side").text.toInt
         val time = (file \\ "time").text.toInt
 
-        var game = initGame
-
-        game.setTime(time)
-        game.setBombs(bombs)
-        game.setSide(side)
-        gameOption = Some(game)
-        
-        gameOption match {
-            case Some(game) => gameOption = Some(game)
-            case None =>
-        }
+        val game = Default.prepareGame(bombs, side, time)
+        val gameOption: Option[IGame] = Some(game)
         gameOption
     }
 
     def gameToXml(game: IGame) = {
-        <game status ={ game.getStatus.toString }>
-            <bombs>{ game.getBombs }</bombs>
-            <side>{ game.getSide }</side>
-            <time>{ game.getTime }</time>
+        <game status ={ game.board }>
+            <bombs>{ game.bombs}</bombs>
+            <side>{ game.side }</side>
+            <time>{ game.time }</time>
         </game>
     }
 
@@ -73,86 +52,60 @@ class FileIO extends IFileIO {
             case _ => Symbols.E
         }
     }
-
-    override def loadField2: Option[IField] = {
-        var fieldOption: Option[IField] = None
-        var matrixOption: Option[IMatrix[Symbols]] = None
-        var hiddenOption: Option[IMatrix[Symbols]] = None
-
+    
+    override def loadField: Option[IField] = {
         val file = scala.xml.XML.loadFile("C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\field.xml")
         val size = (file \\ "field" \@ "size").toInt
 
-        size match{
-            case _ => 
-                matrixOption = Some(Default.scalableMatrix(size, Symbols.Covered))
-                hiddenOption = Some(Default.scalableMatrix(size, Symbols.Covered))
-                fieldOption = Some(Default.scalableField(size, Symbols.Covered)) 
-        }
+        val matrixOption = Some(Default.scalableMatrix(size, Symbols.Covered))
+        val hiddenOption = Some(Default.scalableMatrix(size, Symbols.Covered))
+        val fieldOption = Some(Default.scalableField(size, Symbols.Covered))
 
         val cellNodesVisible: NodeSeq = (file \\ "field" \\ "matrix" \\ "cell")
-        var matrix = matrixOption match{
-            case Some(m) => m
-            case None => println("Matrix is not valid"); Default.scalableMatrix(size, Symbols.E)
-        }
-   
-        var _matrix = matrix
-        for(cell <- cellNodesVisible){
+        val matrix = cellNodesVisible.foldLeft(matrixOption.get) { (m, cell) =>
             val row: Int = (cell \ "@row").text.toInt
             val col: Int = (cell \ "@col").text.toInt
-            val symbols: String = cell.text.trim
-            _matrix = _matrix.replaceCell(row, col, stringToSymbols(symbols))
+            val symbol = stringToSymbols(cell.text.trim)
+            m.replaceCell(row, col, symbol)
         }
 
-        val cellNodesHidden :NodeSeq = (file \\ "field" \\ "hidden" \\ "cell")
-        var hidden = matrixOption match{
-            case Some(m) => m
-            case None => println("hidden is not Valid"); Default.scalableMatrix(size, Symbols.E)
-        }
-
-        var _hidden = hidden
-        for(cell <- cellNodesHidden){
-            val row: Int = (cell \"@row").text.toInt
+        val cellNodesHidden: NodeSeq = (file \\ "field" \\ "hidden" \\ "cell")
+        val hidden = cellNodesHidden.foldLeft(hiddenOption.get) { (h, cell) =>
+            val row: Int = (cell \ "@row").text.toInt
             val col: Int = (cell \ "@col").text.toInt
-            val symbols: String = cell.text.trim
-            _hidden = _hidden.replaceCell(row, col, stringToSymbols(symbols))
-        }
-        
-        fieldOption match{
-            case Some(f) =>{
-                var field = Default.mergeMatrixToField(_matrix, _hidden)
-                fieldOption = Some(field)
-            }
-            case None => println("field is not Valid");
+            val symbol = stringToSymbols(cell.text.trim)
+            h.replaceCell(row, col, symbol)
         }
 
-        fieldOption
-
+        fieldOption.map { f =>
+            Default.mergeMatrixToField(matrix, hidden)
+        }
     }
 
     def fieldToXml(field: IField) = {
 
-        <field size = {field.getFieldSize.toString}>
+        <field size = {field.matrix.size.toString}>
             <matrix>
             {
                 for {
-                    row <- 0 until field.getFieldSize
-                    col <- 0 until field.getFieldSize
+                    row <- 0 until field.matrix.size
+                    col <- 0 until field.matrix.size
                 } yield cellToXmlVisible(field, row, col)
             }
             </matrix>
             <hidden>
             {
                 for {
-                    row <- 0 until field.getFieldSize
-                    col <- 0 until field.getFieldSize
+                    row <- 0 until field.matrix.size
+                    col <- 0 until field.matrix.size
                 } yield cellToXmlHidden(field, row, col)
             }
             </hidden>
         </field>
     }
 
-    def cellToXmlVisible(field: IField, row: Int, col: Int) = {<cell row={ row.toString } col={ col.toString }>{ field.getVisible(row, col).toString }</cell>}
-    def cellToXmlHidden(field: IField, row: Int, col: Int) = {<cell row={ row.toString } col={ col.toString }>{ field.getInvisible(row, col).toString }</cell>}
+    def cellToXmlVisible(field: IField, row: Int, col: Int) = {<cell row={ row.toString } col={ col.toString }>{ field.showVisibleCell(row, col).toString }</cell>}
+    def cellToXmlHidden(field: IField, row: Int, col: Int) = {<cell row={ row.toString } col={ col.toString }>{ field.showInvisibleCell(row, col).toString }</cell>}
     
     def saveField(field: IField): Unit = saveString(field)
 
@@ -161,8 +114,8 @@ class FileIO extends IFileIO {
 
         val pw = new PrintWriter(new File("C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\field.xml"))
         val prettyPrinter = new PrettyPrinter(120, 4)
-        val hiddenField = new Field(field.getInvisibleMatrix)
-        val visibleField = new Field(field.getVisibleMatrix)
+        val hiddenField = new Field(field.hidden)
+        val visibleField = new Field(field.matrix)
         val xml = prettyPrinter.format(fieldToXml(field))
         pw.write(xml)
         pw.close
@@ -207,7 +160,7 @@ class FileIO extends IFileIO {
         try {
             writer.write(printer.format(updatedRootElem))
         } finally {
-            writer.close() // Ensure the writer is closed to flush the output
+            writer.close()
         }
     }
     

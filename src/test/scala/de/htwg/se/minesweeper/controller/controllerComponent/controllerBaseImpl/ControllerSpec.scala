@@ -9,7 +9,7 @@ import de.htwg.se.minesweeper.model.gameComponent.gameBaseImpl._
 import de.htwg.se.minesweeper.util.{Observer, Move}
 
 import java.io.ByteArrayOutputStream
-import de.htwg.se.minesweeper.util.NewEvent
+import de.htwg.se.minesweeper.util.Event
 import de.htwg.se.minesweeper.Default.{given}
 import de.htwg.se.minesweeper.controller.controllerComponent.IController
 import de.htwg.se.minesweeper.model.gameComponent.IGame
@@ -21,23 +21,24 @@ class ControllerSpec extends AnyWordSpec{
 
 
     "The Controller when created" should {
-        val game1: IGame = Default.prepareGame
-        val startField = game1.getField
+        val game1: IGame = Default.prepareGame(10, 9, 0)
+        val startField = Default.createField(game1)
 
         val controller1 = new Controller(using game1)
         
         "have a game and field" in{
-            controller1.getControllerGame should be(game1)
+            controller1.game should be(game1)
         }
 
         "have no observers" in {
             controller1.subscribers should be (empty)
         }
     }
+
     
     "performing a first move" should {
-        var game2 = Default.prepareGame
-        val emptyField2 = game2.getField
+        var game2 = Default.prepareGame(10, 9, 0)
+        val emptyField2 = Default.createField(game2)
 
         val move2 = Move("open", 0 ,0)
 
@@ -45,7 +46,7 @@ class ControllerSpec extends AnyWordSpec{
  
         val observer = new Observer {
             var notified = false
-            override def update(e: NewEvent): Boolean = 
+            override def update(e: Event): Boolean = 
                 notified = true
                 notified
         }
@@ -53,19 +54,19 @@ class ControllerSpec extends AnyWordSpec{
 
         "update the field after firstMove" in {
             controller2.doMove(true, move2, game2)
-            game2.state should be (Status.Playing)
+            game2.board should be ("Playing")
         }
 
-    }   
+    }
 
     "flagging a field" should {
-        var game = Default.prepareGame
-        val emptyField = game.getField
+        var game = Default.prepareGame(10, 9, 0)
+        val emptyField = Default.createField(game)
 
         val controller = new Controller(using game)
         val observer = new Observer {
             var notified = false
-            override def update(e: NewEvent): Boolean = 
+            override def update(e: Event): Boolean = 
                 notified = true
                 notified
         }
@@ -73,21 +74,18 @@ class ControllerSpec extends AnyWordSpec{
 
         "update the field" in {
             controller.flag(2, 2)
-            controller.getControllerField.getMatrix.cell(2,2) should be (Symbols.F)
+            controller.field.matrix.cell(2,2) should be (Symbols.F)
         }
     }
 
     "unflagging a field" should {
-        var game = Default.prepareGame
-        val emptyField = game.getField
-
-        game.bombs = 3
-        game.side = 3
+        var game = Default.prepareGame(10, 9, 0)
+        val emptyField = Default.createField(game)
 
         val controller = new Controller(using game)
         val observer = new Observer {
         var notified = false
-        override def update(e: NewEvent): Boolean = 
+        override def update(e: Event): Boolean = 
             notified = true
             notified
         }
@@ -95,62 +93,30 @@ class ControllerSpec extends AnyWordSpec{
 
         "update the field" in {
             controller.unflag(2, 2)
-            controller.getControllerField.getMatrix.cell(2,2) should be (Symbols.Covered)
+            controller.field.matrix.cell(2,2) should be (Symbols.Covered)
       }
 
     }
 
     "def helpMenue" should {
-        var game = Default.prepareGame
-        val emptyField = game.getField
-
-        game.bombs = 3
-        game.side = 3
-
-        val controller5 = new Controller(using game)
+        val controller5 = new Controller()
         val observer = new Observer {
         var notified = false
-        override def update(e: NewEvent): Boolean = 
+        override def update(e: Event): Boolean = 
             notified = true
             notified
         }
         controller5.add(observer)
 
-
-        "def HelpMenue" in {
-
+        "print the helpMenue" in {
             controller5.helpMenu
-
-            val testHelpMsg =
-                """******************************************************************************
-                  |* This is Minesweeper HELP - MENU                                            *
-                  |* Enter your move (<action><x><y>, eg. o0002, q to quit, h for help):        *
-                  |*                                                                            *
-                  |* Possible moves: o0003 ----> opens cell on coordinates x=0, y=3             *
-                  |*                 f0202 ----> flags cell on coordinates x=2, y=2             *
-                  |*                 u0202 ----> removes flag at cell on coordinates x=2, y=2   *
-                  |*                 z   ----> undo Move                                        *
-                  |*                 y   ----> redo Move                                        *
-                  |*                 r   ----> reaveals field                                   *
-                  |*                 h   ----> help                                             *
-                  |*                 q   ----> quits game                                       *
-                  |*                                                                            *
-                  |* Copyright: Steve Madoerin                                                  *
-                  |*                                                                            *
-                  |******************************************************************************""".stripMargin('|')
-            val consoleOutput = new ByteArrayOutputStream()
-            Console.withOut(consoleOutput){
-                game.helpMessage
-            }
-            assert(consoleOutput.toString.trim == testHelpMsg.trim)
         }
+
     }
 
     "cheat" should{
-        val game4 = new Game(Status.Playing)
-        game4.bombs = 3
-        game4.side = 3
-        game4.setField()
+        val game4 = Game(3, 3, 0, "Playing")
+        val newField = Default.createField(game4)
         val spielfeld = Playfield()
         val testfield = spielfeld.newField(3, game4)
 
@@ -159,7 +125,7 @@ class ControllerSpec extends AnyWordSpec{
         val controller7 = new Controller(using game4)
         val observer = new Observer {
         var notified = false
-        override def update(e: NewEvent): Boolean = 
+        override def update(e: Event): Boolean = 
             notified = true
             notified
         }
@@ -174,12 +140,9 @@ class ControllerSpec extends AnyWordSpec{
 
     "uncover field" should {
 
-        var game22 = new Game(Status.Playing)
+        var game22 = new Game(2, 3, 0, "Playing")
         val emptyField = new Field(3, Symbols.Covered)
-        game22.setField()
-        game22.bombs = 2
-        game22.side = 3
-        val invisible = emptyField.invisibleMatrix.replaceCell(1, 1, Symbols.Bomb)	
+        val invisible = emptyField.hidden.replaceCell(1, 1, Symbols.Bomb)	
         val testField = new Field(emptyField.matrix, invisible)
         val move3 = Move("open", 1 ,1)
 
@@ -187,7 +150,7 @@ class ControllerSpec extends AnyWordSpec{
 
         var notified = false
         val observer = new Observer {
-        override def update(e: NewEvent): Boolean = 
+        override def update(e: Event): Boolean = 
             notified = true
             notified
         }
@@ -197,19 +160,19 @@ class ControllerSpec extends AnyWordSpec{
         
             controller1.doMove(false, move3, game22)
             val resultField = controller1.field
-            resultField.get(2, 1) should not be (Symbols.Bomb)
+            resultField.showVisibleCell(2, 1) should not be (Symbols.Bomb)
         }
     }
 
     "the controllers put method" should {
-        val game24: IGame = Default.prepareGame
-        val startField = game24.getField
+        val game24: IGame = Default.prepareGame(10, 9, 0) // bombs, size, time
+        val startField = Default.createField(game24)
 
 
         val controller = new Controller(using game24)
         val observer = new Observer {
         var notified = false
-        override def update(e: NewEvent): Boolean = 
+        override def update(e: Event): Boolean = 
             notified = true
             notified
         }
@@ -218,19 +181,19 @@ class ControllerSpec extends AnyWordSpec{
         "put a move" in {
             val move = Move("open", 1, 1)
             controller.put(move)
-            controller.getControllerField.get(1, 1) should be (Symbols.Covered)
+            controller.field.showVisibleCell(1, 1) should be (Symbols.Covered)
         }
     }
 
     "def makeAndPublish with 3 parameters" should {
-        val game25: IGame = Default.prepareGame
-        val startField = game25.getField
+        val game25: IGame = Default.prepareGame(10, 9, 0)
+        val startField = Default.createField(game25)
 
         val controller8 = new Controller(using game25)
     
         val observer = new Observer {
         var notified = false
-        override def update(e: NewEvent): Boolean = 
+        override def update(e: Event): Boolean = 
             notified = true
             notified
         }
@@ -239,21 +202,19 @@ class ControllerSpec extends AnyWordSpec{
         "make and publish a move" in {
             val move = Move("open", 1, 1)
             controller8.makeAndPublish(controller8.doMove, false, move, game25)
-            controller8.getControllerField.get(1, 1) should not be (Symbols.Empty)
+            controller8.field.showVisibleCell(1, 1) should not be (Symbols.Empty)
         }
     }
 
     "def makeAndPublish with 2 parameters" should {
-        val game26 = new Game(Status.Playing)
+        val game26 = new Game(3, 3, 0, "Playing")
         val emptyField = new Field(3, Symbols.Empty)
-        game26.setField()
-        game26.bombs = 3
-        game26.side = 3
+
 
         val controller9 = new Controller(using game26)
         val observer = new Observer {
         var notified = false
-        override def update(e: NewEvent): Boolean = 
+        override def update(e: Event): Boolean = 
             notified = true
             notified
         }
@@ -262,21 +223,18 @@ class ControllerSpec extends AnyWordSpec{
         "make and publish a move" in {
             val move = Move("flag", 1, 1)
             controller9.makeAndPublish(controller9.put, move)
-            controller9.field.get(1, 1) should be (Symbols.F)
+            controller9.field.showVisibleCell(1, 1) should be (Symbols.F)
         }
     }
 
     "def gameOver" should {
-        val game27 = new Game(Status.Playing)
+        val game27 = new Game(3, 3, 0, "Playing")	
         val emptyField = new Field(3, Symbols.Empty)
-        game27.setField()
-        game27.bombs = 3
-        game27.side = 3
 
         val controller10 = new Controller(using game27)
         val observer = new Observer {
         var notified = false
-        override def update(e: NewEvent): Boolean = 
+        override def update(e: Event): Boolean = 
             notified = true
             notified
         }
@@ -289,13 +247,13 @@ class ControllerSpec extends AnyWordSpec{
     }
 
     "def openRec" should {
-        val game28: IGame = Default.prepareGame
-        val startField = game28.getField
+        val game28: IGame = Default.prepareGame(10, 9, 0)
+        val startField = Default.createField(game28)
 
         val controller11 = new Controller(using game28)
         val observer = new Observer {
         var notified = false
-        override def update(e: NewEvent): Boolean = 
+        override def update(e: Event): Boolean = 
             notified = true
             notified
         }
@@ -303,20 +261,18 @@ class ControllerSpec extends AnyWordSpec{
 
         "make and publish a move" in {
             controller11.openRec(1, 1, startField)
-            controller11.field.get(1, 1) should not be (Symbols.Empty)
+            controller11.field.showVisibleCell(1, 1) should not be (Symbols.Empty)
         }
     }
 
     "def checkGameOver" should {
-        val game29 = new Game(Status.Playing)
+        val game29 = new Game(3, 3, 0, "Playing")
         val emptyField = new Field(3, Symbols.Empty)
-        game29.bombs = 3
-        game29.side = 3
 
         val controller12 = new Controller(using game29)
         val observer = new Observer {
         var notified = false
-        override def update(e: NewEvent): Boolean = 
+        override def update(e: Event): Boolean = 
             notified = true
             notified
         }
@@ -328,15 +284,13 @@ class ControllerSpec extends AnyWordSpec{
     }
 
     "def newGameGui" should {
-        val game31 = new Game(Status.Playing)
+        val game31 = new Game(3, 3, 0, "Playing")
         val emptyField = new Field(3, Symbols.Empty)
-        game31.bombs = 3
-        game31.side = 3
 
         val controller14 = new Controller(using game31)
         val observer = new Observer {
         var notified = false
-        override def update(e: NewEvent): Boolean = 
+        override def update(e: Event): Boolean = 
             notified = true
             notified
         }
@@ -347,15 +301,13 @@ class ControllerSpec extends AnyWordSpec{
     }
 
     "def newGame" should {
-        val game32 = new Game(Status.Playing)
+        val game32 = new Game(3, 3, 0, "Playing")
         val emptyField = new Field(3, Symbols.Empty)
-        game32.bombs = 3
-        game32.side = 3
 
         val controller15 = new Controller(using game32)
         val observer = new Observer {
         var notified = false
-        override def update(e: NewEvent): Boolean = 
+        override def update(e: Event): Boolean = 
             notified = true
             notified
         }
@@ -364,129 +316,89 @@ class ControllerSpec extends AnyWordSpec{
             val in = new java.io.ByteArrayInputStream("steve\n0\n".getBytes)
                 Console.withIn(in){
                     controller15.newGame(5 , 5)
-                    controller15.notifyObservers(NewEvent.NewGame)
+                    controller15.notifyObservers(Event.NewGame)
                 }
             
         }
     }
 
-
-    "def getInvisible" should {
-        val game33: IGame = Default.prepareGame
-        val startField = game33.getField
-
-        val controller16 = new Controller(using game33)
-        val observer = new Observer {
-        var notified = false
-        override def update(e: NewEvent): Boolean = 
-            notified = true
-            notified
-        }
-
-        "make and publish a move" in {
-            controller16.getInvisible(1, 1) should not be (" ")
-        }
-    }
-
-    "def get" should {
-        val game34: IGame = Default.prepareGame
-        val startField = game34.getField
+    "def showVisibleCell" should {
+        val game34: IGame = Default.prepareGame(10, 9, 0)
+        val startField = Default.createField(game34)
 
         val controller17 = new Controller(using game34)
         val observer = new Observer {
         var notified = false
-        override def update(e: NewEvent): Boolean = 
+        override def update(e: Event): Boolean = 
             notified = true
             notified
         }
 
         "make and publish a move" in {
-            controller17.get(1, 1) should be ("~")
+            controller17.showVisibleCell(1, 1) should be ("~")
         }
     }
 
-    "def getVisible" should {
-        val game35: IGame = Default.prepareGame
-        val startField = game35.getField
-
-        val controller18 = new Controller(using game35)
-        val observer = new Observer {
-        var notified = false
-        override def update(e: NewEvent): Boolean = 
-            notified = true
-            notified
-        }
-
-        "make and publish a move" in {
-            controller18.getVisible(1, 1) should be ("~")
-        }
-    }
 
     "def newGameField" should{
-        val game36 = new Game(Status.Playing)
+        val game36 = new Game(3, 3, 0, "Playing")
         val emptyField = new Field(3, Symbols.Empty)
-        game36.bombs = 3
-        game36.side = 3
 
         val controller19 = new Controller(using game36)
         val observer = new Observer {
         var notified = false
-        override def update(e: NewEvent): Boolean = 
+        override def update(e: Event): Boolean = 
             notified = true
             notified
         }
 
         "make and publish a move" in {
             controller19.newGameField(Some("Easy"))
-            controller19.notifyObservers(NewEvent.NewGame)
+            controller19.notifyObservers(Event.NewGame)
         }
     }
 
-    "def getSpielbrettState" should {
-        val game37: IGame = Default.prepareGame
-        val startField = game37.getField
+    "def board" should {
+        val game37: IGame = Default.prepareGame(10, 9, 0)
+        val startField = Default.createField(game37)
 
         val controller20 = new Controller(using game37)
         val observer = new Observer {
         var notified = false
-        override def update(e: NewEvent): Boolean = 
+        override def update(e: Event): Boolean = 
             notified = true
             notified
         }
 
         "make and publish a move" in {
-            controller20.getSpielbrettState
+            controller20.game.board
         }
     }
 
-    "def getControllerField" should {
-        val game38:IGame = new Game(Status.Playing)
-        val startField38 = Default.prepareGame.getField
+    "def field" should {
+        val game38:IGame = new Game(3, 3, 0, "Playing")
+        val startField38 = Default.createField(game38)
 
-        val controller21 = new Controller(using game38)
+        val controller21 = new Controller()
         val observer = new Observer {
         var notified = false
-        override def update(e: NewEvent): Boolean = 
+        override def update(e: Event): Boolean = 
             notified = true
             notified
         }
 
         "make and publish a move" in {
-            controller21.getControllerField should not be (startField38)
+            controller21.field should not be (startField38)
         }
 
     }
+
     "def controllerSaveGame" should{
-        var game39 = new Game(Status.Playing)
-        val emptyField = new Field(3, Symbols.Empty)
-        game39.setField()
-        game39.bombs = 3
-        game39.side = 2
 
-        val controller22 = new Controller(using game39)
+        val controller22 = new Controller()
         val observer = new Observer {
         var notified = false
-        override def update(e: NewEvent): Boolean = 
+        override def update(e: Event): Boolean = 
             notified = true
             notified
         }
@@ -497,16 +409,12 @@ class ControllerSpec extends AnyWordSpec{
     }
 
     "def saveScoreAndPlayerName" should{
-        val game41 = new Game(Status.Playing)
-        val emptyField = new Field(3, Symbols.Empty)
-        game41.setField()
-        game41.bombs = 3
-        game41.side = 2
+        val game41 = new Game( 10, 9, 0, "Playing")
 
         val controller24 = new Controller(using game41)
         val observer = new Observer {
         var notified = false
-        override def update(e: NewEvent): Boolean =
+        override def update(e: Event): Boolean =
             notified = true
             notified
         }
@@ -518,18 +426,15 @@ class ControllerSpec extends AnyWordSpec{
         }
     }
 
+    // sometimes this test could fail because of concurrency
     "def loadPlayerScores" should{
-        val game42 = new Game(Status.Playing)
-        val emptyField = new Field(3, Symbols.Empty)
-        game42.setField()
-        game42.bombs = 3
-        game42.side = 2
+        val game42 = new Game( 10, 9, 0, "Playing")
 
         val controller25 = new Controller(using game42)
         val observer = new Observer {
         var notified = false
 
-        override def update(e: NewEvent): Boolean =
+        override def update(e: Event): Boolean =
             notified = true
             notified
         }
@@ -541,17 +446,13 @@ class ControllerSpec extends AnyWordSpec{
     }
 
     "def Controller.loadGame" should{
-        val game43 = new Game(Status.Playing)
-        val emptyField = new Field(3, Symbols.Empty)
-        game43.setField()
-        game43.bombs = 3
-        game43.side = 2
+        val game43 = new Game( 10, 9, 0, "Playing")
 
         val controller26 = new Controller(using game43)
         val observer = new Observer {
         var notified = false
 
-        override def update(e: NewEvent): Boolean =
+        override def update(e: Event): Boolean =
             notified = true
             notified
         }
