@@ -351,8 +351,7 @@ class ControllerSpec extends AnyWordSpec{
         }
     }
 
-
-    /*"def showVisibleCell" should {
+    "def showVisibleCell" should {
         val game34: IGame = Default.prepareGame(10, 9, 0)
         val startField = Default.createField(game34)
 
@@ -388,7 +387,7 @@ class ControllerSpec extends AnyWordSpec{
         }
     }
 
-    "def getSpielbrettState" should {
+    "def board" should {
         val game37: IGame = Default.prepareGame(10, 9, 0)
         val startField = Default.createField(game37)
 
@@ -405,7 +404,7 @@ class ControllerSpec extends AnyWordSpec{
         }
     }
 
-    "def getControllerField" should {
+    "def field" should {
         val game38:IGame = new Game(3, 3, 0, "Playing")
         val startField38 = Default.createField(game38)
 
@@ -422,7 +421,10 @@ class ControllerSpec extends AnyWordSpec{
         }
 
     }
-    "def controllerSaveGame" should{
+
+    // TODO: refactor controllerSaveGame
+
+/*     "def controllerSaveGame" should{
         var game39 = new Game(3, 2, 0, "Playing")
         val emptyField = new Field(3, Symbols.Empty)
 
@@ -437,9 +439,11 @@ class ControllerSpec extends AnyWordSpec{
         "make and publish a move" in {
             controller22.saveGame
         }
-    }
+    } */
 
-    "def saveScoreAndPlayerName" should{
+    // refactore saveScoreAndPlayerName
+
+/*     "def saveScoreAndPlayerName" should{
         val game41 = new Game(3, 2, 0, "Playing")
         val emptyField = new Field(3, Symbols.Empty)
 
