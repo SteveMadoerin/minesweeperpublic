@@ -53,7 +53,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
         task = None // Indicate task is no longer scheduled -> was null before
         timerStarted = false
     }
-
+    
     def cells(first: Boolean) = {
         val tmpPanel = new CellPanel(boardBounds+1, boardBounds+1, boardBounds, first)
         tmpPanel.border = borderCreator(0, 2, 2, 2)
