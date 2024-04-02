@@ -10,8 +10,8 @@ trait IGame {
     def replaceBomb(x: Int, y: Int, field: IField): IField
    
     def calcFlag(visibleMatrix: Matrix[Symbols]): Int
-    def addCoveredAndFlag(visibleMatrix: Matrix[Symbols]): Int
     def calcMineAndFlag(visibleMatrix: Matrix[Symbols]): Int
+    def calcX(symbols:Symbols)(visibleMatrix: Matrix[Symbols]): Int
     def calcAdjacentMines(row: Int, col: Int, side: Int, invisibleMatrix: Matrix[Symbols]): Int
     def calcWonOrLost(visibleMatrix: Matrix[Symbols], mines: Int): Boolean
 
