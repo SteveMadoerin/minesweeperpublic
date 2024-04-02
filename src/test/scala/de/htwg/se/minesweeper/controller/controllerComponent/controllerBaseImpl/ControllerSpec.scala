@@ -426,11 +426,9 @@ class ControllerSpec extends AnyWordSpec{
         }
     }
 
-    // below refactor:
-
-/*     "def loadPlayerScores" should{
-        val game42 = new Game(3, 2, 0, "Playing")
-        val emptyField = new Field(3, Symbols.Empty)
+    // sometimes this test could fail because of concurrency
+    "def loadPlayerScores" should{
+        val game42 = new Game( 10, 9, 0, "Playing")
 
         val controller25 = new Controller(using game42)
         val observer = new Observer {
@@ -445,11 +443,10 @@ class ControllerSpec extends AnyWordSpec{
             val filePathHighScore = Default.filePathHighScore
             controller25.loadPlayerScores(filePathHighScore)
         }
-    } */
+    }
 
-/*     "def Controller.loadGame" should{
-        val game43 = new Game(3, 2, 0, "Playing")
-        val emptyField = new Field(3, Symbols.Empty)
+    "def Controller.loadGame" should{
+        val game43 = new Game( 10, 9, 0, "Playing")
 
         val controller26 = new Controller(using game43)
         val observer = new Observer {
@@ -463,6 +460,6 @@ class ControllerSpec extends AnyWordSpec{
         "make and publish a move" in {
             controller26.loadGame
         }
-    } */
+    }
 
 }
