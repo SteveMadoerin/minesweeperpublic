@@ -12,25 +12,30 @@ import java.io.PrintStream
 import java.io.ByteArrayOutputStream
 
 
-class TUISpec extends AnyWordSpec{
-/*     "A TUI when initialised" should {
-        val tui1 = new TUI()
+class TUISpec extends AnyWordSpec {
+
+    "A TUI when initialised" should {
+        val controller = new Controller
+        val tui = new TUI(using controller)
         "self register with controller" in{
-            tui1.controller.subscribers should contain(tui1.controller)
+            controller.subscribers should contain(tui)
 
         }
-    } */
-/* 
-    "A TUI with following input" should {
+
+    }
+
+        
+/*     "A TUI with following input" should {
         val tui = new TUI()
         "run only once" in {
-            val in = new java.io.ByteArrayInputStream("no\nt\ntest\n".getBytes)
+            val in = new java.io.ByteArrayInputStream("0\nq\n".getBytes)
             Console.withIn(in){
                 tui.parseInputandPrintLoop(true)
             }
         } 
 
     } */
+
 
     "The TUI update method" should{
         val tui2 = new TUI()
