@@ -3,14 +3,15 @@ package de.htwg.se.minesweeper.model.gameComponent.gameBaseImpl
 import de.htwg.se.minesweeper.model.gameComponent._
 
 class Decider():
-    private var strategy: OpenStrategy = _
-
-    def evaluateStrategy(expression: Boolean, x: Int, y: Int, field: IField, game: IGame): IField = {
+    
+    def evaluateStrategy(expression: Boolean, x: Int, y: Int, field: IField, game: IGame): (IGame, IField) = {
         if (expression) {
-            strategy = new FirstMove
+            val strategy: OpenStrategy = new FirstMove
             strategy.show(x, y, field, game)
         } else {
-            strategy = new NormalMove
+            val strategy: OpenStrategy  = new NormalMove
             strategy.show(x, y, field, game)
         }
     }
+
+end Decider

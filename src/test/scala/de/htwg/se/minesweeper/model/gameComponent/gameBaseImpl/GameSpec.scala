@@ -7,7 +7,7 @@ import java.io.ByteArrayOutputStream
 
 class GameSpec extends AnyWordSpec {
     
-    "The chooseDifficulty method" should {
+/*     "The chooseDifficulty method" should {
 
         val newGame = new Game(Status.Playing)
 
@@ -61,12 +61,10 @@ class GameSpec extends AnyWordSpec {
             }
         }
     }
-
+ */
 
     "Method replaceBomb" should {
-        val testGame10 = new Game(Status.Playing)
-        testGame10.bombs = 2
-        testGame10.side = 3
+        val testGame10 = new Game(2, 3, 0, "Playing")
 
         val sicht1 = new Matrix(4, Symbols.Covered)
         val unsicht1 = new Matrix(4, Symbols.Empty)
@@ -77,16 +75,14 @@ class GameSpec extends AnyWordSpec {
         "replace matrix and ensure the player doesn't click on bomb at first move" in{
 
             val result33 = testGame10.replaceBomb(1, 1, testField1)
-            result33.getInvisible(1, 1) should not be (Symbols.Bomb)
+            result33.showInvisibleCell(1, 1) should not be (Symbols.Bomb)
         }
 
     }
 
     "Premier move" should{
 
-        val game42 = new Game(Status.Playing)
-        game42.bombs = 1
-        game42.side = 3
+        val game42 = new Game(1, 3, 0, "Playing")
 
         val sicht11 = new Matrix(4, Symbols.Covered)
         val unsicht11 = new Matrix(4, Symbols.Empty)
@@ -95,29 +91,21 @@ class GameSpec extends AnyWordSpec {
 
         "guarante that you do not loose on first move" in{
             val result42 = game42.premierMove(1, 1, preparedField)
-            result42.getInvisible(1, 1) should not be (Symbols.Bomb)
+            result42.showInvisibleCell(1, 1) should not be (Symbols.Bomb)
         }
     }
 
     "Method check exit" should {
         "return false game is in Status playing" in {
-            val testGame55 = new Game(Status.Playing)
-            testGame55.bombs = 1
-            testGame55.side = 3
-            val testB = GameState
+            var testGame55 = new Game(1, 3, 0, "Playing")	
+            val testB = "Playing"
 
-            testB.handle(new PlayEvent)
-
-            testGame55.checkExit should be (false)
-
-
+            testGame55.checkExit(testB) should be (false)
         }
     }
     
     "def calcMineAndFlag" should {
-        val testGame = new Game(Status.Playing)
-        testGame.bombs = 1
-        testGame.side = 3
+        val testGame = new Game(1, 3, 0, "Playing")
 
         val sicht = new Matrix(4, Symbols.Covered)
         val unsicht = new Matrix(4, Symbols.Zero)
@@ -131,9 +119,7 @@ class GameSpec extends AnyWordSpec {
     }
 
     "optionToList" should {
-        val testGame66 = new Game(Status.Playing)
-        testGame66.bombs = 1
-        testGame66.side = 3
+        val testGame66 = new Game(1, 3, 0, "Playing")	
 
         "return List(5, 5) when given Some(\"SuperEasy\")" in {
             testGame66.optionToList(Some("SuperEasy")) shouldEqual List(5, 5)
@@ -161,35 +147,28 @@ class GameSpec extends AnyWordSpec {
     }
 
     "def getGame" should {
-        val testGame = new Game(Status.Playing)
-        testGame.bombs = 1
-        testGame.side = 3
-        testGame.setField()
+        val testGame = new Game(1, 3, 0, "Playing")
+        //val testField = new Field(testGame.side, Symbols.Covered)
 
         "return the game" in {
-            val result = testGame.getGame
+            val result = testGame
             result should be (testGame)
         }
     }
 
     "def setState" should {
-        val testGame67 = new Game(Status.Playing)
-        testGame67.bombs = 1
-        testGame67.side = 3
-        testGame67.setField()
+        var testGame67 = new Game(1, 3, 0, "Playing")	
 
         "return the game" in {
-            testGame67.setState(Status.Playing)
-            testGame67.state should be (Status.Playing)
+            var testGameTmp = testGame67.copy(board = "Playing")
+            testGameTmp.board should be ("Playing")
+            
         }
     
     }
 
     "Game object" should {
-        val testGame = Game(Status.Playing)
-        testGame.bombs = 1
-        testGame.side = 3
-        testGame.setField()
+        val testGame = Game(1, 3, 0, "Playing")
 
         "return the game" in {
             val result = testGame

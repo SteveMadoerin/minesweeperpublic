@@ -3,7 +3,7 @@ package de.htwg.se.minesweeper.model.fileIoComponent.fileIoJsonImpl
 import org.scalatest.matchers.should.Matchers._
 import org.scalatest.wordspec.AnyWordSpec
 
-import de.htwg.se.minesweeper.model.gameComponent.gameBaseImpl.{Field, Game, Matrix, Playfield, Status, Symbols}
+import de.htwg.se.minesweeper.model.gameComponent.gameBaseImpl.{Field, Game, Matrix, Playfield, Symbols}
 import de.htwg.se.minesweeper.model.fileIoComponent.fileIoJsonImpl.FileIO
 import de.htwg.se.minesweeper.model.gameComponent.{IGame,IField}
 import de.htwg.se.minesweeper.Default
@@ -18,17 +18,16 @@ class FileIOJasonSpec extends AnyWordSpec {
 
     "save and load Game" should {
       val fileIO1 = new FileIO()
-      var game: IGame = Default.prepareGame
-      game.setBombs(10)
-      game.setSide(10)
-      game.setTime(10)
+      var game: IGame = Default.prepareGame(10, 10, 10)
+/*       game.setSideAndBombs(10, 10)
+      game.setTime(10) */
 
       "save the game status, bombs, side and time and reload it" in {
         fileIO1.saveGame(game)
         val loadGameTest = fileIO1.loadGame.get
-        loadGameTest.getBombs should be (10)
-        loadGameTest.getSide should be (10)
-        loadGameTest.getTime should be (10)
+        loadGameTest.bombs should be (10)
+        loadGameTest.side should be (10) // 10 or 9
+        loadGameTest.time should be (10)
       }
     }
     "save and load Field" should {
@@ -38,8 +37,8 @@ class FileIOJasonSpec extends AnyWordSpec {
 
       "save the field and reload it" in {
         fileIO2.saveField(field)
-        val loadFieldTest = fileIO2.loadField2.get
-        loadFieldTest.getFieldSize should be (1)
+        val loadFieldTest = fileIO2.loadField.get
+        loadFieldTest.matrix.size should be (1)
       }
     }
 

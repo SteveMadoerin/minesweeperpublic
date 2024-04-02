@@ -40,13 +40,6 @@ class MatrixSpec extends AnyWordSpec{
                 vectorMatrix.row(1) should be (Vector(4,5,6))
             }
         }
-        "def getRealMatrix" should {
-            val testMatrix5 = new Matrix(4, Symbols.Covered)
-            "return the real Matrix" in {
-                testMatrix5.getRealMatrix should be (testMatrix5)
-
-            }
-        }
         "def cell" should {
             val testMatrix6 = new Matrix(4, Symbols.Covered)
             "return the cell" in {
@@ -56,7 +49,7 @@ class MatrixSpec extends AnyWordSpec{
         "def getSize" should {
             val testMatrix7 = new Matrix(4, Symbols.Covered)
             "return the size" in {
-                testMatrix7.getSize should be (4)
+                testMatrix7.size should be (4)
             }
         }
 
