@@ -2,7 +2,7 @@ package de.htwg.se.minesweeper.aview
 
 
 import de.htwg.se.minesweeper.controller.controllerComponent.IController
-import de.htwg.se.minesweeper.util.{Observer, Move, NewEvent}
+import de.htwg.se.minesweeper.util.{Observer, Move, Event}
 
 import scala.io.StdIn.readLine
 import scala.util.{Try, Success, Failure}
@@ -16,97 +16,110 @@ class TUI(using var controller: IController) extends Observer:
     
     controller.add(this)
 
-    var game = controller.getControllerGame
-    var isFirstMove = true
-
     def run = 
         infoMessages("Welcome to Minesweeper")
         resize
-        parseInputandPrintLoop(isFirstMove)
+        parseInputandPrintLoop(firstMoveCheck = true) // initialFirstMove
         
-    override def update(e: NewEvent): Boolean = 
-      e match
-        case NewEvent.NewGame => 
-          infoMessages(controller.getControllerField.toString())
-          isFirstMove = true
-          true
-        case NewEvent.Start => infoMessages(controller.getControllerField.toString()); true
-        case NewEvent.Next => infoMessages(controller.getControllerField.toString()); true
-        case NewEvent.GameOver => infoMessages(controller.getControllerField.toString()); true
-        case NewEvent.Cheat => false
-        case NewEvent.Help => false
-        case NewEvent.Input => false
-        case NewEvent.Load => infoMessages(controller.getControllerField.toString()); true
-        case NewEvent.Save => false
-        case NewEvent.SaveTime => false
-        case NewEvent.Exit => System.exit(0); false
+    override def update(e: Event): Boolean = 
+        e match
+            case Event.NewGame => 
+                infoMessages(controller.field.toString())
+                true
+            
+            case Event.Start => infoMessages(controller.field.toString()); true
+            case Event.Next => infoMessages(controller.field.toString()); true
+            case Event.GameOver => infoMessages(s"The Game is ${controller.game.board} !", controller.field.toString()); true
+            case Event.Cheat => false
+            case Event.Help => false
+            case Event.Input => false
+            case Event.Load => infoMessages(controller.field.toString()); true
+            case Event.Save => false
+            case Event.SaveTime => false
+            case Event.Exit => System.exit(0); false
+    
+    
+    def userInX(rawInput: String): Option[Move] = {
+        val cleanInputPattern: Regex = """^[a-z]{1}[0-9]{4}$""".r
+        val onlyOneStringPattern: Regex = """^[q|h|r|z|y|o|f|s|l|u|t]{1}$""".r
 
-    def userInX(rawInput: String): Option[Move] = 
-      val cleanInputPattern: Regex = """^[a-z]{1}[0-9]{4}$""".r
-      val onlyOneStringPattern: Regex = """^[q|h|r|z|y|o|f|s|l|u|t]{1}$""".r
+        val input = rawInput match
+            case cleanInputPattern() => rawInput
+            case onlyOneStringPattern() => rawInput
+            case _ => infoMessages(">> Invalid Input Format");"e"
+        
+        input match
+            case "q" => System.exit(0); None
+            case "h" => controller.helpMenu; None
+            case "r" => controller.cheat; None
+            case "z" => controller.makeAndPublish(controller.undo); None
+            case "y" => controller.makeAndPublish(controller.redo); None
+            case "s" => controller.saveGame; None
+            case "l" => controller.loadGame; None
+            case "e" => None
+            case _ => {
+                val charAccumulator = input.toCharArray()
+                
+                val action = charAccumulator(0) match
+                    case 'o' => "open"
+                    case 'f' => "flag"
+                    case 'u' => "unflag"
+                    case _ => "e"
+                
+                val coordinates = charArrayToInt(charAccumulator) match{
+                    case Success(i) => Some(i)
+                    case Failure(e) => infoMessages(s">> Invalid Move: ${e.getMessage}"); None
+                }
 
-      val input = rawInput match
-        case cleanInputPattern() => rawInput
-        case onlyOneStringPattern() => rawInput
-        case _ => infoMessages(">> Invalid Input Format");"e"
-      
-      input match
-        case "q" => System.exit(0); None
-        case "h" => controller.helpMenu; None
-        case "r" => controller.cheat; None
-        case "z" => controller.makeAndPublish(controller.undo); None
-        case "y" => controller.makeAndPublish(controller.redo); None
-        case "s" => controller.saveGame; None
-        case "l" => controller.loadGame; None
-        case "e" => None // for testing
-        case _ => {
-          val charAccumulator = input.toCharArray()
-          
-          val action = charAccumulator(0) match
-            case 'o' => "open"
-            case 'f' => "flag"
-            case 'u' => "unflag"
-            case _ => "e"
-          
-          val coordinates = charArrayToInt(charAccumulator) match{
-            case Success(i) => Some(i)
-            case Failure(e) => infoMessages(s">> Invalid Move: ${e.getMessage}"); None
-          }
+                val validCoordinates: Option[Move] = coordinates match {
+                    case Some(i) => {if controller.game.side > i._1 && controller.game.side > i._2 then Some(Move(action, i._1, i._2)) else { infoMessages(">> Invalid Move: Coordinates out of bounds"); None}} // no var game
+                    case None => None
+                }
+                validCoordinates
+            }
+        
+    }
 
-          val validCoordinates: Option[Move] = coordinates match {
-            case Some(i) => {if game.getSide > i._1 && game.getSide > i._2 then Some(Move(action, i._1, i._2)) else { infoMessages(">> Invalid Move: Coordinates out of bounds"); None}}
-            case None => None
-          }
-          validCoordinates
-        }
-
+    // recursion
     def parseInputandPrintLoop(firstMoveCheck: Boolean): Unit = {
-      infoMessages("Enter your move (<action><x><y>, eg. o0102, q to quit, h for help):")
-      
-      var stillFirstMove = false
-      userInX(readLine) match
-        case None => if firstMoveCheck == true then stillFirstMove = true
-        case Some(move) => 
-          move.value match {
-            case "open" => controller.makeAndPublish(controller.doMove, firstMoveCheck, move, game)
+        infoMessages("Enter your move (<action><x><y>, eg. o0102, q to quit, h for help):")
+        val stillFirstMove = userInX(readLine) match {
+            case None => firstMoveCheck
+            case Some(move) =>
+                processMove(move, firstMoveCheck)
+                false
+        }
+        
+        controller.checkGameOver(controller.game.board) match {
+            case false =>
+                parseInputandPrintLoop(stillFirstMove)
+            case true =>
+                controller.gameOver
+                restart
+        }
+    }
+    
+
+    def processMove(move: Move, firstMoveCheck: Boolean): Unit = {
+        move.value match {
+            case "open" => controller.makeAndPublish(controller.doMove, firstMoveCheck, move, controller.game)
             case "flag" => controller.makeAndPublish(controller.put, move)
             case "unflag" => controller.makeAndPublish(controller.put, move)
             case "help" => controller.helpMenu
             case _ => infoMessages(">> Invalid Input")
-          }
-      
-      if !controller.checkGameOver then parseInputandPrintLoop(stillFirstMove) else controller.gameOver; restart
+        }
     }
 
-    def restart: Unit = 
-      infoMessages("Do you want to play again? (yes/no)")
-      readLine match
-        case "yes" => run
-        case "no" => controller.exit
-        case _ => infoMessages(">> Invalid Input");
     
-    def charArrayToInt(s: Array[Char]): Try[(Int, Int)] =
-      Try(((s(1).toString + s(2).toString).toInt, (s(3).toString + s(4).toString).toInt))
+
+    def restart: Unit = 
+        infoMessages("Do you want to play again? (yes/no)")
+        readLine match
+            case "yes" => run
+            case "no" => controller.exit
+            case _ => infoMessages(">> Invalid Input");
+    
+    def charArrayToInt(s: Array[Char]): Try[(Int, Int)] = Try(((s(1).toString + s(2).toString).toInt, (s(3).toString + s(4).toString).toInt))
     
     def resize: Unit = 
         val (side, bombs) = chooseDifficulty()

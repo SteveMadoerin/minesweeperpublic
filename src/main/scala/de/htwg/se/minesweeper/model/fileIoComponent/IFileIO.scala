@@ -6,7 +6,7 @@ trait IFileIO {
     def loadGame: Option[IGame]
     def saveGame(game: IGame): Unit
 
-    def loadField2: Option[IField]
+    def loadField: Option[IField]
     def saveField(field: IField): Unit
 
     def loadPlayerScores(filePath: String): Seq[(String, Int)]

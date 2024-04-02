@@ -15,7 +15,8 @@ trait IController extends Observable{
     def openRec(x: Int, y: Int, field: IField): IField
     def helpMenu: Unit
     def cheat: Unit
-    def checkGameOver: Boolean
+    
+    def checkGameOver(status: String): Boolean
     def newGameGUI: Unit
     def newGameField(optionString: Option[String]): Unit
     def newGame(side: Int, bombs: Int): Unit
@@ -27,19 +28,15 @@ trait IController extends Observable{
     def loadPlayerScores(filePath: String): Seq[(String, Int)]
     def saveScoreAndPlayerName(playerName: String, saveScore: Int, filePath: String): Unit
 
-    def get(x: Int, y: Int): String
-    def getInvisible(x: Int, y: Int): String
-    def getVisible(x: Int, y: Int): String
+    def showVisibleCell(x: Int, y: Int): String
    
-    def getFieldSize: Int
-    def getSpielbrettState: Status
-    def getControllerField: IField
-    def getControllerGame: IGame
-    def getControllerGameInterface: IGame
+    def field: IField
+    def game: IGame
 
     def put(move: Move): IField
     def undo: IField
     def redo: IField
 
     def exit: Unit
+    def saveTime(currentTime: Int): Unit
 }
