@@ -9,7 +9,7 @@ import de.htwg.se.minesweeper.Default.given
 
 
 case class Game (bombs : Int, side: Int, time: Int, board : String) extends IGame:
-    
+
     def optionToList(s: Option[String]): List[Int] = {
         s match{
             case Some("SuperEasy") => List(5, 5)
@@ -19,7 +19,7 @@ case class Game (bombs : Int, side: Int, time: Int, board : String) extends IGam
             case _ => List(9, 10)
         }
     }
-    
+
     // currying
     def prepareBoard(s: Option[String])(game: IGame): (IField, IGame) = {
         val realGame = this.copy(optionToList(s)(1), optionToList(s)(0))
@@ -61,7 +61,7 @@ case class Game (bombs : Int, side: Int, time: Int, board : String) extends IGam
         }
         val newVisibleMatrix = newReplacedbombHidMatrix.openNew(x, y, newReplacedbombHidMatrix)
         newVisibleMatrix
-    
+
     def replaceBomb(x: Int, y: Int, field: IField): IField = {
         val size = field.matrix.size
         val indices = 0 until size
@@ -88,27 +88,19 @@ case class Game (bombs : Int, side: Int, time: Int, board : String) extends IGam
     }
 
 
-    def calcCovered(visibleMatrix: Matrix[Symbols]): Int =
+    def calcX(symbols:Symbols)(visibleMatrix: Matrix[Symbols]): Int = {
         val sizze = visibleMatrix.size -1
         val multiIndex = 0 to sizze
         multiIndex
-            .flatMap(row => multiIndex.map(col => (row, col)))
-            .count{ case(row, col) => visibleMatrix.cell(row, col) == Symbols.Covered && isValid(row, col, sizze)}
+          .flatMap(row => multiIndex.map(col => (row, col)))
+          .count{ case(row, col) => visibleMatrix.cell(row, col) == symbols && isValid(row, col, sizze)}
+    }
 
-    def calcFlag(visibleMatrix: Matrix[Symbols]): Int =
-        val sizze = visibleMatrix.size -1
-        val multiIndex = 0 to sizze
-        multiIndex
-            .flatMap(row => multiIndex.map(col => (row, col))) //.flatMap and .map to create a new collection of all possible (row, col) pairs
-            .count { case (row, col) => visibleMatrix.cell(row, col) == Symbols.F && isValid(row, col, sizze) } // count pairs that meet the condition
-
-    def addCoveredAndFlag(visibleMatrix: Matrix[Symbols]): Int = (calcCovered(visibleMatrix) + calcFlag(visibleMatrix))
+    def calcCovered (visibleMatrix: Matrix[Symbols]): Int = calcX(Symbols.Covered)(visibleMatrix)
+    def calcFlag (visibleMatrix: Matrix[Symbols]): Int = calcX(Symbols.F)(visibleMatrix)
 
     def calcMineAndFlag(visibleMatrix: Matrix[Symbols]): Int = (this.bombs - calcFlag(visibleMatrix))
 
-    def calcWonOrLost(visibleMatrix: Matrix[Symbols], mines: Int): Boolean = (mines+1 - addCoveredAndFlag(visibleMatrix) == 0)
-
-    // try to implement function chaining here
     def calcAdjacentMines(row: Int, col: Int, side: Int, invisibleMatrix: Matrix[Symbols]): Int = {
 
         val neighbors = List(
@@ -124,6 +116,8 @@ case class Game (bombs : Int, side: Int, time: Int, board : String) extends IGam
 
         neighbors.count { case (r, c) => isValid(r, c, side) && isMine(r, c, invisibleMatrix) }
     }
+
+    def calcWonOrLost(visibleMatrix: Matrix[Symbols], mines: Int): Boolean = (mines+1 - (calcFlag(visibleMatrix) + calcCovered(visibleMatrix)) == 0)
     
     def isMine(row: Int, col: Int, m: Matrix[Symbols]): Boolean = {if(m.cell(row, col) == Symbols.Bomb) true else false} // fc
     def isValid(row: Int, col: Int, side: Int): Boolean = {row >= 0 && row <= side && col >= 0 && col <= side} // fc
