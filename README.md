@@ -6,7 +6,7 @@ This is a project developped by [Steve Madoerin](https://github.com/SteveMadoeri
 class Software Engineering at the University of Applied Science HTWG Konstanz.
 
 
-[![Coverage Status](https://coveralls.io/repos/github/SteveMadoerin/minesweeperpublic/badge.svg?branch=development)](https://coveralls.io/github/SteveMadoerin/minesweeperpublic?branch=development)
+[![Coverage Status](https://coveralls.io/repos/github/SteveMadoerin/minesweeperpublic/badge.svg?branch=main)](https://coveralls.io/github/SteveMadoerin/minesweeperpublic?branch=main)
                                                 [![Scala CI](https://github.com/SteveMadoerin/minesweeperpublic/actions/workflows/scala.yml/badge.svg?branch=development&event=push)](https://github.com/SteveMadoerin/minesweeperpublic/actions/workflows/scala.yml)
 
 ![Minesweeper_Steve_Madoerin](https://github.com/SteveMadoerin/minesweeper/assets/115166447/9b831e76-6268-4ecd-a35e-a2448302f2f9)
