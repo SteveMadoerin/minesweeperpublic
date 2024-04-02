@@ -12,7 +12,7 @@ import scala.util.matching.Regex
 
 import de.htwg.se.minesweeper.Default.{given}
 
-class TUI(using controller: IController) extends Observer:
+class TUI(using var controller: IController) extends Observer:
     
     controller.add(this)
 

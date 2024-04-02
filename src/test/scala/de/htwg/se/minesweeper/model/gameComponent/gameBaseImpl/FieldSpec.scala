@@ -64,7 +64,7 @@ class FieldSpec extends AnyWordSpec
                 }
             }
             "field open" should {
-                var testSpiel = new Game(Status.Playing, 9, 3)
+                var testSpiel = new Game(9, 3, 0, "Playing")
 
                 val sicht = new Matrix(4, Symbols.Covered)
                 val unsicht = new Matrix(4, Symbols.Eight)
@@ -73,7 +73,7 @@ class FieldSpec extends AnyWordSpec
 
 
                 "return a new field" in{
-                    val resultField = testField.open(1, 1, testSpiel)
+                    val (resultGame, resultField) = testField.open(1, 1, testSpiel)
                     resultField.showVisibleCell(1,1) should be (Symbols.Eight)
 
                 }
@@ -123,13 +123,13 @@ class FieldSpec extends AnyWordSpec
                 val testField72 = new Field(sicht72, unsicht72)
 
                 "return a new field" in{
-                    val resultField = testField72.openNewXXX(1, 1, testField72)
+                    val resultField = testField72.openNew(1, 1, testField72)
                     resultField.showVisibleCell(1,1) should be (Symbols.Eight)
 
                 }
             }
 
-            " test recusiveMadness" should {
+            " test recusiveOpen" should {
                 val sicht74 = new Matrix(5, Symbols.Covered)
                 val unsicht74 = new Matrix(5, Symbols.Eight)
                 val unsichtWithZero = unsicht74.replaceCell(2, 2, Symbols.Zero)
@@ -144,7 +144,7 @@ class FieldSpec extends AnyWordSpec
                 val testField74 = new Field(sicht74, unsichtWithZero9)
 
                 "return a new field" in{
-                    val resultField = testField74.recursiveMadness(2, 2, testField74)
+                    val resultField = testField74.recursiveOpen(2, 2, testField74)
                     resultField.showVisibleCell(2,2) should be (Symbols.Zero)
                     resultField.showVisibleCell(1,1) should be (Symbols.Zero)
                     resultField.showVisibleCell(0,0) should be (Symbols.Eight)
@@ -158,7 +158,7 @@ class FieldSpec extends AnyWordSpec
                 val testField75 = new Field(sicht75, unsicht75)
 
                 "return a new field" in{
-                    val resultField = testField75._matrix.size
+                    val resultField = testField75.matrix.size
                     resultField should be (4)
 
                 }

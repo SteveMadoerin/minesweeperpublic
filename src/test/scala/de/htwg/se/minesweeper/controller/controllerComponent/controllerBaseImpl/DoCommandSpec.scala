@@ -15,7 +15,7 @@ class DoCommandSpec extends AnyWordSpec{
         val doCommand2 = new DoCommand(Move("flag", 1, 1))
         val doCommand3 = new DoCommand(Move("unflag", 1, 1))
 
-        val game1 = new Game(Status.Playing)
+        val game1 = new Game(4, 4, 0, "Playing") // check
         val sicht1 = new Matrix(4, Symbols.Covered)
         val unsicht1 = new Matrix(4, Symbols.Eight)
         

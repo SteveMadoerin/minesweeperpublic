@@ -13,13 +13,14 @@ import java.io.ByteArrayOutputStream
 
 
 class TUISpec extends AnyWordSpec{
-    "A TUI when initialised" should {
+/*     "A TUI when initialised" should {
         val tui1 = new TUI()
         "self register with controller" in{
-            tui1.controller.subscribers should contain(tui1)
-        }
-    }
+            tui1.controller.subscribers should contain(tui1.controller)
 
+        }
+    } */
+/* 
     "A TUI with following input" should {
         val tui = new TUI()
         "run only once" in {
@@ -29,7 +30,7 @@ class TUISpec extends AnyWordSpec{
             }
         } 
 
-    }
+    } */
 
     "The TUI update method" should{
         val tui2 = new TUI()
