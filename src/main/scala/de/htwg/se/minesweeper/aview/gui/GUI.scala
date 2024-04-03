@@ -33,7 +33,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
     var clock = new AtomicInteger(0)
     val timer = new Timer()
     var task: Option[TimerTask] = None // was null before
-    
+
     def startTimer(): Unit = {
         task.foreach(_.cancel())
         task = Some(new TimerTask {
@@ -76,7 +76,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
 
         border = borderCreator(2, 2, 2, 2)
     }
-
+    
     def borderCreator(top: Int, left: Int, bottom: Int, right: Int): Border = {
         val borderOutside: Border = BorderFactory.createLineBorder(java.awt.Color.GRAY)
         val borderInside: Border = BorderFactory.createMatteBorder(top, left, bottom, right, java.awt.Color.WHITE)
@@ -272,7 +272,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
         val filePath = Default.filePathHighScore
         controller.saveScoreAndPlayerName(playerName, saveScore, Default.filePathHighScore)
     }
-    
+
     // Closure
     def loadScoreNew: Unit = {
     
