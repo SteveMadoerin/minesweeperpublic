@@ -272,19 +272,27 @@ class GUI(using var controller: IController) extends Frame with Observer:
         val filePath = Default.filePathHighScore
         controller.saveScoreAndPlayerName(playerName, saveScore, Default.filePathHighScore)
     }
-
-    def loadScoreNew: Unit = {
-        val filePath = Default.filePathHighScore
-        val scores = controller.loadPlayerScores(filePath)
-        val top10 = scores.sortBy(-_._2).take(10)
-
-        val message = top10.zipWithIndex.map { case ((name, score), index) =>
-            s"${index + 1}. $name: $score"
-        }.mkString("\n")
-
-        showMessage(None.orNull, message, "Top 10 High Scores", Message.Info) // was null before
-    }
     
+    // Closure
+    def loadScoreNew: Unit = {
+    
+        val filePath = Default.filePathHighScore
+
+        // Closure captures the filePath variable
+        val loadAndDisplayScores = () => {
+            val scores = controller.loadPlayerScores(filePath)
+            val top10 = scores.sortBy(-_._2).take(10)
+
+            val message = top10.zipWithIndex.map { case ((name, score), index) =>
+                s"${index + 1}. $name: $score"
+            }.mkString("\n")
+
+            Dialog.showMessage(null, message, "Top 10 High Scores", Message.Info)
+        }
+
+        loadAndDisplayScores() // Invoke the closure
+    }
+        
     class CellPanel(x: Int, y: Int, bounds: Int, first: Boolean) extends GridPanel(x,y) {
         (for(
             x <- 0 to bounds;
