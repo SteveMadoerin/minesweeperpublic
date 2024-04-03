@@ -2,7 +2,7 @@ package de.htwg.se.minesweeper.aview
 
 
 import de.htwg.se.minesweeper.controller.controllerComponent.IController
-import de.htwg.se.minesweeper.util.{Observer, Move, Event}
+import de.htwg.se.minesweeper.util.{Observer, Move, Event, MoveBox}
 
 import scala.io.StdIn.readLine
 import scala.util.{Try, Success, Failure}
@@ -19,27 +19,16 @@ class TUI(using var controller: IController) extends Observer:
     def run = 
         infoMessages("Welcome to Minesweeper")
         resize
-        parseInputandPrintLoop(firstMoveCheck = true) // initialFirstMove
+        parseInputandPrintLoop(firstMoveCheck = true)
         
     override def update(e: Event): Boolean = 
         e match
-            case Event.NewGame => 
-                infoMessages(controller.field.toString())
-                true
-            
-            case Event.Start => infoMessages(controller.field.toString()); true
-            case Event.Next => infoMessages(controller.field.toString()); true
+            case Event.NewGame | Event.Start | Event.Next | Event.Load => infoMessages(controller.field.toString()); true
             case Event.GameOver => infoMessages(s"The Game is ${controller.game.board} !", controller.field.toString()); true
-            case Event.Cheat => false
-            case Event.Help => false
-            case Event.Input => false
-            case Event.Load => infoMessages(controller.field.toString()); true
-            case Event.Save => false
-            case Event.SaveTime => false
             case Event.Exit => System.exit(0); false
+            case _ => false
     
-    
-    def userInX(rawInput: String): Option[Move] = {
+    def userInX(rawInput: String): MoveBox = {
         val cleanInputPattern: Regex = """^[a-z]{1}[0-9]{4}$""".r
         val onlyOneStringPattern: Regex = """^[q|h|r|z|y|o|f|s|l|u|t]{1}$""".r
 
@@ -49,14 +38,14 @@ class TUI(using var controller: IController) extends Observer:
             case _ => infoMessages(">> Invalid Input Format");"e"
         
         input match
-            case "q" => System.exit(0); None
-            case "h" => controller.helpMenu; None
-            case "r" => controller.cheat; None
-            case "z" => controller.makeAndPublish(controller.undo); None
-            case "y" => controller.makeAndPublish(controller.redo); None
-            case "s" => controller.saveGame; None
-            case "l" => controller.loadGame; None
-            case "e" => None
+            case "q" => System.exit(0); MoveBox(None)
+            case "h" => controller.helpMenu; MoveBox(None)
+            case "r" => controller.cheat; MoveBox(None)
+            case "z" => controller.makeAndPublish(controller.undo); MoveBox(None)
+            case "y" => controller.makeAndPublish(controller.redo); MoveBox(None)
+            case "s" => controller.saveGame; MoveBox(None)
+            case "l" => controller.loadGame; MoveBox(None)
+            case "e" => MoveBox(None)
             case _ => {
                 val charAccumulator = input.toCharArray()
                 
@@ -75,7 +64,7 @@ class TUI(using var controller: IController) extends Observer:
                     case Some(i) => {if controller.game.side > i._1 && controller.game.side > i._2 then Some(Move(action, i._1, i._2)) else { infoMessages(">> Invalid Move: Coordinates out of bounds"); None}} // no var game
                     case None => None
                 }
-                validCoordinates
+                MoveBox(validCoordinates) // validCoordinates
             }
         
     }
@@ -84,8 +73,8 @@ class TUI(using var controller: IController) extends Observer:
     def parseInputandPrintLoop(firstMoveCheck: Boolean): Unit = {
         infoMessages("Enter your move (<action><x><y>, eg. o0102, q to quit, h for help):")
         val stillFirstMove = userInX(readLine) match {
-            case None => firstMoveCheck
-            case Some(move) =>
+            case MoveBox(None) => firstMoveCheck
+            case MoveBox(Some(move)) =>
                 processMove(move, firstMoveCheck)
                 false
         }
