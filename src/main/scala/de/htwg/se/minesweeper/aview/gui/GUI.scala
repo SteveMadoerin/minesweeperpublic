@@ -76,7 +76,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
 
         border = borderCreator(2, 2, 2, 2)
     }
-    
+
     def borderCreator(top: Int, left: Int, bottom: Int, right: Int): Border = {
         val borderOutside: Border = BorderFactory.createLineBorder(java.awt.Color.GRAY)
         val borderInside: Border = BorderFactory.createMatteBorder(top, left, bottom, right, java.awt.Color.WHITE)
@@ -103,7 +103,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
                 contents += new MenuItem(Action("Cheat") { controller.cheat })
             }
         }
-
+        
         resizable = false
         contents = updateContents
         pack()
