@@ -12,7 +12,7 @@ import de.htwg.se.minesweeper.Default
 class FileIOXmlSpec extends AnyWordSpec {
   "A FileIO" when {
 
-/*     "save and load Game" should {
+    "save and load Game" should {
       val fileIO1 = new FileIO
       var game: IGame = new Game(10, 9, 10, "Playing")
 
@@ -24,9 +24,9 @@ class FileIOXmlSpec extends AnyWordSpec {
         loadGameTest.side should be (9)
         loadGameTest.time should be (10)
       }
-    } */
+    }
 
-/*     "save and load Field" should {
+    "save and load Field" should {
       val fileIO2 = new FileIO
       var field: IField = new Field(1, Symbols.Covered)
       field = field.put(Symbols.Bomb, 0, 0)
@@ -36,7 +36,7 @@ class FileIOXmlSpec extends AnyWordSpec {
         val loadFieldTest = fileIO2.loadField
         loadFieldTest.size should be (1)
       }
-    } */
+    }
 
     "def stringToSymbols" should {
       val fileIO3 = new FileIO
