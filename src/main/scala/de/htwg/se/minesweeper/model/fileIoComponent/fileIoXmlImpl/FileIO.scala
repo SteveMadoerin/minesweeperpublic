@@ -11,7 +11,23 @@ import java.io._
 
 class FileIO extends IFileIO {
 
-    override def loadGame: Option[IGame] = {
+    override def loadGame: GameBox = {
+        // TRY OPTION for file
+        val file = scala.xml.XML.loadFile("C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\game.xml")
+        val status = (file \\ "game" \@ "status")
+        val bombs = (file \\ "bombs").text.toInt
+        val side = (file \\ "side").text.toInt
+        val time = (file \\ "time").text.toInt
+        // HERE IS THE TWO TRACK CODE
+        val gameBox = GameBox(Some(new Game(0, 0, 0, ""))).insertBomb(bombs).insertSide(side).insertTime(time)
+        gameBox
+        //val game = Default.prepareGame(bombs, side, time)
+        //val gameOption: Option[IGame] = Some(game)
+        //gameOption
+    }
+
+/*     override def loadGame: Option[IGame] = {
+        
         val file = scala.xml.XML.loadFile("C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\game.xml")
         val status = (file \\ "game" \@ "status")
         val bombs = (file \\ "bombs").text.toInt
@@ -20,8 +36,7 @@ class FileIO extends IFileIO {
 
         val game = Default.prepareGame(bombs, side, time)
         val gameOption: Option[IGame] = Some(game)
-        gameOption
-    }
+        gam */
 
     def gameToXml(game: IGame) = {
         <game status ={ game.board }>
