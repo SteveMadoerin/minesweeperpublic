@@ -19,9 +19,12 @@ import scala.util.Failure
 class FileIO extends IFileIO{
     
     override def saveGame(game: IGame): Unit = {
-        val pw = new PrintWriter(new File("C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\game.json"))
-        pw.write(gameToJson(game).+('\n'))
-        pw.close
+        val pw = Try (new PrintWriter(new File("C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\game.json")))
+        pw match {
+            case Success(pw) => pw.write(gameToJson(game).+('\n'))
+            case Failure(e) => println("Error: " + e)
+        }
+        pw.get.close
     }
 
 
@@ -57,7 +60,8 @@ class FileIO extends IFileIO{
         }
         gameOption */
 
-    def sourceToString(path: String): Try[String] = Try(Source.fromFile(path).getLines.mkString)
+    def sourceToString(path: String): Try[String] = Try(Source.fromFile(path).getLines.mkString) // TRY
+    def genericTry[T](f: => T): Try[T] = Try(f) // TRY
 
     override def loadGame: GameBox = 
         import java.io._
@@ -66,25 +70,20 @@ class FileIO extends IFileIO{
             case Success(source) => source
             case Failure(exception) => throw exception
         }
-        //val source: String = Source.fromFile("C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\game.json").getLines.mkString
-        val json: JsValue = Json.parse(source)
+
+        val maybeJson: Try[JsValue] = genericTry(Json.parse(source))
+        val json = maybeJson match {
+            case Success(json) => json
+            case Failure(exception) => throw exception
+        }
+
         val status = (json \ "game" \ "status").get.toString
         val bombs = (json \ "game" \ "bombs").get.toString.toInt
         val side = (json \ "game" \ "side").get.toString.toInt
         val time = (json \ "game" \ "time").get.toString.toInt
-        //val game = Default.prepareGame(bombs, side, time)
-
                 
         val gameBox = GameBox(Some(new Game(0, 0, 0, ""))).insertBomb(bombs).insertSide(side).insertTime(time)
         gameBox
-
-/*         val gameOption: Option[IGame] = Some(game)
-
-        val newGameOption = gameOption match {
-            case Some(game) => Some(game)
-            case None =>
-        }
-        gameOption */
     
 
     override def saveField(field: IField): Unit = 
@@ -197,11 +196,8 @@ class FileIO extends IFileIO{
 
         val finalScores: Seq[(String, Int)] = if (file.exists() && file.length() != 0) {
             val source = Source.fromFile(file)
-            val scoresJson = try {
-                Json.parse(source.mkString)
-            } finally {
-                source.close()
-            }
+            val scoresJson = Try(Json.parse(source.mkString)).getOrElse(JsArray())
+            source.close()
 
             val scores = scoresJson.as[JsArray].value.flatMap { scoreJson =>
             for {
@@ -222,11 +218,9 @@ class FileIO extends IFileIO{
 
         val scoresArray: JsArray = if (file.exists() && file.length() != 0) {
             val source = Source.fromFile(file)
-            try {
-                Json.parse(source.mkString).as[JsArray]
-            } finally {
-                source.close()
-            }
+            val scoresArrayNew = Try(Json.parse(source.mkString)).getOrElse(JsArray()).as[JsArray]
+            source.close()
+            scoresArrayNew
         } else {
             JsArray()
         }
@@ -238,11 +232,14 @@ class FileIO extends IFileIO{
 
         val updatedScoresArray = scoresArray :+ newScoreObj
 
-        val writer = new PrintWriter(new FileWriter(file))
-        try {
-            writer.write(Json.prettyPrint(updatedScoresArray))
-        } finally {
-            writer.close()
+        val writer = Try(new PrintWriter(new FileWriter(file)))
+        writer.foreach { w =>
+            Try {
+                w.write(Json.prettyPrint(updatedScoresArray))
+            }.foreach { _ =>
+                w.close()
+            }
+
         }
     } 
 
