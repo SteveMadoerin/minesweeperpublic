@@ -11,6 +11,9 @@ import de.htwg.se.minesweeper.model.gameComponent.gameBaseImpl.Symbols
 import de.htwg.se.minesweeper.model.gameComponent.gameBaseImpl.Matrix
 import de.htwg.se.minesweeper.model.gameComponent.gameBaseImpl.GameBox
 import de.htwg.se.minesweeper.model.gameComponent.gameBaseImpl.Game
+import scala.util.Try
+import scala.util.Success
+import scala.util.Failure
 
 
 class FileIO extends IFileIO{
@@ -54,9 +57,16 @@ class FileIO extends IFileIO{
         }
         gameOption */
 
+    def sourceToString(path: String): Try[String] = Try(Source.fromFile(path).getLines.mkString)
+
     override def loadGame: GameBox = 
         import java.io._
-        val source: String = Source.fromFile("C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\game.json").getLines.mkString
+        val maybeSource = sourceToString("C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\game.json")
+        val source = maybeSource match {
+            case Success(source) => source
+            case Failure(exception) => throw exception
+        }
+        //val source: String = Source.fromFile("C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\game.json").getLines.mkString
         val json: JsValue = Json.parse(source)
         val status = (json \ "game" \ "status").get.toString
         val bombs = (json \ "game" \ "bombs").get.toString.toInt

@@ -101,7 +101,7 @@ class TUI(using var controller: IController) extends Observer:
 
     
 
-    def restart: Unit = 
+    def restart = 
         infoMessages("Do you want to play again? (yes/no)")
         readLine match
             case "yes" => run
