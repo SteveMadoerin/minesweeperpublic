@@ -15,10 +15,10 @@ object Default{
     given IField = createField(prepareGame(10, 9, 0))
     given IController = Controller()
     
-/*     given IFileIO = new JsonFileIO() //choose Implementation here
-    val filePathHighScore = "C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\highscore.json" */
-    given IFileIO = new XmlFileIO() //choose Implementation here
-    val filePathHighScore = "C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\highscore.xml"
+    given IFileIO = new JsonFileIO() //choose Implementation here
+    val filePathHighScore = "C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\highscore.json"
+/*     given IFileIO = new XmlFileIO() //choose Implementation here
+    val filePathHighScore = "C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\highscore.xml" */
 
     def scalableMatrix(size: Int, filling: Symbols): Matrix[Symbols] = new Matrix(size, filling)
     def scalableField(size: Int, filling: Symbols): IField = new Field(size, filling)

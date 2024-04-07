@@ -41,24 +41,6 @@ class FileIO extends IFileIO{
         )
         
     }
-    
-/*     override def loadGame: Option[IGame] = 
-        import java.io._
-        val source: String = Source.fromFile("C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\game.json").getLines.mkString
-        val json: JsValue = Json.parse(source)
-        val status = (json \ "game" \ "status").get.toString
-        val bombs = (json \ "game" \ "bombs").get.toString.toInt
-        val side = (json \ "game" \ "side").get.toString.toInt
-        val time = (json \ "game" \ "time").get.toString.toInt
-        val game = Default.prepareGame(bombs, side, time)
-
-        val gameOption: Option[IGame] = Some(game)
-
-        val newGameOption = gameOption match {
-            case Some(game) => Some(game)
-            case None =>
-        }
-        gameOption */
 
     def sourceToString(path: String): Try[String] = Try(Source.fromFile(path).getLines.mkString) // TRY
     def genericTry[T](f: => T): Try[T] = Try(f) // TRY
@@ -81,17 +63,16 @@ class FileIO extends IFileIO{
         val bombs = (json \ "game" \ "bombs").get.toString.toInt
         val side = (json \ "game" \ "side").get.toString.toInt
         val time = (json \ "game" \ "time").get.toString.toInt
-                
-        val gameBox = GameBox(Some(new Game(0, 0, 0, ""))).insertBomb(bombs).insertSide(side).insertTime(time)
-        gameBox
+        // TWO TRACK CODE   
+        GameBox(Some(new Game(0, 0, 0, ""))).insertBomb(bombs).insertSide(side).insertTime(time)
     
-
-    override def saveField(field: IField): Unit = 
+    override def saveField(field: IField) = {
         import java.io._
         val pw = new PrintWriter(new File("C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\field.json"))
         pw.write(fieldToJson(field))
         pw.close
-    
+    } 
+
     def fieldToJson(field: IField): String = {
         import play.api.libs.json._
         Json.prettyPrint(
@@ -242,5 +223,4 @@ class FileIO extends IFileIO{
 
         }
     } 
-
 }
