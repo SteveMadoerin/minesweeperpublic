@@ -24,10 +24,24 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
     def loadGame =
         // TWO TRACK CODE
         val gameBox = file.loadGame
-        val extractedGame: IGame = gameBox.game match {
+        val gameBox2 = gameBox // just for study purposes
+        val gameBoxList = List[GameBox](gameBox, gameBox2)
+        val packGame = new PackGame(gameBoxList)
+        
+        // Using For to uppack the Monad
+        val extractedGameList = for (
+            game <- packGame.games
+        ) yield game.game match {
             case Some(g) => g
             case None =>  this.game
         }
+
+        val extractedGame = extractedGameList(0)
+
+/*         val extractedGame: IGame = gameBox.game match {
+            case Some(g) => g
+            case None =>  this.game
+        } */
 
         game = copyInterface(extractedGame, "Playing")
 

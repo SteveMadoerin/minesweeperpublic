@@ -14,7 +14,6 @@ case class Game (bombs : Int, side: Int, time: Int, board : String) extends IGam
     def insertSide(newSide: Int): Game = copy(side = newSide)
     def insertTime(newTime: Int): Game = copy(time = newTime)
     def insertBoard(newBoard: String): Game = copy(board = newBoard)
-    //def consume: Game = copy(bombs, side, time, board)
     
 
     def optionToList(s: Option[String]): List[Int] = {

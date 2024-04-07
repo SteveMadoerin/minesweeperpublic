@@ -6,7 +6,6 @@ import de.htwg.se.minesweeper.model.gameComponent.gameBaseImpl.{Symbols,Matrix}
 trait IGame {
         
     def premierMove(x: Int, y: Int, field: IField): IField
-    //def openNew(x: Int, y: Int, field: IField): IField
     def replaceBomb(x: Int, y: Int, field: IField): IField
    
     def calcFlag(visibleMatrix: Matrix[Symbols]): Int
@@ -29,7 +28,6 @@ trait IGame {
     def time: Int
 
     def prepareBoard(s: Option[String])(game: IGame): (IField, IGame) // currying
-    //def prepareBoard(s: Option[String], game: IGame): (IField, IGame)
 }
 
 trait IField{
