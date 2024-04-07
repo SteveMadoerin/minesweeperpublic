@@ -8,19 +8,29 @@ import de.htwg.se.minesweeper.Default
 import scala.xml._
 import scala.compiletime.ops.string
 import java.io._
+import scala.util.Try
+import scala.util.Success
+import scala.util.Failure
 
 class FileIO extends IFileIO {
 
+    def genericTry[T](f: => T): Try[T] = Try(f) 
+
     override def loadGame: GameBox = {
         // TRY OPTION for file
-        val file = scala.xml.XML.loadFile("C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\game.xml")
+        val maybeFile: Try[Elem] = genericTry(scala.xml.XML.loadFile("C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\game.xml"))
+        val file = maybeFile match {
+            case Success(file) => file
+            case Failure(exception) => throw exception
+        }
+        //val files = scala.xml.XML.loadFile("C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\game.xml")
         val status = (file \\ "game" \@ "status")
         val bombs = (file \\ "bombs").text.toInt
         val side = (file \\ "side").text.toInt
         val time = (file \\ "time").text.toInt
         // HERE IS THE TWO TRACK CODE
-        val gameBox = GameBox(Some(new Game(0, 0, 0, ""))).insertBomb(bombs).insertSide(side).insertTime(time)
-        gameBox
+        GameBox(Some(new Game(0, 0, 0, ""))).insertBomb(bombs).insertSide(side).insertTime(time)
+        
         //val game = Default.prepareGame(bombs, side, time)
         //val gameOption: Option[IGame] = Some(game)
         //gameOption
@@ -69,7 +79,12 @@ class FileIO extends IFileIO {
     }
     
     override def loadField: Option[IField] = {
-        val file = scala.xml.XML.loadFile("C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\field.xml")
+        val maybeFile: Try[Elem] = genericTry(scala.xml.XML.loadFile("C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\field.xml"))
+        val file = maybeFile match {
+            case Success(file) => file
+            case Failure(exception) => throw exception
+        }
+        //val file = scala.xml.XML.loadFile("C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\field.xml")
         val size = (file \\ "field" \@ "size").toInt
 
         val matrixOption = Some(Default.scalableMatrix(size, Symbols.Covered))
@@ -127,16 +142,28 @@ class FileIO extends IFileIO {
     def saveString(field: IField): Unit = {
         import java.io._
 
-        val pw = new PrintWriter(new File("C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\field.xml"))
-        val prettyPrinter = new PrettyPrinter(120, 4)
+        val pw = Try(new PrintWriter(new File("C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\field.xml")))
+        pw match {
+            case Success(pw) =>
+                val prettyPrinter = new PrettyPrinter(120, 4)
+                val hiddenField = new Field(field.hidden)
+                val visibleField = new Field(field.matrix)
+                val xml = prettyPrinter.format(fieldToXml(field))
+                pw.write(xml)
+            case Failure(exception) => throw exception
+        }
+        pw.get.close
+
+        //val pw = new PrintWriter(new File("C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\field.xml"))
+/*         val prettyPrinter = new PrettyPrinter(120, 4)
         val hiddenField = new Field(field.hidden)
         val visibleField = new Field(field.matrix)
         val xml = prettyPrinter.format(fieldToXml(field))
-        pw.write(xml)
-        pw.close
+        //pw.write(xml) */
+        //pw.close
     }
 
-    def loadPlayerScores(filePath: String): Seq[(String, Int)] = {
+/*     def loadPlayerScores(filePath: String): Seq[(String, Int)] = {
         val file = new File(filePath)
 
         if (file.exists() && file.length() != 0) {
@@ -152,9 +179,31 @@ class FileIO extends IFileIO {
         } else {
             Seq.empty
         }
+    } */
+
+    def loadPlayerScores(filePath: String): Seq[(String, Int)] = {
+        
+        val tryLoadScores = Try {
+            val file = new File(filePath)
+            val rootElem: Elem = XML.loadFile(file)
+            val scores = (rootElem \ "score").map { scoreElem =>
+            val playerName = (scoreElem \ "player").text
+            val score = (scoreElem \ "value").text.toInt
+            (playerName, score)
+            }
+            scores.sortBy { case (_, score) => -score }.take(10)
+        }
+
+        tryLoadScores match {
+            case Success(scores) => scores
+            case Failure(exception) =>
+                println(s"An error occurred while loading scores: ${exception.getMessage}")
+                Seq.empty
+        }
+
     }
 
-    def savePlayerScore(playerName: String, score: Int, filePath: String): Unit = {
+/*     def savePlayerScore(playerName: String, score: Int, filePath: String): Unit = {
         
         val file = new File(filePath)
 
@@ -177,6 +226,49 @@ class FileIO extends IFileIO {
         } finally {
             writer.close()
         }
+    } */
+
+    def savePlayerScore(playerName: String, score: Int, filePath: String): Unit = {
+        
+/*         val file = new File(filePath)
+
+        val rootElem: Elem = if (file.exists() && file.length() != 0) {
+            XML.loadFile(file)
+        } else {
+            <scores></scores>
+        } */
+
+        //val file = new File(filePath)
+        val maybeFile = Try(new File(filePath))
+        val file = maybeFile.getOrElse(throw new Exception("File not found"))
+
+        val maybeRootElement = Try {
+            val rootElem: Elem = XML.loadFile(file)
+            rootElem
+        }
+
+        val rootElem = maybeRootElement.getOrElse( <scores></scores>)
+
+        val newScoreElem = <score>
+            <player>{playerName}</player>
+            <value>{score}</value>
+        </score>
+
+        val updatedRootElem = rootElem.copy(child = rootElem.child ++ Seq(newScoreElem))
+
+        Try {
+            val printer = new PrettyPrinter(80, 2)
+            val writer = new PrintWriter(new FileWriter(file))
+            writer.write(printer.format(updatedRootElem))
+            writer.close()
+        }
+
+        
+/*         try {
+            writer.write(printer.format(updatedRootElem))
+        } finally {
+            writer.close()
+        } */
     }
     
 }
