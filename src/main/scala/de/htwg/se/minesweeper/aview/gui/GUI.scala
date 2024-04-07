@@ -274,7 +274,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
     }
 
     // Closure
-    def loadScoreNew: Unit = {
+    def loadScoreNew = {
     
         val filePath = Default.filePathHighScore
 

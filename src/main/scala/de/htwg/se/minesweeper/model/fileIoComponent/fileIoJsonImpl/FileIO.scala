@@ -42,12 +42,11 @@ class FileIO extends IFileIO{
         
     }
 
-    def sourceToString(path: String): Try[String] = Try(Source.fromFile(path).getLines.mkString) // TRY
     def genericTry[T](f: => T): Try[T] = Try(f) // TRY
 
     override def loadGame: GameBox = 
         import java.io._
-        val maybeSource = sourceToString("C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\game.json")
+        val maybeSource = genericTry(Source.fromFile("C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\game.json").getLines.mkString)
         val source = maybeSource match {
             case Success(source) => source
             case Failure(exception) => throw exception
@@ -68,9 +67,12 @@ class FileIO extends IFileIO{
     
     override def saveField(field: IField) = {
         import java.io._
-        val pw = new PrintWriter(new File("C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\field.json"))
-        pw.write(fieldToJson(field))
-        pw.close
+        val pw = Try (new PrintWriter(new File("C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\field.json")))
+        pw match {
+            case Success(pw) => pw.write(fieldToJson(field))
+            case Failure(e) => println("Error: " + e)
+        }
+        pw.get.close
     } 
 
     def fieldToJson(field: IField): String = {
@@ -173,38 +175,39 @@ class FileIO extends IFileIO{
     }
 
     def loadPlayerScores(filePath: String): Seq[(String, Int)] = {
-        val file = new File(filePath)
 
-        val finalScores: Seq[(String, Int)] = if (file.exists() && file.length() != 0) {
+        val maybeFinalScores: Try[Seq[(String, Int)]] = Try {
+            val file = new File(filePath)
             val source = Source.fromFile(file)
             val scoresJson = Try(Json.parse(source.mkString)).getOrElse(JsArray())
             source.close()
 
-            val scores = scoresJson.as[JsArray].value.flatMap { scoreJson =>
+            scoresJson.as[JsArray].value.flatMap { scoreJson =>
             for {
                 playerName <- (scoreJson \ "player").validate[String].asOpt
                 score <- (scoreJson \ "score").validate[Int].asOpt
             } yield (playerName, score)
             }.toSeq
-            scores
-        } else {
-            val scores = Seq.empty
-            scores
+            
         }
-        finalScores
+        maybeFinalScores.getOrElse(Seq.empty)
     }
 
     def savePlayerScore(playerName: String, score: Int, filePath: String): Unit = {
-        val file = new File(filePath)
-
-        val scoresArray: JsArray = if (file.exists() && file.length() != 0) {
+        
+        val maybeFile =  Try{ new File(filePath) } 
+        val file = maybeFile match {
+            case Success(f) => f
+            case Failure(exception) => throw exception
+        }
+        val maybeScoresArray: Try[JsArray] = Try {
             val source = Source.fromFile(file)
             val scoresArrayNew = Try(Json.parse(source.mkString)).getOrElse(JsArray()).as[JsArray]
             source.close()
             scoresArrayNew
-        } else {
-            JsArray()
         }
+
+        val scoresArray = maybeScoresArray.getOrElse(JsArray())
 
         val newScoreObj = Json.obj(
             "player" -> playerName,
