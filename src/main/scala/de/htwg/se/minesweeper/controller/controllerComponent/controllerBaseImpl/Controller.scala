@@ -38,35 +38,8 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
 
         val extractedGame = extractedGameList(0)
 
-/*         val extractedGame: IGame = gameBox.game match {
-            case Some(g) => g
-            case None =>  this.game
-        } */
-
         game = copyInterface(extractedGame, "Playing")
-
-/*         val gameList = List[Option[Game]](Some(Game(0, 0, 0, "")))
-        val gamePack = new PackGame[Option[Game]](gameList)
-
-        def consumeAllAssumeNoneWithFor(pack:PackGame[Option[Game]], currentGame: IGame) = {
-        for (
-            spiel <- pack.games) yield spiel match {
-                case Some(b) => b
-                case None => currentGame
-            }
-        }
-
-        val tmpGame = consumeAllAssumeNoneWithFor(gamePack, game)
-        game = tmpGame(0) */
         
-        // CODE BEFORE TWO TRACK
-/*         val gameOption = file.loadGame
-        gameOption match {
-            case Some(game) => this.game = game
-            case None =>
-        }
-
-        game = copyInterface(game, "Playing") */
 
         val fieldOption = file.loadField
         fieldOption match {

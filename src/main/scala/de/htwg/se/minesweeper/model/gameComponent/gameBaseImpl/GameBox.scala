@@ -20,3 +20,4 @@ case class GameBox(game: Option[Game]):
         case None => copy(None)
 
 end GameBox
+
