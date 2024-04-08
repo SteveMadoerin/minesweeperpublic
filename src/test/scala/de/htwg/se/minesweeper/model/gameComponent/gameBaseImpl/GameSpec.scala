@@ -6,62 +6,6 @@ import java.io.ByteArrayOutputStream
 
 
 class GameSpec extends AnyWordSpec {
-    
-/*     "The chooseDifficulty method" should {
-
-        val newGame = new Game(Status.Playing)
-
-        "return the super easy difficulty when input is 0" in {
-            val testGame = newGame
-            val in = new java.io.ByteArrayInputStream("0\n".getBytes)
-            Console.withIn(in){
-                testGame.setSideAndBombs(5, 5)
-                testGame.getSide should be (5)
-                testGame.getBombs should be (5)
-            }
-        }
-        
-        "return the beginner difficulty when input is 1" in {
-            val testGame = new Game(Status.Playing)
-            val in = new java.io.ByteArrayInputStream("1\n".getBytes)
-            Console.withIn(in){
-                testGame.setSideAndBombs(9, 10)
-                testGame.getSide should be (9)
-                testGame.getBombs should be (10)
-            }
-        }
-
-        "return the intermediate difficulty when input is 2" in {
-            val testGame = new Game(Status.Playing)
-            val in = new java.io.ByteArrayInputStream("2\n".getBytes)
-            Console.withIn(in){
-                testGame.setSideAndBombs(15, 40)
-                testGame.getSide should be (15)
-                testGame.getBombs should be (40)
-            }
-        }
-
-        "return the advanced difficulty when input is 3" in {
-            val testGame = new Game(Status.Playing)
-            val in = new java.io.ByteArrayInputStream("3\n".getBytes)
-            Console.withIn(in) {
-                testGame.setSideAndBombs(19, 85)
-                testGame.getSide should be (19)
-                testGame.getBombs should be (85)
-            }
-        }
-
-        "return the beginner difficulty by default when input is not recognized" in{
-            val testGame = new Game(Status.Playing)
-            val in = new java.io.ByteArrayInputStream("33\n".getBytes)
-            Console.withIn(in){
-                testGame.setSideAndBombs(9, 10)
-                testGame.getSide should be (9)
-                testGame.getBombs should be (10)
-            }
-        }
-    }
- */
 
     "Method replaceBomb" should {
         val testGame10 = new Game(2, 3, 0, "Playing")
@@ -175,6 +119,44 @@ class GameSpec extends AnyWordSpec {
             result should be (testGame)
         }
     }
+
+   
+    "insertBomb is invoked" should {
+        "update the number of bombs in the game" in {
+            val game = Game(bombs = 5, side = 10, time = 0, board = "Playing")
+            val newBombs = 10
+            val updatedGame = game.insertBomb(newBombs)
+            updatedGame.bombs shouldBe newBombs
+        }
+    }
+
+    "insertSide is invoked" should {
+        "update the side length of the game board" in {
+            val game = Game(bombs = 5, side = 10, time = 0, board = "Playing")
+            val newSide = 15
+            val updatedGame = game.insertSide(newSide)
+            updatedGame.side shouldBe newSide
+        }
+    }
+
+    "insertTime is invoked" should {
+        "update the time of the game" in {
+            val game = Game(bombs = 5, side = 10, time = 0, board = "Playing")
+            val newTime = 100
+            val updatedGame = game.insertTime(newTime)
+            updatedGame.time shouldBe newTime
+        }
+    }
+
+    "insertBoard is invoked" should {
+        "update the state of the game board" in {
+            val game = Game(bombs = 5, side = 10, time = 0, board = "Playing")
+            val newBoard = "Won"
+            val updatedGame = game.insertBoard(newBoard)
+            updatedGame.board shouldBe newBoard
+        }
+    }
+
 
 
 
