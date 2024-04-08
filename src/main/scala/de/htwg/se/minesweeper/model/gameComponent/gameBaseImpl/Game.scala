@@ -9,6 +9,12 @@ import de.htwg.se.minesweeper.Default.given
 
 
 case class Game (bombs : Int, side: Int, time: Int, board : String) extends IGame:
+    
+    def insertBomb(newBombs: Int): Game = copy(bombs = newBombs)
+    def insertSide(newSide: Int): Game = copy(side = newSide)
+    def insertTime(newTime: Int): Game = copy(time = newTime)
+    def insertBoard(newBoard: String): Game = copy(board = newBoard)
+    
 
     def optionToList(s: Option[String]): List[Int] = {
         s match{

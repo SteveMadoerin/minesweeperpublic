@@ -19,25 +19,14 @@ class TUI(using var controller: IController) extends Observer:
     def run = 
         infoMessages("Welcome to Minesweeper")
         resize
-        parseInputandPrintLoop(firstMoveCheck = true) // initialFirstMove
+        parseInputandPrintLoop(firstMoveCheck = true)
         
     override def update(e: Event): Boolean = 
         e match
-            case Event.NewGame => 
-                infoMessages(controller.field.toString())
-                true
-            
-            case Event.Start => infoMessages(controller.field.toString()); true
-            case Event.Next => infoMessages(controller.field.toString()); true
+            case Event.NewGame | Event.Start | Event.Next | Event.Load => infoMessages(controller.field.toString()); true
             case Event.GameOver => infoMessages(s"The Game is ${controller.game.board} !", controller.field.toString()); true
-            case Event.Cheat => false
-            case Event.Help => false
-            case Event.Input => false
-            case Event.Load => infoMessages(controller.field.toString()); true
-            case Event.Save => false
-            case Event.SaveTime => false
             case Event.Exit => System.exit(0); false
-    
+            case _ => false
     
     def userInX(rawInput: String): Option[Move] = {
         val cleanInputPattern: Regex = """^[a-z]{1}[0-9]{4}$""".r
@@ -112,7 +101,7 @@ class TUI(using var controller: IController) extends Observer:
 
     
 
-    def restart: Unit = 
+    def restart = 
         infoMessages("Do you want to play again? (yes/no)")
         readLine match
             case "yes" => run

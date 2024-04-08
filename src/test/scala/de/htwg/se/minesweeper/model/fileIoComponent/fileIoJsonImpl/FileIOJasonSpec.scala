@@ -19,17 +19,16 @@ class FileIOJasonSpec extends AnyWordSpec {
     "save and load Game" should {
       val fileIO1 = new FileIO()
       var game: IGame = Default.prepareGame(10, 10, 10)
-/*       game.setSideAndBombs(10, 10)
-      game.setTime(10) */
 
       "save the game status, bombs, side and time and reload it" in {
         fileIO1.saveGame(game)
-        val loadGameTest = fileIO1.loadGame.get
-        loadGameTest.bombs should be (10)
-        loadGameTest.side should be (10) // 10 or 9
-        loadGameTest.time should be (10)
+        val loadGameTest = fileIO1.loadGame
+        loadGameTest.game.get.bombs should be (10)
+        loadGameTest.game.get.side should be (10)
+        loadGameTest.game.get.time should be (10)
       }
     }
+
     "save and load Field" should {
       val fileIO2 = new FileIO()
       var field: IField = new Field(1, Symbols.Covered)

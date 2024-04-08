@@ -22,14 +22,24 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
         else{undoRedoManager.doStep(field, DoCommand(move))}
 
     def loadGame =
-
-        val gameOption = file.loadGame
-        gameOption match {
-            case Some(game) => this.game = game
-            case None =>
+        // TWO TRACK CODE
+        val gameBox = file.loadGame
+        val gameBox2 = gameBox // just for study purposes
+        val gameBoxList = List[GameBox](gameBox, gameBox2)
+        val packGame = new PackGame(gameBoxList)
+        
+        // Using For to uppack the Monad
+        val extractedGameList = for (
+            game <- packGame.games
+        ) yield game.game match {
+            case Some(g) => g
+            case None =>  this.game
         }
 
-        game = copyInterface(game, "Playing")
+        val extractedGame = extractedGameList(0)
+
+        game = copyInterface(extractedGame, "Playing")
+        
 
         val fieldOption = file.loadField
         fieldOption match {

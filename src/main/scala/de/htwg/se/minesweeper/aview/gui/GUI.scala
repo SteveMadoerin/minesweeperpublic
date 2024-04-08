@@ -274,7 +274,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
     }
 
     // Closure
-    def loadScoreNew: Unit = {
+    def loadScoreNew = {
     
         val filePath = Default.filePathHighScore
 
@@ -287,7 +287,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
                 s"${index + 1}. $name: $score"
             }.mkString("\n")
 
-            Dialog.showMessage(null, message, "Top 10 High Scores", Message.Info)
+            Dialog.showMessage(None.orNull, message, "Top 10 High Scores", Message.Info)
         }
 
         loadAndDisplayScores() // Invoke the closure
