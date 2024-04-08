@@ -89,13 +89,13 @@ class TUI(using var controller: IController) extends Observer:
     }
     
 
-    def processMove(move: Move, firstMoveCheck: Boolean): Unit = {
+    def processMove(move: Move, firstMoveCheck: Boolean): Boolean = {
         move.value match {
-            case "open" => controller.makeAndPublish(controller.doMove, firstMoveCheck, move, controller.game)
-            case "flag" => controller.makeAndPublish(controller.put, move)
-            case "unflag" => controller.makeAndPublish(controller.put, move)
-            case "help" => controller.helpMenu
-            case _ => infoMessages(">> Invalid Input")
+            case "open" => controller.makeAndPublish(controller.doMove, firstMoveCheck, move, controller.game); true
+            case "flag" => controller.makeAndPublish(controller.put, move); true
+            case "unflag" => controller.makeAndPublish(controller.put, move); true
+            case "help" => controller.helpMenu; true
+            case _ => infoMessages(">> Invalid Input"); false
         }
     }
 

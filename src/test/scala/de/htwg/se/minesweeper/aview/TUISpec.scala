@@ -24,7 +24,17 @@ class TUISpec extends AnyWordSpec {
 
     }
 
-        
+    "def processMove" should {
+        val controller = new Controller
+        val tui = new TUI(using controller)
+        val leMove = Move("", 0, 0)
+        "should print a message when user input is invalid" in{
+            tui.processMove(leMove, false) should be(false)
+
+        }
+
+    }
+
 /*     "A TUI with following input" should {
         val tui = new TUI()
         "run only once" in {
