@@ -286,7 +286,6 @@ class GUI(using var controller: IController) extends Frame with Observer:
 
             Dialog.showMessage(None.orNull, message, "Top 10 High Scores", Message.Info)
         }
-
         loadAndDisplayScores() // Invoke the closure
     }
         
