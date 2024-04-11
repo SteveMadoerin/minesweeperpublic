@@ -4,7 +4,7 @@ package de.htwg.sa.minesweeper.aview
 import org.scalatest.matchers.should.Matchers._
 import org.scalatest.wordspec.AnyWordSpec
 import de.htwg.sa.minesweeper.controller.controllerComponent.controllerBaseImpl.Controller
-import de.htwg.se.minesweeper.model.gameComponent.gameBaseImpl._
+import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl._
 import de.htwg.sa.minesweeper.util.Move
 import de.htwg.sa.minesweeper.util.Event
 import de.htwg.sa.minesweeper.Default.{given}
