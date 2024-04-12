@@ -1,14 +1,15 @@
+ThisBuild / scalaVersion := "3.3.1"
+ThisBuild / version := "0.1.0-SNAPSHOT"
+ThisBuild / organization := "de.htwg.sa.minesweeper"
+ThisBuild / organizationName := "minesweeper"
 
 
-val scala3Version = "3.3.1"
 
 lazy val root: Project = project
     .in(file("."))
     .dependsOn(core, model, persistence, ui)
     .settings(
-        name := "Minesweeper",
-        version := "0.1.0-SNAPSHOT",
-        sharedSettings,
+        commonSettings,
         jacocoCoverallsCoverageSettings
     )
     .aggregate(core, model, persistence, ui)
@@ -18,7 +19,7 @@ lazy val model = project
     .in(file("model"))
     .settings(
         name := "model",
-        sharedSettings
+        commonSettings
     )
 
 lazy val core = project
@@ -26,7 +27,7 @@ lazy val core = project
     .dependsOn(model, persistence)
     .settings(
         name := "core",
-        sharedSettings
+        commonSettings
     )
 
 
@@ -35,7 +36,7 @@ lazy val persistence = project
     .dependsOn(model)
     .settings(
         name := "persistence",
-        sharedSettings
+        commonSettings
     )
 
 lazy val ui = project
@@ -43,10 +44,10 @@ lazy val ui = project
     .dependsOn(model, persistence, core)
     .settings(
         name := "ui",
-        sharedSettings
+        commonSettings
     )
 
-lazy val sharedSettings: Seq[Def.Setting[?]] = Seq(
+lazy val commonSettings: Seq[Def.Setting[?]] = Seq(
     scalaVersion := scala3Version,
     libraryDependencies ++= Seq(
         ("com.typesafe.play" %% "play-json" % "2.10.0-RC5"),
