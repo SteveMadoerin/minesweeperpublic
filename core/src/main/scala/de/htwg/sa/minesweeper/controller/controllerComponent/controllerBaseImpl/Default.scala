@@ -15,7 +15,6 @@ object Default{
     
     given IGame = prepareGame(10, 9, 0)
     given IField = createField(prepareGame(10, 9, 0))
-    given IController = Controller()
     
     /*given IFileIO = new JsonFileIO() //choose Implementation here
     val filePathHighScore = "C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\highscore.json"*/
