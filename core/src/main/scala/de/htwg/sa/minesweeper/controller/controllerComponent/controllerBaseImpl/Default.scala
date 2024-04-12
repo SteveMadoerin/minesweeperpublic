@@ -1,4 +1,4 @@
-package controller.controllerComponent.controllerBaseImpl
+/* package controller.controllerComponent.controllerBaseImpl
 
 import controller.controllerComponent.IController
 import model.gameComponent.gameBaseImpl._
@@ -33,4 +33,4 @@ object Default{
         adjacentField.newField(leGame.side, tempGame)
     }
     
-}
+} */

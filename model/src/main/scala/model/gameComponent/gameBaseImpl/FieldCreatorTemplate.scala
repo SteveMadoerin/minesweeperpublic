@@ -2,7 +2,7 @@ package model.gameComponent.gameBaseImpl
 
 import model.gameComponent._
 import scala.util.Random
-/* import de.htwg.sa.minesweeper.Default */
+//import de.htwg.sa.minesweeper.Default
 
 
 abstract class FieldCreatorTemplate{

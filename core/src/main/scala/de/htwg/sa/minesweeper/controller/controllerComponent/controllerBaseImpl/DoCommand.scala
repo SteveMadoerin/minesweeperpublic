@@ -4,7 +4,9 @@ import model.gameComponent._
 import model.gameComponent.gameBaseImpl._
 
 import de.htwg.sa.minesweeper.util.{Command, UndoRedoManager, Move}
-import Default.{given}
+//import Default.{given}
+import model.gameComponent.gameBaseImpl.Module.{given}
+
 
 class DoCommand(move: Move) extends Command[IField]:
 

@@ -4,11 +4,13 @@ import controller.controllerComponent.IController
 import model.gameComponent.gameBaseImpl._
 import model.gameComponent._
 import de.htwg.sa.minesweeper.util.{Observable, Move, UndoRedoManager, Event}
+import model.gameComponent.gameBaseImpl.Module
 
 import fileIoComponent.IFileIO
 
 class Controller(using var game: IGame, var file: IFileIO) extends IController with Observable:
-    var field: IField = Default.createField(game)
+    //var field: IField = Default.createField(game)
+    var field: IField = Module.createField(game)
     val decider = new Decider()
     val undoRedoManager = new UndoRedoManager[IField]
     
@@ -104,7 +106,8 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
         val gameCopy = tempGame.copy(bombs, side, tempGame.time, "Playing")
         val newGame: IGame = gameCopy
         game = newGame
-        field = Default.createField(game)
+        //field = Default.createField(game)
+        field = createField(game)
         notifyObservers(Event.NewGame)
     
     // doMove wird von TUI als parameter übergeben hierzu wird game und field in der TUI Klasse angegeben
@@ -150,6 +153,12 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
         val gameCopy = tempGame.copy(tempGame.bombs, tempGame.side, tempGame.time, status)
         val newGame: IGame = gameCopy
         newGame
+
+    def createField(leGame: IGame): IField = {
+        val adjacentField = Playfield()
+        val tempGame: Game = leGame.asInstanceOf[Game]
+        adjacentField.newField(leGame.side, tempGame)
+    }
 
     
 end Controller
