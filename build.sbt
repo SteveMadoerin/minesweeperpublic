@@ -7,8 +7,16 @@ ThisBuild / organizationName := "minesweeper"
 
 
 
+lazy val shared = project
+    .in(file("shared"))
+    .settings(
+        name := "shared",
+        commonSettings
+    )
+
 lazy val model = project
     .in(file("model"))
+    .dependsOn(shared)
     .settings(
         name := "model",
         commonSettings
@@ -16,7 +24,7 @@ lazy val model = project
 
 lazy val core = project
     .in(file("core"))
-    .dependsOn(model, persistence)
+    .dependsOn(model, persistence, shared)
     .settings(
         name := "core",
         commonSettings
@@ -25,7 +33,7 @@ lazy val core = project
 
 lazy val persistence = project
     .in(file("persistence"))
-    .dependsOn(model)
+    .dependsOn(model, shared)
     .settings(
         name := "persistence",
         commonSettings
@@ -33,7 +41,7 @@ lazy val persistence = project
 
 lazy val ui = project
     .in(file("ui"))
-    .dependsOn(model, persistence, core)
+    .dependsOn(model, persistence, core, shared)
     .settings(
         name := "ui",
         commonSettings
@@ -41,7 +49,7 @@ lazy val ui = project
 
 lazy val root: Project = project
     .in(file("."))
-    .dependsOn(core, model, persistence, ui)
+    .dependsOn(core, model, persistence, ui, shared)
     .settings(
         commonSettings,
         jacocoCoverallsCoverageSettings
