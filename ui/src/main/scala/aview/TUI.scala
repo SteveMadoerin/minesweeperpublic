@@ -10,7 +10,6 @@ import scala.util.{Try, Success, Failure}
 import scala.compiletime.ops.string
 import scala.util.matching.Regex
 
-import de.htwg.sa.minesweeper.Default.{given}
 
 class TUI(using var controller: IController) extends Observer:
     

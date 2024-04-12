@@ -3,8 +3,8 @@ package aview.gui
 import controller.controllerComponent.IController
 import de.htwg.sa.minesweeper.util.{Observer, Event, Move}
 
-import de.htwg.sa.minesweeper.Default.{given}
-import de.htwg.sa.minesweeper.Default
+import aview.Default.{given}
+import aview.Default
 import scala.swing.event.MouseClicked
 import scala.swing._
 import scala.swing.Button

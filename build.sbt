@@ -54,7 +54,7 @@ lazy val root: Project = project
         commonSettings,
         jacocoCoverallsCoverageSettings
     )
-    .aggregate(core, model, persistence, ui)
+    .aggregate(core, model, persistence, ui, shared)
     .enablePlugins(JacocoCoverallsPlugin)
 
 

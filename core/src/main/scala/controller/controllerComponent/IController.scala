@@ -1,8 +1,8 @@
-package ontroller.controllerComponent
+package controller.controllerComponent
 
 import model.gameComponent._
 import model.gameComponent.gameBaseImpl._
-import util.{Observable, Move}
+import de.htwg.sa.minesweeper.util.{Observable, Move}
 
 
 trait IController extends Observable{

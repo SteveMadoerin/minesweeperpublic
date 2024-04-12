@@ -3,11 +3,9 @@ package controller.controllerComponent.controllerBaseImpl
 import controller.controllerComponent.IController
 import model.gameComponent.gameBaseImpl._
 import model.gameComponent._
-import util.{Observable, Move, UndoRedoManager, Event}
+import de.htwg.sa.minesweeper.util.{Observable, Move, UndoRedoManager, Event}
 
-import Default.{given}
-import model.fileIoComponent.IFileIO
-import de.htwg.sa.minesweeper.Default
+import fileIoComponent.IFileIO
 
 class Controller(using var game: IGame, var file: IFileIO) extends IController with Observable:
     var field: IField = Default.createField(game)

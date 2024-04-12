@@ -1,4 +1,4 @@
-package de.htwg.sa.minesweeper
+package aview
 
 import controller.controllerComponent.IController
 import controller.controllerComponent.controllerBaseImpl.Controller
@@ -9,6 +9,7 @@ import de.htwg.sa.minesweeper.util.{Observable, Move, UndoRedoManager, Event}
 import fileIoComponent.IFileIO
 import fileIoComponent.fileIoXmlImpl.{FileIO => XmlFileIO}
 import fileIoComponent.fileIoJsonImpl.{FileIO => JsonFileIO}
+
 
 
 object Default{

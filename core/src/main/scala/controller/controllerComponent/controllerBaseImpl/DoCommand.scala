@@ -3,7 +3,7 @@ package controller.controllerComponent.controllerBaseImpl
 import model.gameComponent._
 import model.gameComponent.gameBaseImpl._
 
-import util.{Command, UndoRedoManager, Move}
+import de.htwg.sa.minesweeper.util.{Command, UndoRedoManager, Move}
 import Default.{given}
 
 class DoCommand(move: Move) extends Command[IField]:
