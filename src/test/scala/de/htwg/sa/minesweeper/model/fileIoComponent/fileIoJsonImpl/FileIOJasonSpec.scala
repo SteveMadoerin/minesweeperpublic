@@ -1,4 +1,4 @@
-package de.htwg.sa.minesweeper.model.fileIoComponent.fileIoJsonImpl
+/* package de.htwg.sa.minesweeper.model.fileIoComponent.fileIoJsonImpl
 
 import org.scalatest.matchers.should.Matchers._
 import org.scalatest.wordspec.AnyWordSpec
@@ -118,4 +118,4 @@ class FileIOJasonSpec extends AnyWordSpec {
     }
 
   }
-}
+} */

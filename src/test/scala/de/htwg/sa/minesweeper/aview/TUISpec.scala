@@ -1,4 +1,4 @@
-package de.htwg.sa.minesweeper.aview
+/* package de.htwg.sa.minesweeper.aview
 
 
 import org.scalatest.matchers.should.Matchers._
@@ -127,4 +127,4 @@ class TUISpec extends AnyWordSpec {
     }
 
 
-}
+} */

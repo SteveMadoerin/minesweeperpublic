@@ -1,10 +1,10 @@
-package de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl
+package model.gameComponent.gameBaseImpl
 
-import de.htwg.sa.minesweeper.model.gameComponent._
-import de.htwg.sa.minesweeper.Default
+import model.gameComponent._
 import scala.io.StdIn.readLine
 import scala.util.{Random, Try}
 import scala.annotation.tailrec
+import de.htwg.sa.minesweeper.Default
 import de.htwg.sa.minesweeper.Default.given
 
 

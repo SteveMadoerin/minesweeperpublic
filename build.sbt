@@ -1,6 +1,8 @@
+
+
 val scala3Version = "3.3.1"
 
-lazy val root = project
+lazy val root: Project = project
     .in(file("."))
     .dependsOn(core, model, persistence, ui)
     .settings(
@@ -12,6 +14,13 @@ lazy val root = project
     .aggregate(core, model, persistence, ui)
     .enablePlugins(JacocoCoverallsPlugin)
 
+lazy val model = project
+    .in(file("model"))
+    .settings(
+        name := "model",
+        sharedSettings
+    )
+
 lazy val core = project
     .in(file("core"))
     .dependsOn(model, persistence)
@@ -20,16 +29,10 @@ lazy val core = project
         sharedSettings
     )
 
-lazy val model = project
-    .in(file("model"))
-    .settings(
-        name := "model",
-        sharedSettings
-    )
 
 lazy val persistence = project
     .in(file("persistence"))
-    .dependsOn(model) // evt ui
+    .dependsOn(model)
     .settings(
         name := "persistence",
         sharedSettings
@@ -37,7 +40,7 @@ lazy val persistence = project
 
 lazy val ui = project
     .in(file("ui"))
-    .dependsOn(core, model, persistence)
+    .dependsOn(model, persistence, core)
     .settings(
         name := "ui",
         sharedSettings

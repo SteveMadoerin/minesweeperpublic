@@ -1,12 +1,12 @@
-package de.htwg.sa.minesweeper.controller.controllerComponent.controllerBaseImpl
+package controller.controllerComponent.controllerBaseImpl
 
-import de.htwg.sa.minesweeper.controller.controllerComponent.IController
-import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl._
-import de.htwg.sa.minesweeper.model.gameComponent._
-import de.htwg.sa.minesweeper.util.{Observable, Move, UndoRedoManager, Event}
+import controller.controllerComponent.IController
+import model.gameComponent.gameBaseImpl._
+import model.gameComponent._
+import util.{Observable, Move, UndoRedoManager, Event}
 
-import de.htwg.sa.minesweeper.Default.{given}
-import de.htwg.sa.minesweeper.model.fileIoComponent.IFileIO
+import Default.{given}
+import model.fileIoComponent.IFileIO
 import de.htwg.sa.minesweeper.Default
 
 class Controller(using var game: IGame, var file: IFileIO) extends IController with Observable:
@@ -15,7 +15,7 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
     val undoRedoManager = new UndoRedoManager[IField]
     
     def doMove(b: Boolean, move: Move, game: IGame) = 
-        val (tempGame, tempField) = decider.evaluateStrategy(b, move.x, move.y, field, game)
+        val (tempGame, tempField): (IGame, IField) = decider.evaluateStrategy(b, move.x, move.y, field, game)
         field = tempField 
         this.game = tempGame
         if(field.showInvisibleCell(move.y, move.x) == Symbols.Zero){field}
@@ -95,7 +95,7 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
     def newGameField(optionString: Option[String]) =
         game = copyInterface(game, "Playing")
         val prepareWithDifficulty = game.prepareBoard(optionString)_ // partially applied and get a function
-        val (feld, spiel) = prepareWithDifficulty(game)// complete preparation with game instance
+        val (feld, spiel): (IField, IGame) = prepareWithDifficulty(game)// complete preparation with game instance
         field = feld
         game = spiel
 

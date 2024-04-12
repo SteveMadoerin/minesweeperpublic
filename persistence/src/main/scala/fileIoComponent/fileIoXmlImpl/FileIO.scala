@@ -1,8 +1,8 @@
-package de.htwg.sa.minesweeper.model.fileIoComponent.fileIoXmlImpl
+package fileIoComponent.fileIoXmlImpl
 
-import de.htwg.sa.minesweeper.model.fileIoComponent.IFileIO
-import de.htwg.sa.minesweeper.model.gameComponent.{IGame, IField}
-import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl._
+import fileIoComponent.IFileIO
+import model.gameComponent.{IGame, IField}
+import model.gameComponent.gameBaseImpl._
 import de.htwg.sa.minesweeper.Default.{given}
 import de.htwg.sa.minesweeper.Default
 import scala.xml._

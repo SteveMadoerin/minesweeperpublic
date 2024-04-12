@@ -1,12 +1,12 @@
 package de.htwg.sa.minesweeper
 
-import de.htwg.sa.minesweeper.controller.controllerComponent.IController
-import de.htwg.sa.minesweeper.controller.controllerComponent.controllerBaseImpl.Controller
-import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl._
-import de.htwg.sa.minesweeper.model.gameComponent._
-import de.htwg.sa.minesweeper.model.fileIoComponent.IFileIO
-import de.htwg.sa.minesweeper.model.fileIoComponent.fileIoXmlImpl.{FileIO => XmlFileIO}
-import de.htwg.sa.minesweeper.model.fileIoComponent.fileIoJsonImpl.{FileIO => JsonFileIO}
+import controller.controllerComponent.IController
+import controller.controllerComponent.controllerBaseImpl.Controller
+import model.gameComponent.gameBaseImpl._
+import model.gameComponent._
+import model.fileIoComponent.IFileIO
+import model.fileIoComponent.fileIoXmlImpl.{FileIO => XmlFileIO}
+import model.fileIoComponent.fileIoJsonImpl.{FileIO => JsonFileIO}
 
 
 object Default{

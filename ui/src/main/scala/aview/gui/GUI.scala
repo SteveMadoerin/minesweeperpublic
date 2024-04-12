@@ -1,6 +1,6 @@
-package de.htwg.sa.minesweeper.aview.gui
+package aview.gui
 
-import de.htwg.sa.minesweeper.controller.controllerComponent.IController
+import controller.controllerComponent.IController
 import de.htwg.sa.minesweeper.util.{Observer, Event, Move}
 
 import de.htwg.sa.minesweeper.Default.{given}

@@ -1,7 +1,7 @@
 package de.htwg.sa.minesweeper
 
-import de.htwg.sa.minesweeper.aview.TUI
-import de.htwg.sa.minesweeper.aview.gui.GUI
+import aview.TUI
+import aview.gui.GUI
 import de.htwg.sa.minesweeper.Default.{given}
 
 object Minesweeper {

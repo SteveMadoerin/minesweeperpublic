@@ -1,7 +1,7 @@
-package de.htwg.sa.minesweeper.model.fileIoComponent
+package model.fileIoComponent
 
-import de.htwg.sa.minesweeper.model.gameComponent.{IGame, IField}
-import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl.GameBox
+import model.gameComponent.{IGame, IField}
+import model.gameComponent.gameBaseImpl.GameBox
 
 trait IFileIO {
     //def loadGame: Option[IGame]

@@ -1,4 +1,4 @@
-package de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl
+package model.gameComponent.gameBaseImpl
 
 
 case class GameBox(game: Option[Game]):

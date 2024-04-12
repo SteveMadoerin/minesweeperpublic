@@ -1,11 +1,10 @@
-package de.htwg.sa.minesweeper
 package controller.controllerComponent.controllerBaseImpl
 
-import de.htwg.sa.minesweeper.model.gameComponent._
-import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl._
+import model.gameComponent._
+import model.gameComponent.gameBaseImpl._
 
 import util.{Command, UndoRedoManager, Move}
-import de.htwg.sa.minesweeper.Default.{given}
+import Default.{given}
 
 class DoCommand(move: Move) extends Command[IField]:
 

@@ -1,7 +1,7 @@
-package de.htwg.sa.minesweeper.aview
+package aview
 
 
-import de.htwg.sa.minesweeper.controller.controllerComponent.IController
+import controller.controllerComponent.IController
 import de.htwg.sa.minesweeper.util.{Observer, Move, Event}
 
 import scala.io.StdIn.readLine

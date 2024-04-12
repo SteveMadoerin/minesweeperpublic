@@ -1,16 +1,16 @@
-package de.htwg.sa.minesweeper.model.fileIoComponent.fileIoJsonImpl
+package fileIoComponent.fileIoJsonImpl
 
-import de.htwg.sa.minesweeper.model.fileIoComponent.IFileIO
-import de.htwg.sa.minesweeper.model.gameComponent.{IGame, IField}
+import fileIoComponent.IFileIO
+import model.gameComponent.{IGame, IField}
 import scala.io.Source
 import java.io._
 import play.api.libs.json._
 import de.htwg.sa.minesweeper.Default.{given}
 import de.htwg.sa.minesweeper.Default
-import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl.Symbols
-import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl.Matrix
-import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl.GameBox
-import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl.Game
+import model.gameComponent.gameBaseImpl.Symbols
+import model.gameComponent.gameBaseImpl.Matrix
+import model.gameComponent.gameBaseImpl.GameBox
+import model.gameComponent.gameBaseImpl.Game
 import scala.util.Try
 import scala.util.Success
 import scala.util.Failure

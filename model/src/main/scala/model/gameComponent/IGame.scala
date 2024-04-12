@@ -1,6 +1,6 @@
-package de.htwg.sa.minesweeper.model.gameComponent
+package model.gameComponent
 
-import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl.{Symbols,Matrix}
+import model.gameComponent.gameBaseImpl.{Symbols,Matrix}
 
 
 trait IGame {

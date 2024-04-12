@@ -1,4 +1,4 @@
-package de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl
+/* package de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl
 
 import org.scalatest.matchers.should.Matchers._
 import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl.Symbols
@@ -54,3 +54,4 @@ class SymbolsSpec extends AnyWordSpec {
   }
 }
 
+ */

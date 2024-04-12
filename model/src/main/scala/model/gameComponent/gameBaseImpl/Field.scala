@@ -1,6 +1,6 @@
-package de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl
+package model.gameComponent.gameBaseImpl
 
-import de.htwg.sa.minesweeper.model.gameComponent._
+import model.gameComponent._
 import util.chaining.scalaUtilChainingOps
 
 case class Field(matrix: Matrix[Symbols], hidden: Matrix[Symbols]) extends IField:
