@@ -1,4 +1,4 @@
-package model.fileIoComponent
+package fileIoComponent
 
 import model.gameComponent.{IGame, IField}
 import model.gameComponent.gameBaseImpl.GameBox

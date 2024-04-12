@@ -4,8 +4,8 @@ import model.gameComponent._
 import scala.io.StdIn.readLine
 import scala.util.{Random, Try}
 import scala.annotation.tailrec
-import de.htwg.sa.minesweeper.Default
-import de.htwg.sa.minesweeper.Default.given
+/* import de.htwg.sa.minesweeper.Default
+import de.htwg.sa.minesweeper.Default.given */
 
 
 case class Game (bombs : Int, side: Int, time: Int, board : String) extends IGame:
@@ -60,7 +60,7 @@ case class Game (bombs : Int, side: Int, time: Int, board : String) extends IGam
         val adjacentInitialised = adjacent.newField(side, this)
         val newReplacedbombHidMatrix = if(adjacentInitialised.hidden.cell(y, x) == Symbols.Bomb){
             val replacedHiddenMatrix = replaceBomb(x, y, adjacentInitialised)
-            val replacedAdjacentHiddenField = Default.mergeMatrixToField(field.matrix, replacedHiddenMatrix.hidden)
+            val replacedAdjacentHiddenField = mergeMatrixToField(field.matrix, replacedHiddenMatrix.hidden)
             replacedAdjacentHiddenField
         } else {
             adjacentInitialised
@@ -101,6 +101,8 @@ case class Game (bombs : Int, side: Int, time: Int, board : String) extends IGam
           .flatMap(row => multiIndex.map(col => (row, col)))
           .count{ case(row, col) => visibleMatrix.cell(row, col) == symbols && isValid(row, col, sizze)}
     }
+
+    def mergeMatrixToField(sichtbar: Matrix[Symbols], unsichtbar: Matrix[Symbols] ): IField = new Field(sichtbar, unsichtbar)
 
     def calcCovered (visibleMatrix: Matrix[Symbols]): Int = calcX(Symbols.Covered)(visibleMatrix)
     def calcFlag (visibleMatrix: Matrix[Symbols]): Int = calcX(Symbols.F)(visibleMatrix)

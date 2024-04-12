@@ -5,15 +5,7 @@ ThisBuild / organizationName := "minesweeper"
 
 
 
-lazy val root: Project = project
-    .in(file("."))
-    .dependsOn(core, model, persistence, ui)
-    .settings(
-        commonSettings,
-        jacocoCoverallsCoverageSettings
-    )
-    .aggregate(core, model, persistence, ui)
-    .enablePlugins(JacocoCoverallsPlugin)
+
 
 lazy val model = project
     .in(file("model"))
@@ -47,8 +39,18 @@ lazy val ui = project
         commonSettings
     )
 
+lazy val root: Project = project
+    .in(file("."))
+    .dependsOn(core, model, persistence, ui)
+    .settings(
+        commonSettings,
+        jacocoCoverallsCoverageSettings
+    )
+    .aggregate(core, model, persistence, ui)
+    .enablePlugins(JacocoCoverallsPlugin)
+
+
 lazy val commonSettings: Seq[Def.Setting[?]] = Seq(
-    scalaVersion := scala3Version,
     libraryDependencies ++= Seq(
         ("com.typesafe.play" %% "play-json" % "2.10.0-RC5"),
          "org.scala-lang.modules" %% "scala-xml" % "2.0.1",
