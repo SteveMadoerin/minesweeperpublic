@@ -22,20 +22,19 @@ lazy val model = project
         commonSettings
     )
 
-lazy val core = project
-    .in(file("core"))
-    .dependsOn(model, persistence, shared)
-    .settings(
-        name := "core",
-        commonSettings
-    )
-
-
 lazy val persistence = project
     .in(file("persistence"))
     .dependsOn(model, shared)
     .settings(
         name := "persistence",
+        commonSettings
+    )
+
+lazy val core = project
+    .in(file("core"))
+    .dependsOn(model, persistence, shared)
+    .settings(
+        name := "core",
         commonSettings
     )
 

@@ -11,13 +11,11 @@ import model.gameComponent.gameBaseImpl._
 import scala.util.Try
 import scala.util.Success
 import scala.util.Failure
+import fileIoComponent.config.Default
 
 
 class FileIO extends IFileIO{
 
-    def scalableMatrix(size: Int, filling: Symbols): Matrix[Symbols] = new Matrix(size, filling)
-    def scalableField(size: Int, filling: Symbols): IField = new Field(size, filling)
-    def mergeMatrixToField(sichtbar: Matrix[Symbols], unsichtbar: Matrix[Symbols] ): IField = new Field(sichtbar, unsichtbar)
     
     override def saveGame(game: IGame): Unit = {
         val pw = Try (new PrintWriter(new File("C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\game.json")))
@@ -134,14 +132,14 @@ class FileIO extends IFileIO{
         val json: JsValue = Json.parse(source)
         val size = (json \ "field" \ "size").get.toString.toInt
 
-        val fieldOption: Option[IField] = Some(scalableField(size, Symbols.E))
-        val matrixOption: Option[Matrix[Symbols]] = Some(scalableMatrix(size, Symbols.E))
-        val hiddenOption: Option[Matrix[Symbols]] = Some(scalableMatrix(size, Symbols.E))
+        val fieldOption: Option[IField] = Some(Default.scalableField(size, Symbols.E))
+        val matrixOption: Option[Matrix[Symbols]] = Some(Default.scalableMatrix(size, Symbols.E))
+        val hiddenOption: Option[Matrix[Symbols]] = Some(Default.scalableMatrix(size, Symbols.E))
 
 
         val matrix1 = matrixOption match{
             case Some(matrix) => matrix
-            case None => println("Matrix is not valid"); scalableMatrix(size, Symbols.E)
+            case None => println("Matrix is not valid"); Default.scalableMatrix(size, Symbols.E)
         }
 
         val updatedMatrix: Matrix[Symbols] = (0 until size * size).foldLeft(matrix1) {
@@ -154,7 +152,7 @@ class FileIO extends IFileIO{
 
         val hidden1 = hiddenOption match{
             case Some(m) => m
-            case None => println("Hidden is not valid"); scalableMatrix(size, Symbols.E)
+            case None => println("Hidden is not valid"); Default.scalableMatrix(size, Symbols.E)
         }
 
         val updatedHidden: Matrix[Symbols] = (0 until size * size).foldLeft(hidden1) {
@@ -166,7 +164,7 @@ class FileIO extends IFileIO{
         }
 
         val finalFieldOption = fieldOption match{
-            case Some(f) => Some(mergeMatrixToField(updatedMatrix, updatedHidden))
+            case Some(f) => Some(Default.mergeMatrixToField(updatedMatrix, updatedHidden))
             case None => println("Field is not valid"); None
         }
 

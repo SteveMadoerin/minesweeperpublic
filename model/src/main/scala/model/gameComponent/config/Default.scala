@@ -1,10 +1,9 @@
-package model.gameComponent.gameBaseImpl
+package model.gameComponent.config
 
 import model.gameComponent._
+import model.gameComponent.gameBaseImpl._
 
-
-
-object Module {
+object Default {
 
     given IGame = prepareGame(10, 9, 0)
     given IField = createField(prepareGame(10, 9, 0))
@@ -20,5 +19,4 @@ object Module {
         val tempGame: Game = leGame.asInstanceOf[Game]
         adjacentField.newField(leGame.side, tempGame)
     }
-  
 }

@@ -5,18 +5,16 @@ import model.gameComponent.{IGame, IField}
 import model.gameComponent.gameBaseImpl._
 /* import de.htwg.sa.minesweeper.Default.{given}
 import de.htwg.sa.minesweeper.Default */
+import fileIoComponent.config.Default
 import scala.xml._
 import scala.compiletime.ops.string
+import scala.util.{Try, Success, Failure}
 import java.io._
-import scala.util.Try
-import scala.util.Success
-import scala.util.Failure
+
+
 
 class FileIO extends IFileIO {
 
-    def scalableMatrix(size: Int, filling: Symbols): Matrix[Symbols] = new Matrix(size, filling)
-    def scalableField(size: Int, filling: Symbols): IField = new Field(size, filling)
-    def mergeMatrixToField(sichtbar: Matrix[Symbols], unsichtbar: Matrix[Symbols] ): IField = new Field(sichtbar, unsichtbar)
 
     override def loadGame: GameBox = {
         // TRY OPTION for file
@@ -72,9 +70,9 @@ class FileIO extends IFileIO {
 
         val size = (file \\ "field" \@ "size").toInt
 
-        val matrixOption = Some(scalableMatrix(size, Symbols.Covered))
-        val hiddenOption = Some(scalableMatrix(size, Symbols.Covered))
-        val fieldOption = Some(scalableField(size, Symbols.Covered))
+        val matrixOption = Some(Default.scalableMatrix(size, Symbols.Covered))
+        val hiddenOption = Some(Default.scalableMatrix(size, Symbols.Covered))
+        val fieldOption = Some(Default.scalableField(size, Symbols.Covered))
 
         val cellNodesVisible: NodeSeq = (file \\ "field" \\ "matrix" \\ "cell")
         val matrix = cellNodesVisible.foldLeft(matrixOption.get) { (m, cell) =>
@@ -93,7 +91,7 @@ class FileIO extends IFileIO {
         }
 
         fieldOption.map { f =>
-            mergeMatrixToField(matrix, hidden)
+            Default.mergeMatrixToField(matrix, hidden)
         }
     }
 

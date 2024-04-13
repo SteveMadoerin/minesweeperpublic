@@ -2,8 +2,8 @@ package model.gameComponent.gameBaseImpl
 
 import model.gameComponent._
 import scala.util.Random
+import model.gameComponent.config.Default
 //import de.htwg.sa.minesweeper.Default
-
 
 abstract class FieldCreatorTemplate{
 
@@ -12,10 +12,7 @@ abstract class FieldCreatorTemplate{
         val initialisedField = initialiseInvisibleMatrix(emptyField, spiel)
         initialisedField
 
-    protected def createEmptyField(side: Int ): IField = 
-        def scalableField(size: Int, filling: Symbols): IField = new Field(size, filling)
-        scalableField(side, Symbols.Covered)
-
+    protected def createEmptyField(side: Int ): IField = Default.scalableField(side, Symbols.Covered)
 
     protected def initialiseInvisibleMatrix(field: IField, game: Game): IField = field
 }
@@ -26,15 +23,12 @@ class Minefield extends FieldCreatorTemplate{
     
     override protected def initialiseInvisibleMatrix(field: IField, game: Game): IField =
 
-        def scalableMatrix(size: Int, filling: Symbols): Matrix[Symbols] = new Matrix(size, filling)
-        def mergeMatrixToField(sichtbar: Matrix[Symbols], unsichtbar: Matrix[Symbols] ): IField = new Field(sichtbar, unsichtbar) 
-
         val bombs = game.bombs
         val side = game.side
         val sichtbareMatrix = field.matrix
-        val unsichtbareMatrix = scalableMatrix(side, Symbols.Empty)
+        val unsichtbareMatrix = Default.scalableMatrix(side, Symbols.Empty)
         val newUnsichtbareMatrix = game.intitializeBombs(unsichtbareMatrix, bombs)
-        val newField = mergeMatrixToField(sichtbareMatrix, newUnsichtbareMatrix)
+        val newField = Default.mergeMatrixToField(sichtbareMatrix, newUnsichtbareMatrix)
         newField
 
 }
@@ -44,17 +38,13 @@ class Playfield extends FieldCreatorTemplate{
 
     override protected def initialiseInvisibleMatrix(field: IField, game: Game): IField = 
 
-    
-        def scalableMatrix(size: Int, filling: Symbols): Matrix[Symbols] = new Matrix(size, filling)
-        def mergeMatrixToField(sichtbar: Matrix[Symbols], unsichtbar: Matrix[Symbols] ): IField = new Field(sichtbar, unsichtbar) 
-
         val bombs = game.bombs
         val side = game.side
         val sichtbareMatrix = field.matrix
-        val unsichtbareMatrix = scalableMatrix(side, Symbols.Empty)
+        val unsichtbareMatrix = Default.scalableMatrix(side, Symbols.Empty)
         val newUnsichtbareMatrix = game.intitializeBombs(unsichtbareMatrix, bombs)
         val newUnsichtbareMatrixAdjacent = game.initializeAdjacentNumbers(newUnsichtbareMatrix)
-        val newField = mergeMatrixToField(sichtbareMatrix, newUnsichtbareMatrixAdjacent)
+        val newField = Default.mergeMatrixToField(sichtbareMatrix, newUnsichtbareMatrixAdjacent)
         newField
 
 }
