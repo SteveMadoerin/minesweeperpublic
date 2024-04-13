@@ -30,17 +30,17 @@ lazy val persistence = project
         commonSettings
     )
 
-lazy val core = project
-    .in(file("core"))
+lazy val controller = project
+    .in(file("controller"))
     .dependsOn(model, persistence, shared)
     .settings(
-        name := "core",
+        name := "controller",
         commonSettings
     )
 
 lazy val ui = project
     .in(file("ui"))
-    .dependsOn(model, persistence, core, shared)
+    .dependsOn(model, persistence, controller, shared)
     .settings(
         name := "ui",
         commonSettings
@@ -48,12 +48,12 @@ lazy val ui = project
 
 lazy val root: Project = project
     .in(file("."))
-    .dependsOn(core, model, persistence, ui, shared)
+    .dependsOn(controller, model, persistence, ui, shared)
     .settings(
         commonSettings,
         jacocoCoverallsCoverageSettings
     )
-    .aggregate(core, model, persistence, ui, shared)
+    .aggregate(controller, model, persistence, ui, shared)
     .enablePlugins(JacocoCoverallsPlugin)
 
 
