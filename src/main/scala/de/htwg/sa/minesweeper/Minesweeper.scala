@@ -1,9 +1,9 @@
 package de.htwg.sa.minesweeper
 
-import aview.TUI
-import aview.gui.GUI
+import de.htwg.sa.minesweeper.ui.TUI
+import de.htwg.sa.minesweeper.ui.gui.GUI
 //import de.htwg.sa.minesweeper.Default.{given}
-import aview.config.Default.{given}
+import de.htwg.sa.minesweeper.ui.config.Default.{given}
 
 object Minesweeper {
     

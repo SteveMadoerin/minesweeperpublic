@@ -1,7 +1,7 @@
-package de.htwg.sa.minesweeper
+package de.htwg.sa.minesweeper.ui.config
 
-//import controller.controllerComponent.IController
-//import controller.controllerComponent.controllerBaseImpl.Controller
+import de.htwg.sa.minesweeper.controller.controllerComponent.IController
+import de.htwg.sa.minesweeper.controller.controllerComponent.controllerBaseImpl.Controller
 import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl._
 import de.htwg.sa.minesweeper.model.gameComponent._
 import de.htwg.sa.minesweeper.shared.{Observable, Move, UndoRedoManager, Event}
@@ -11,16 +11,13 @@ import de.htwg.sa.minesweeper.persistence.fileIoComponent.fileIoXmlImpl.{FileIO 
 import de.htwg.sa.minesweeper.persistence.fileIoComponent.fileIoJsonImpl.{FileIO => JsonFileIO}
 
 
+
 object Default{
-    
+
+    given IController = Controller()
+
     given IGame = prepareGame(10, 9, 0)
     given IField = createField(prepareGame(10, 9, 0))
-    //given IController = Controller()
-    
-    /*given IFileIO = new JsonFileIO() //choose Implementation here
-    val filePathHighScore = "C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\highscore.json"*/
-    given IFileIO = new XmlFileIO() //choose Implementation here
-    val filePathHighScore = "C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\highscore.xml"
 
     def scalableMatrix(size: Int, filling: Symbols): Matrix[Symbols] = new Matrix(size, filling)
     def scalableField(size: Int, filling: Symbols): IField = new Field(size, filling)
@@ -34,4 +31,8 @@ object Default{
         adjacentField.newField(leGame.side, tempGame)
     }
     
+    /*given IFileIO = new JsonFileIO() //choose Implementation here
+    val filePathHighScore = "C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\highscore.json"*/
+    given IFileIO = new XmlFileIO() //choose Implementation here
+    val filePathHighScore = "C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\highscore.xml"
 }
