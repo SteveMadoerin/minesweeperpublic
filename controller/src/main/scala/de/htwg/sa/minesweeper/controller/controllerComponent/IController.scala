@@ -1,8 +1,8 @@
 package de.htwg.sa.minesweeper.controller.controllerComponent
 
-import model.gameComponent._
-import model.gameComponent.gameBaseImpl._
-import de.htwg.sa.minesweeper.util.{Observable, Move}
+import de.htwg.sa.minesweeper.model.gameComponent._
+import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl._
+import de.htwg.sa.minesweeper.shared.{Observable, Move}
 
 
 trait IController extends Observable{
