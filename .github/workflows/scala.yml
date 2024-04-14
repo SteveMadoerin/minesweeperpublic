@@ -1,9 +1,9 @@
 name: Scala CI
 on:
  push:
-   branches: [ main ]
+   branches: [ SA_04_Microservices ]
  pull_request:
-   branches: [ main ]
+   branches: [ SA_04_Microservices ]
 jobs:
  build:
    runs-on: ubuntu-latest
