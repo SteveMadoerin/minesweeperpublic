@@ -19,8 +19,10 @@ lazy val model = project
     .dependsOn(shared)
     .settings(
         name := "model",
-        commonSettings
+        commonSettings,
+        jacocoCoverallsCoverageSettings
     )
+    .enablePlugins(JacocoCoverallsPlugin)
 
 lazy val persistence = project
     .in(file("persistence"))
@@ -44,9 +46,9 @@ lazy val ui = project
     .settings(
         name := "ui",
         commonSettings,
-        jacocoCoverallsCoverageSettings
+        //jacocoCoverallsCoverageSettings
     )
-    .enablePlugins(JacocoCoverallsPlugin)
+    //.enablePlugins(JacocoCoverallsPlugin)
 
 lazy val root: Project = project
     .in(file("."))
