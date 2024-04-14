@@ -16,7 +16,7 @@ class FileIOXmlSpec extends AnyWordSpec {
 
     "save and load Game" should {
       val fileIO1 = new FileIO
-      var game: IGame = new Game(10, 9, 10, "Playing")
+      var game: IGame = new Game(10, 9, 0, "Playing")
 
       "save the game status, bombs, side and time and reload it" in {
         fileIO1.saveGame(game)
@@ -24,7 +24,7 @@ class FileIOXmlSpec extends AnyWordSpec {
         val loadGameTest = loadGameOption.game.get
         loadGameTest.bombs should be (10)
         loadGameTest.side should be (9)
-        loadGameTest.time should be (10)
+        loadGameTest.time should be (0)
       }
     }
 
