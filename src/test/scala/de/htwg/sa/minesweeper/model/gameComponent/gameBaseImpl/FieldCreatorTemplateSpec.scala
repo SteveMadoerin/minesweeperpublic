@@ -1,4 +1,4 @@
-/* package de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl
+package de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl
 
 import org.scalatest.matchers.should.Matchers._
 import org.scalatest.wordspec.AnyWordSpec
@@ -39,4 +39,4 @@ class FieldCreatorTemplateSpec extends AnyWordSpec{
             result2.open(1,1, testGame3) should not be (Symbols.Covered)
         }
     }
-} */
+}

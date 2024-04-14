@@ -1,8 +1,8 @@
-/* package de.htwg.sa.minesweeper.util
+package de.htwg.sa.minesweeper.shared
 
 import org.scalatest.matchers.should.Matchers._
 import org.scalatest.wordspec.AnyWordSpec
-import de.htwg.sa.minesweeper.util.Command
+import de.htwg.sa.minesweeper.shared.Command
 
 class testCommand extends  Command[Int]:
     override def noStep(t: Int): Int = t
@@ -33,4 +33,3 @@ class CommandSpec extends AnyWordSpec{
 
 
 }
-    	 */

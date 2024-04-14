@@ -1,16 +1,16 @@
-/* package de.htwg.sa.minesweeper.aview
+package de.htwg.sa.minesweeper.ui
 
 
 import org.scalatest.matchers.should.Matchers._
 import org.scalatest.wordspec.AnyWordSpec
 import de.htwg.sa.minesweeper.controller.controllerComponent.controllerBaseImpl.Controller
 import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl._
-import de.htwg.sa.minesweeper.util.Move
-import de.htwg.sa.minesweeper.util.Event
-import de.htwg.sa.minesweeper.Default.{given}
+import de.htwg.sa.minesweeper.shared.Move
+import de.htwg.sa.minesweeper.shared.Event
+import de.htwg.sa.minesweeper.ui.config.Default.{given}
 import java.io.PrintStream
 import java.io.ByteArrayOutputStream
-import de.htwg.sa.minesweeper.aview.TUI
+import de.htwg.sa.minesweeper.ui.TUI
 
 
 class TUISpec extends AnyWordSpec {
@@ -127,4 +127,4 @@ class TUISpec extends AnyWordSpec {
     }
 
 
-} */
+}

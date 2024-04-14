@@ -1,8 +1,8 @@
-/* package de.htwg.sa.minesweeper.util
+package de.htwg.sa.minesweeper.util
 
 import org.scalatest.matchers.should.Matchers._
 import org.scalatest.wordspec.AnyWordSpec
-import de.htwg.sa.minesweeper.util.{Event, Observer, Observable}
+import de.htwg.sa.minesweeper.shared.{Event, Observer, Observable}
 
 class ObserverSpec extends AnyWordSpec{
 
@@ -51,4 +51,4 @@ class ObserverSpec extends AnyWordSpec{
 
 
 
-} */
+}

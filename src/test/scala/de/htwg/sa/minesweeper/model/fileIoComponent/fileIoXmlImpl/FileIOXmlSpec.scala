@@ -1,10 +1,10 @@
-/* package de.htwg.sa.minesweeper.model.fileIoComponent.fileIoXmlImpl
+package de.htwg.sa.minesweeper.model.fileIoComponent.fileIoXmlImpl
 
 import org.scalatest.matchers.should.Matchers._
 import org.scalatest.wordspec.AnyWordSpec
 
 import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl.{Field, Game, Matrix, Playfield, Symbols}
-import de.htwg.sa.minesweeper.model.fileIoComponent.fileIoXmlImpl.FileIO
+import de.htwg.sa.minesweeper.persistence.fileIoComponent.fileIoXmlImpl.FileIO
 import de.htwg.sa.minesweeper.model.gameComponent.IGame
 import de.htwg.sa.minesweeper.model.gameComponent.IField
 import de.htwg.sa.minesweeper.Default
@@ -66,5 +66,3 @@ class FileIOXmlSpec extends AnyWordSpec {
 
   }
 }
-
- */
