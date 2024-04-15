@@ -4,14 +4,25 @@ ThisBuild / organization := "de.htwg.sa.minesweeper"
 ThisBuild / organizationName := "minesweeper"
 
 
-
+lazy val root: Project = project
+    .in(file(""))
+    .dependsOn(controller, model, persistence, ui, shared)
+    .settings(
+        name := "Minesweeper",
+        commonSettings,
+        jacocoCoverallsCoverageSettings
+        //jacocoCoverallsReportSettings
+    )
+    .aggregate(controller, model, persistence, ui, shared)
+    .enablePlugins(JacocoCoverallsPlugin)
 
 
 lazy val shared = project
     .in(file("shared"))
     .settings(
         name := "shared",
-        commonSettings
+        commonSettings,
+        jacocoCoverallsCoverageSettings
     )
 
 lazy val model = project
@@ -20,6 +31,7 @@ lazy val model = project
     .settings(
         name := "model",
         commonSettings,
+        jacocoCoverallsCoverageSettings
         //jacocoCoverallsCoverageSettings
     )
     //.enablePlugins(JacocoCoverallsPlugin)
@@ -29,7 +41,8 @@ lazy val persistence = project
     .dependsOn(model, shared)
     .settings(
         name := "persistence",
-        commonSettings
+        commonSettings,
+        jacocoCoverallsCoverageSettings
     )
 
 lazy val controller = project
@@ -37,7 +50,8 @@ lazy val controller = project
     .dependsOn(model, persistence, shared)
     .settings(
         name := "controller",
-        commonSettings
+                commonSettings,
+        jacocoCoverallsCoverageSettings
     )
 
 lazy val ui = project
@@ -48,18 +62,9 @@ lazy val ui = project
         commonSettings,
         jacocoCoverallsCoverageSettings
     )
-    .enablePlugins(JacocoCoverallsPlugin)
+    //.enablePlugins(JacocoCoverallsPlugin)
 
-lazy val root: Project = project
-    .in(file("."))
-    .dependsOn(controller, model, persistence, ui, shared)
-    .settings(
-        commonSettings,
-        jacocoCoverallsCoverageSettings,
-        //jacocoCoverallsReportSettings
-    )
-    .aggregate(controller, model, persistence, ui, shared)
-    .enablePlugins(JacocoCoverallsPlugin)
+
 
 
 lazy val commonSettings: Seq[Def.Setting[?]] = Seq(
