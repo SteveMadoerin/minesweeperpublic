@@ -1,19 +1,19 @@
 ThisBuild / scalaVersion := "3.3.1"
 ThisBuild / version := "0.1.0-SNAPSHOT"
-ThisBuild / organization := "de.htwg.sa.minesweeper"
+ThisBuild / organization := "de.htwg.sa"
 ThisBuild / organizationName := "minesweeper"
 
 
 lazy val root: Project = project
     .in(file(""))
     .dependsOn(controller, model, persistence, ui, shared)
+    .aggregate(controller, model, persistence, ui, shared)
     .settings(
         name := "Minesweeper",
         commonSettings,
         jacocoCoverallsCoverageSettings
         //jacocoCoverallsReportSettings
     )
-    .aggregate(controller, model, persistence, ui, shared)
     .enablePlugins(JacocoCoverallsPlugin)
 
 
