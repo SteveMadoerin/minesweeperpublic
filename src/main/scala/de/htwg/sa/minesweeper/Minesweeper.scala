@@ -12,7 +12,6 @@ object Minesweeper {
         if (args.length >= 1){
             return
         } else {
-            
             GUI().run
             TUI().run
         }
