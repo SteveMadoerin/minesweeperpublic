@@ -96,7 +96,7 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
         val (feld, spiel): (IField, IGame) = prepareWithDifficulty(game)// complete preparation with game instance
         field = feld
         game = spiel
-
+        
         notifyObservers(Event.NewGame)
         
     def newGame(side: Int, bombs: Int) =
