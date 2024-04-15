@@ -228,7 +228,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
             case Event.Exit => false
         }
     }
-
+    
     def scaleImage(kind: String): ImageIcon = {
         val specialCases = Map("~" -> "covered", "F" -> "flag", "*" -> "bomb", "" -> "0")
         val numericCases = (0 to 8).map(i => i.toString -> s"$i").toMap
@@ -273,7 +273,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
     }
 
     def loadScoreNew = {
-        
+
         val filePath = Default.filePathHighScore
         val loadAndDisplayScores = () => {
             val scores = controller.loadPlayerScores(filePath)
