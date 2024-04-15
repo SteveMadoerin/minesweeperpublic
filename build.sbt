@@ -22,7 +22,7 @@ lazy val model = project
         commonSettings,
         //jacocoCoverallsCoverageSettings
     )
-    //.enablePlugins(JacocoCoverallsPlugin)
+    .enablePlugins(JacocoCoverallsPlugin)
 
 lazy val persistence = project
     .in(file("persistence"))
