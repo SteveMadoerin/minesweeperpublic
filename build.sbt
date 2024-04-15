@@ -20,9 +20,9 @@ lazy val model = project
     .settings(
         name := "model",
         commonSettings,
-        jacocoCoverallsCoverageSettings
+        //jacocoCoverallsCoverageSettings
     )
-    .enablePlugins(JacocoCoverallsPlugin)
+    //.enablePlugins(JacocoCoverallsPlugin)
 
 lazy val persistence = project
     .in(file("persistence"))
@@ -55,7 +55,8 @@ lazy val root: Project = project
     .dependsOn(controller, model, persistence, ui, shared)
     .settings(
         commonSettings,
-        jacocoCoverallsCoverageSettings
+        jacocoCoverallsCoverageSettings,
+        jacocoCoverallsReportSettings
     )
     .aggregate(controller, model, persistence, ui, shared)
     .enablePlugins(JacocoCoverallsPlugin)
@@ -79,5 +80,15 @@ lazy val jacocoCoverallsCoverageSettings: Seq[Def.Setting[?]] = Seq(
         jacocoCoverallsServiceName := "github-actions",
         jacocoCoverallsBranch := sys.env.get("CI_BRANCH"),
         jacocoCoverallsPullRequest := sys.env.get("GITHUB_EVENT_NAME"),
-        jacocoCoverallsRepoToken := sys.env.get("COVERALLS_REPO_TOKEN")
+        jacocoCoverallsRepoToken := sys.env.get("COVERALLS_REPO_TOKEN"),
+)
+
+lazy val jacocoCoverallsReportSettings: Seq[Def.Setting[?]] = Seq(
+    jacocoReportSettings := JacocoReportSettings(
+        "Jacoco Merged Coverage Report",
+        None,
+        JacocoThresholds(),
+        Seq(JacocoReportFormats.ScalaHTML),
+        "utf-8"
+    )
 )
