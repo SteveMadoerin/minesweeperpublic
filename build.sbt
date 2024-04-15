@@ -46,9 +46,9 @@ lazy val ui = project
     .settings(
         name := "ui",
         commonSettings,
-        //jacocoCoverallsCoverageSettings
+        jacocoCoverallsCoverageSettings
     )
-    //.enablePlugins(JacocoCoverallsPlugin)
+    .enablePlugins(JacocoCoverallsPlugin)
 
 lazy val root: Project = project
     .in(file("."))
