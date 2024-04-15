@@ -5,7 +5,7 @@ ThisBuild / organizationName := "minesweeper"
 
 
 lazy val root: Project = project
-    .in(file(""))
+    .in(file("."))
     .dependsOn(controller, model, persistence, ui, shared)
     .aggregate(controller, model, persistence, ui, shared)
     .settings(
@@ -15,6 +15,12 @@ lazy val root: Project = project
         //jacocoCoverallsReportSettings
     )
     .enablePlugins(JacocoCoverallsPlugin)
+    .settings(
+        publish := {},
+        publishLocal := {},
+        test := {},
+        testOnly := {}
+    )
 
 
 lazy val shared = project
@@ -34,7 +40,7 @@ lazy val model = project
         jacocoCoverallsCoverageSettings
         //jacocoCoverallsCoverageSettings
     )
-    //.enablePlugins(JacocoCoverallsPlugin)
+    .enablePlugins(JacocoCoverallsPlugin)
 
 lazy val persistence = project
     .in(file("persistence"))
@@ -44,6 +50,7 @@ lazy val persistence = project
         commonSettings,
         jacocoCoverallsCoverageSettings
     )
+    .enablePlugins(JacocoCoverallsPlugin)
 
 lazy val controller = project
     .in(file("controller"))
@@ -53,6 +60,7 @@ lazy val controller = project
                 commonSettings,
         jacocoCoverallsCoverageSettings
     )
+    .enablePlugins(JacocoCoverallsPlugin)
 
 lazy val ui = project
     .in(file("ui"))
@@ -62,7 +70,7 @@ lazy val ui = project
         commonSettings,
         jacocoCoverallsCoverageSettings
     )
-    //.enablePlugins(JacocoCoverallsPlugin)
+    .enablePlugins(JacocoCoverallsPlugin)
 
 
 
@@ -88,12 +96,4 @@ lazy val jacocoCoverallsCoverageSettings: Seq[Def.Setting[?]] = Seq(
         jacocoCoverallsRepoToken := sys.env.get("COVERALLS_REPO_TOKEN"),
 )
 
-lazy val jacocoCoverallsReportSettings: Seq[Def.Setting[?]] = Seq(
-    jacocoReportSettings := JacocoReportSettings(
-        "Jacoco Merged Coverage Report",
-        None,
-        JacocoThresholds(),
-        Seq(JacocoReportFormats.ScalaHTML),
-        "utf-8"
-    )
-)
+
