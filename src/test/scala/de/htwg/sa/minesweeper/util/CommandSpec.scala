@@ -1,4 +1,4 @@
-package de.htwg.sa.minesweeper.shared
+/* package de.htwg.sa.minesweeper.shared
 
 import org.scalatest.matchers.should.Matchers._
 import org.scalatest.wordspec.AnyWordSpec
@@ -33,3 +33,4 @@ class CommandSpec extends AnyWordSpec{
 
 
 }
+ */

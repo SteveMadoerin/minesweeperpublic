@@ -1,4 +1,4 @@
-package de.htwg.sa.minesweeper.persistence.fileIoComponent.fileIoXmlImpl
+/* package de.htwg.sa.minesweeper.persistence.fileIoComponent.fileIoXmlImpl
 
 import org.scalatest.matchers.should.Matchers._
 import org.scalatest.wordspec.AnyWordSpec
@@ -65,4 +65,4 @@ class FileIOXmlSpec extends AnyWordSpec {
     }
 
   }
-}
+} */

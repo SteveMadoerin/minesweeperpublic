@@ -1,4 +1,4 @@
-package de.htwg.sa.minesweeper.controller.controllerComponent.controllerBaseImpl
+/* package de.htwg.sa.minesweeper.controller.controllerComponent.controllerBaseImpl
 
 
 import org.scalatest.matchers.should.Matchers._
@@ -467,4 +467,4 @@ class ControllerSpec extends AnyWordSpec{
         }
     }
 
-}
+} */

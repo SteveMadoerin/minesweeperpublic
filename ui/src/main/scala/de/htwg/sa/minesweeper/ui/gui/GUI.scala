@@ -32,7 +32,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
     private var digitBar = new DigitDisplay(0, 0, 0)
     var clock = new AtomicInteger(0)
     val timer = new Timer()
-    var task: Option[TimerTask] = None // was null before
+    var task: Option[TimerTask] = None
 
     def startTimer(): Unit = {
         task.foreach(_.cancel())
@@ -50,7 +50,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
     
     def stopTimer(): Unit = {
         task.foreach(_.cancel())
-        task = None // Indicate task is no longer scheduled -> was null before
+        task = None // Indicate task is no longer scheduled
         timerStarted = false
     }
     
@@ -168,7 +168,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
                 val text = s"Game is ${controller.game.board} and your Score is ${calculateScore}"
                 
                 resetTimer()
-                showMessage(None.orNull, text, "GameOver", Message.Info) // was null before
+                showMessage(None.orNull, text, "GameOver", Message.Info)
 
                 saveScoreNew(saveScore)
                 loadScoreNew
@@ -177,7 +177,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
             case Event.Cheat =>
 
                 val text = s"${controller.field.gameOverField}"
-                showMessage(None.orNull, text, "Cheat Menu", Message.Plain) // was null before
+                showMessage(None.orNull, text, "Cheat Menu", Message.Plain)
                 false
             
             case Event.Help =>
@@ -194,7 +194,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
                     |                                                   
                     |""".stripMargin
     
-                showMessage(None.orNull, text, "Help Menu", Message.Info) // was null before
+                showMessage(None.orNull, text, "Help Menu", Message.Info)
                 false
             
             case Event.Input =>
@@ -246,7 +246,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
         val resizedImg = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB)
         val g2: Graphics2D = resizedImg.createGraphics()
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
-        g2.drawImage(srcImg, 0, 0, w, h, None.orNull) // was null before
+        g2.drawImage(srcImg, 0, 0, w, h, None.orNull)
         g2.dispose()
         resizedImg
     }
@@ -262,7 +262,6 @@ class GUI(using var controller: IController) extends Frame with Observer:
         val icon: ImageIcon = new ImageIcon(imagePath)
         icon
     
-
     def showGraphicalInput: Option[String] = {
         showInput(None.orNull, "Choose Difficulty", "NewGame", Message.Info, Swing.EmptyIcon, List("SuperEasy","Easy", "Medium", "Hard"), "Easy") // was null before
     }
