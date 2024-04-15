@@ -273,9 +273,8 @@ class GUI(using var controller: IController) extends Frame with Observer:
     }
 
     def loadScoreNew = {
-    
+        
         val filePath = Default.filePathHighScore
-        // Closure captures the filePath variable
         val loadAndDisplayScores = () => {
             val scores = controller.loadPlayerScores(filePath)
             val top10 = scores.sortBy(-_._2).take(10)
@@ -285,7 +284,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
 
             Dialog.showMessage(None.orNull, message, "Top 10 High Scores", Message.Info)
         }
-        loadAndDisplayScores() // Invoke the closure
+        loadAndDisplayScores()
     }
         
     class CellPanel(x: Int, y: Int, bounds: Int, first: Boolean) extends GridPanel(x,y) {
