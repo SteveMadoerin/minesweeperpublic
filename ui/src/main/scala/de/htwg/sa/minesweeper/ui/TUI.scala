@@ -97,9 +97,7 @@ class TUI(using var controller: IController) extends Observer:
             case _ => infoMessages(">> Invalid Input"); false
         }
     }
-
     
-
     def restart = 
         infoMessages("Do you want to play again? (yes/no)")
         readLine match
