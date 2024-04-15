@@ -27,7 +27,6 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
         val gameBoxList = List.fill(1)(gameBox)
         val packGame = new PackGame(gameBoxList)
         
-        // Using For to uppack the Monad
         val extractedGameList = for (
             game <- packGame.games
         ) yield game.game match {
