@@ -1,10 +1,10 @@
 name: Scala CI
 on:
   push:
-    branches: 
+    branches:
       - SA_04_Microservices
   pull_request:
-    branches: 
+    branches:
       - SA_04_Microservices
 jobs:
   build:
@@ -25,8 +25,7 @@ jobs:
       - name: Build Project and export Coverage
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
-        run: sbt clean jacoco jacocoCoveralls
-      - name: Export Coverage for all Modules
-        run: sbt jacocoAggregate 
-        CI_BRANCH="${GITHUB_REF#refs/heads/}"
-
+        run: |
+         export CI_BRANCH="${GITHUB_REF#refs/heads/}"
+         sbt clean jacoco jacocoCoveralls
+         sbt jacocoAggregate
