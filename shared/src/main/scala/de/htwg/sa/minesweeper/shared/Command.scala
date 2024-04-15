@@ -24,7 +24,7 @@ class UndoRedoManager[T]:
                 result
             }
         }
-
+    
     def redoStep(t: T): T =
         redoStack match {
             case Nil => t
