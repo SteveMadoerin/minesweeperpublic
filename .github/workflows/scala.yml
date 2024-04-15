@@ -23,6 +23,8 @@ jobs:
      - name: Build Project and export Coverage
        env:
          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
-       run: |
+       run: sbt clean jacoco jacocoCoveralls
+     - name: Export Coverage for all Modules
+       run: sbt jacocoAggregate 
          export CI_BRANCH="${GITHUB_REF#refs/heads/}"
-         sbt clean jacocoAggregate
+
