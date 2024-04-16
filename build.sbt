@@ -70,7 +70,7 @@ lazy val ui = project
         commonSettings,
         jacocoCoverallsCoverageSettings
     )
-    .enablePlugins(JacocoCoverallsPlugin)
+    .enablePlugins(JacocoPlugin, JacocoCoverallsPlugin)
 
 
 
