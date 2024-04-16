@@ -29,7 +29,7 @@ case class Field(matrix: Matrix[Symbols], hidden: Matrix[Symbols]) extends IFiel
             case _ =>
                 spiel
         }
-
+        
         val extractedSymbol = this.showInvisibleCell(y, x)
         val returnField = this.put(extractedSymbol, y, x)
         (gameStatus, returnField)
