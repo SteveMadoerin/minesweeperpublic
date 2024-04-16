@@ -14,13 +14,13 @@ lazy val root: Project = project
         jacocoCoverallsCoverageSettings
         //jacocoCoverallsReportSettings
     )
-    .enablePlugins(JacocoCoverallsPlugin)
-    .settings(
+    .enablePlugins(JacocoPlugin, JacocoCoverallsPlugin)
+/*     .settings(
         publish := {},
         publishLocal := {},
         test := {},
         testOnly := {}
-    )
+    ) */
 
 
 lazy val shared = project
