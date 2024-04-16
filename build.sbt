@@ -1,7 +1,6 @@
 import org.scoverage.coveralls.GitHubActions
 
-// ThisBuild / scalaVersion := "3.3.1"
-ThisBuild / scalaVersion := "2.13.13"
+ThisBuild / scalaVersion := "3.3.1"
 ThisBuild / version := "0.1.0-SNAPSHOT"
 ThisBuild / organization := "de.htwg.sa"
 ThisBuild / organizationName := "minesweeper"

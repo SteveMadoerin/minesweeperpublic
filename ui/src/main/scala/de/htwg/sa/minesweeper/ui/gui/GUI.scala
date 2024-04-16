@@ -21,7 +21,6 @@ import java.util.concurrent.atomic._
 import java.util.{Timer, TimerTask}
 import java.io.{File, PrintWriter, FileWriter}
 
-// $COVERAGE-OFF$
 class GUI(using var controller: IController) extends Frame with Observer:
 
     controller.add(this)
@@ -390,5 +389,3 @@ class GUI(using var controller: IController) extends Frame with Observer:
     case class DigitDisplay(leftDigit: Int, middleDigit: Int, rightDigit: Int)
 
 end GUI
-
-//$COVERAGE-ON$
