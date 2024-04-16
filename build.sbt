@@ -50,13 +50,13 @@ lazy val ui = project
     )
     .enablePlugins(JacocoCoverallsPlugin)
 
-lazy val root: Project = project
-    .in(file("."))
+lazy val root: Project = (project in file("."))
     .dependsOn(controller, model, persistence, ui, shared)
     .settings(
-        commonSettings,
-        jacocoCoverallsCoverageSettings,
-        jacocoCoverallsReportSettings
+      jacocoCoverallsServiceName := "github-actions",
+      jacocoCoverallsBranch := sys.env.get("CI_BRANCH"),
+      jacocoCoverallsPullRequest := sys.env.get("GITHUB_EVENT_NAME"),
+      jacocoCoverallsRepoToken := sys.env.get("COVERALLS_REPO_TOKEN"),
     )
     .aggregate(controller, model, persistence, ui, shared)
     .enablePlugins(JacocoCoverallsPlugin)
