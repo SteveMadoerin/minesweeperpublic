@@ -28,16 +28,14 @@ lazy val root: Project = (project in file("."))
     ) */
 
 
-lazy val shared = project
-  .in(file("shared"))
+lazy val shared = (project in file("shared"))
   .settings(
     name := "shared",
     commonSettings,
     jacocoCoverallsCoverageSettings
   )
 
-lazy val model = project
-  .in(file("model"))
+lazy val model = (project in file("model"))
   .dependsOn(shared)
   .settings(
     name := "model",
@@ -47,8 +45,7 @@ lazy val model = project
   )
   .enablePlugins(JacocoCoverallsPlugin)
 
-lazy val persistence = project
-  .in(file("persistence"))
+lazy val persistence = (project in file("persistence"))
   .dependsOn(model, shared)
   .settings(
     name := "persistence",
@@ -57,8 +54,7 @@ lazy val persistence = project
   )
   .enablePlugins(JacocoCoverallsPlugin)
 
-lazy val controller = project
-  .in(file("controller"))
+lazy val controller = (project in file("controller"))
   .dependsOn(model, persistence, shared)
   .settings(
     name := "controller",
@@ -67,8 +63,7 @@ lazy val controller = project
   )
   .enablePlugins(JacocoCoverallsPlugin)
 
-lazy val ui = project
-  .in(file("ui"))
+lazy val ui = (project in file("ui"))
   .dependsOn(model, persistence, controller, shared)
   .settings(
     name := "ui",
