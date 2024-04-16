@@ -50,6 +50,7 @@ lazy val ui = project
     )
     .enablePlugins(JacocoCoverallsPlugin)
 
+
 lazy val root: Project = (project in file("."))
     .dependsOn(controller, model, persistence, ui, shared)
     .settings(
