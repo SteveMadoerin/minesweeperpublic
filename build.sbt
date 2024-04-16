@@ -1,6 +1,7 @@
 import org.scoverage.coveralls.GitHubActions
 
-ThisBuild / scalaVersion := "3.3.1"
+// ThisBuild / scalaVersion := "3.3.1"
+ThisBuild / scalaVersion := "2.13.13"
 ThisBuild / version := "0.1.0-SNAPSHOT"
 ThisBuild / organization := "de.htwg.sa"
 ThisBuild / organizationName := "minesweeper"
@@ -66,16 +67,6 @@ lazy val commonSettings = Seq(
     libraryDependencies +="org.scalactic" %% "scalactic" % "3.2.16",
     libraryDependencies +=("org.scalatest" %% "scalatest" % "3.2.16" % "test")
 )
-
-/* lazy val jacocoCoverallsCoverageSettings = Seq(
-        jacocoExcludes := Seq(
-            "*gui.*"
-        ),
-        jacocoCoverallsServiceName := "github-actions",
-        jacocoCoverallsBranch := sys.env.get("CI_BRANCH"),
-        jacocoCoverallsPullRequest := sys.env.get("GITHUB_EVENT_NAME"),
-        jacocoCoverallsRepoToken := sys.env.get("COVERALLS_REPO_TOKEN"),
-) */
 
 
 import org.scoverage.coveralls.Imports.CoverallsKeys.*
