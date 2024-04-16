@@ -1,6 +1,6 @@
 ThisBuild / scalaVersion := "3.3.1"
 ThisBuild / version := "0.1.0-SNAPSHOT"
-ThisBuild / organization := "de.htwg.sa.minesweeper"
+ThisBuild / organization := "de.htwg.sa"
 ThisBuild / organizationName := "minesweeper"
 
 
@@ -83,12 +83,4 @@ lazy val jacocoCoverallsCoverageSettings: Seq[Def.Setting[?]] = Seq(
         jacocoCoverallsRepoToken := sys.env.get("COVERALLS_REPO_TOKEN"),
 )
 
-lazy val jacocoCoverallsReportSettings: Seq[Def.Setting[?]] = Seq(
-    jacocoReportSettings := JacocoReportSettings(
-        "Jacoco Merged Coverage Report",
-        None,
-        JacocoThresholds(),
-        Seq(JacocoReportFormats.ScalaHTML),
-        "utf-8"
-    )
-)
+
