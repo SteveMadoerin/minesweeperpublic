@@ -1,3 +1,5 @@
+import org.scoverage.coveralls.GitHubActions
+
 ThisBuild / scalaVersion := "3.3.1"
 ThisBuild / version := "0.1.0-SNAPSHOT"
 ThisBuild / organization := "de.htwg.sa"
@@ -12,23 +14,15 @@ lazy val root: Project = project
         name := "Minesweeper",
         commonSettings,
         jacocoCoverallsCoverageSettings
-        //jacocoCoverallsReportSettings
     )
-    .enablePlugins(JacocoPlugin, JacocoCoverallsPlugin)
-/*     .settings(
-        publish := {},
-        publishLocal := {},
-        test := {},
-        testOnly := {}
-    ) */
+    .enablePlugins(JacocoCoverallsPlugin)
 
 
 lazy val shared = project
     .in(file("shared"))
     .settings(
         name := "shared",
-        commonSettings,
-        jacocoCoverallsCoverageSettings
+        commonSettings
     )
 
 lazy val model = project
@@ -36,31 +30,24 @@ lazy val model = project
     .dependsOn(shared)
     .settings(
         name := "model",
-        commonSettings,
-        jacocoCoverallsCoverageSettings
-        //jacocoCoverallsCoverageSettings
+        commonSettings
     )
-    .enablePlugins(JacocoCoverallsPlugin)
 
 lazy val persistence = project
     .in(file("persistence"))
     .dependsOn(model, shared)
     .settings(
         name := "persistence",
-        commonSettings,
-        jacocoCoverallsCoverageSettings
+        commonSettings
     )
-    .enablePlugins(JacocoCoverallsPlugin)
 
 lazy val controller = project
     .in(file("controller"))
     .dependsOn(model, persistence, shared)
     .settings(
         name := "controller",
-                commonSettings,
-        jacocoCoverallsCoverageSettings
+        commonSettings
     )
-    .enablePlugins(JacocoCoverallsPlugin)
 
 lazy val ui = project
     .in(file("ui"))
@@ -68,14 +55,10 @@ lazy val ui = project
     .settings(
         name := "ui",
         commonSettings,
-        jacocoCoverallsCoverageSettings
     )
-    .enablePlugins(JacocoPlugin, JacocoCoverallsPlugin)
 
 
-
-
-lazy val commonSettings: Seq[Def.Setting[?]] = Seq(
+lazy val commonSettings = Seq(
     libraryDependencies ++= Seq(
         ("com.typesafe.play" %% "play-json" % "2.10.0-RC5"),
          "org.scala-lang.modules" %% "scala-xml" % "2.0.1",
@@ -86,7 +69,7 @@ lazy val commonSettings: Seq[Def.Setting[?]] = Seq(
     )
 )
 
-lazy val jacocoCoverallsCoverageSettings: Seq[Def.Setting[?]] = Seq(
+lazy val jacocoCoverallsCoverageSettings = Seq(
         jacocoExcludes := Seq(
             "*gui.*"
         ),
@@ -97,3 +80,7 @@ lazy val jacocoCoverallsCoverageSettings: Seq[Def.Setting[?]] = Seq(
 )
 
 
+import org.scoverage.coveralls.Imports.CoverallsKeys.*
+
+coverallsTokenFile := sys.env.get("COVERALLS_REPO_TOKEN")
+coverallsService := Some(GitHubActions)
