@@ -12,10 +12,8 @@ lazy val root: Project = (project in file(""))
     .settings(
         name := "Minesweeper",
         version:= "0.1.0-SNAPSHOT",
-        commonSettings,
-        jacocoCoverallsCoverageSettings
+        commonSettings
     )
-    .enablePlugins(JacocoCoverallsPlugin)
 
 
 lazy val shared = (project in file("shared"))
