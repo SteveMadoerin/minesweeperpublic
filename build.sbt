@@ -8,8 +8,8 @@ ThisBuild / organizationName := "minesweeper"
 
 lazy val root: Project = project
     .in(file("."))
-    .dependsOn(controller, model, persistence, ui, shared)
-    .aggregate(controller, model, persistence, ui, shared)
+    .dependsOn(controller, model, persistence, ui)
+    .aggregate(controller, model, persistence, ui)
     .settings(
         name := "Minesweeper",
         commonSettings,
@@ -17,17 +17,8 @@ lazy val root: Project = project
     )
     .enablePlugins(JacocoCoverallsPlugin)
 
-
-lazy val shared = project
-    .in(file("shared"))
-    .settings(
-        name := "shared",
-        commonSettings
-    )
-
 lazy val model = project
     .in(file("model"))
-    .dependsOn(shared)
     .settings(
         name := "model",
         commonSettings
@@ -35,7 +26,7 @@ lazy val model = project
 
 lazy val persistence = project
     .in(file("persistence"))
-    .dependsOn(model, shared)
+    .dependsOn(model)
     .settings(
         name := "persistence",
         commonSettings
@@ -43,7 +34,7 @@ lazy val persistence = project
 
 lazy val controller = project
     .in(file("controller"))
-    .dependsOn(model, persistence, shared)
+    .dependsOn(model, persistence)
     .settings(
         name := "controller",
         commonSettings
@@ -51,7 +42,7 @@ lazy val controller = project
 
 lazy val ui = project
     .in(file("ui"))
-    .dependsOn(model, persistence, controller, shared)
+    .dependsOn(model, persistence, controller)
     .settings(
         name := "ui",
         commonSettings,

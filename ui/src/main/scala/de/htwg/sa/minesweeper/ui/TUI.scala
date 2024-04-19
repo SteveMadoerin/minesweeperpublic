@@ -2,7 +2,7 @@ package de.htwg.sa.minesweeper.ui
 
 
 import de.htwg.sa.minesweeper.controller.controllerComponent.IController
-import de.htwg.sa.minesweeper.shared.{Observer, Move, Event}
+import de.htwg.sa.minesweeper.util.{Observer, Move, Event}
 
 import scala.io.StdIn.readLine
 import scala.util.{Try, Success, Failure}

@@ -1,4 +1,4 @@
-package de.htwg.sa.minesweeper.shared
+package de.htwg.sa.minesweeper.util
 
 trait Command[T]:
     def noStep(t: T): T

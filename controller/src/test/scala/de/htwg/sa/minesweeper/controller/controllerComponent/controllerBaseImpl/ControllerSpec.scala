@@ -6,10 +6,10 @@ import org.scalatest.wordspec.AnyWordSpec
 
 import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl._
 
-import de.htwg.sa.minesweeper.shared.{Observer, Move}
+import de.htwg.sa.minesweeper.util.{Observer, Move}
 
 import java.io.ByteArrayOutputStream
-import de.htwg.sa.minesweeper.shared.Event
+import de.htwg.sa.minesweeper.util.Event
 //import de.htwg.sa.minesweeper.controller.controllerComponent.config.Default.{given}
 //import de.htwg.sa.minesweeper.ui.config.Default.{given} // take care
 import de.htwg.sa.minesweeper.controller.controllerComponent.config.Default.{given}

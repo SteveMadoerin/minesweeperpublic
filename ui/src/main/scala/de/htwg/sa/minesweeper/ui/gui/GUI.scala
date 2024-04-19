@@ -1,7 +1,7 @@
 package de.htwg.sa.minesweeper.ui.gui
 
 import de.htwg.sa.minesweeper.controller.controllerComponent.IController
-import de.htwg.sa.minesweeper.shared.{Observer, Event, Move}
+import de.htwg.sa.minesweeper.util.{Observer, Event, Move}
 
 import de.htwg.sa.minesweeper.ui.config.Default.{given}
 import de.htwg.sa.minesweeper.ui.config.Default

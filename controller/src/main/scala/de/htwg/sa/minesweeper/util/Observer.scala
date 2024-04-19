@@ -1,4 +1,4 @@
-package de.htwg.sa.minesweeper.shared
+package de.htwg.sa.minesweeper.util
 
 trait Observer:
     def update(e: Event): Boolean

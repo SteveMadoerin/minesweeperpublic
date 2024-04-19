@@ -6,7 +6,7 @@ import org.scalatest.wordspec.AnyWordSpec
 
 import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl._
 import de.htwg.sa.minesweeper.controller.controllerComponent.controllerBaseImpl.DoCommand
-import de.htwg.sa.minesweeper.shared.Move
+import de.htwg.sa.minesweeper.util.Move
 import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl.{Game, Field}
 
 

@@ -1,8 +1,8 @@
-package de.htwg.sa.minesweeper.shared
+package de.htwg.sa.minesweeper.util
 
 import org.scalatest.matchers.should.Matchers._
 import org.scalatest.wordspec.AnyWordSpec
-import de.htwg.sa.minesweeper.shared.Move
+import de.htwg.sa.minesweeper.util.Move
 
 class MoveSpec extends AnyWordSpec{
     "The Move" should {

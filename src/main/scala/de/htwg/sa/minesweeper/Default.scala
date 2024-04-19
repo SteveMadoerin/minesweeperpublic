@@ -4,7 +4,7 @@ package de.htwg.sa.minesweeper
 //import controller.controllerComponent.controllerBaseImpl.Controller
 import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl._
 import de.htwg.sa.minesweeper.model.gameComponent._
-import de.htwg.sa.minesweeper.shared.{Observable, Move, UndoRedoManager, Event}
+import de.htwg.sa.minesweeper.util.{Observable, Move, UndoRedoManager, Event}
 
 import de.htwg.sa.minesweeper.persistence.fileIoComponent.IFileIO
 import de.htwg.sa.minesweeper.persistence.fileIoComponent.fileIoXmlImpl.{FileIO => XmlFileIO}
