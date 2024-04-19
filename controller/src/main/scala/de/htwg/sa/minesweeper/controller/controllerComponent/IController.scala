@@ -4,7 +4,6 @@ import de.htwg.sa.minesweeper.model.gameComponent._
 import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl._
 import de.htwg.sa.minesweeper.util.{Observable, Move}
 
-
 trait IController extends Observable{
     def doMove(b: Boolean, move: Move, game: IGame): IField
     def loadGame: Unit

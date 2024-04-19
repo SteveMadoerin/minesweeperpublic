@@ -22,6 +22,7 @@ import java.util.{Timer, TimerTask}
 import java.io.{File, PrintWriter, FileWriter}
 
 
+
 class GUI(using var controller: IController) extends Frame with Observer:
 
     controller.add(this)

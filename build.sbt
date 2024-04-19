@@ -56,15 +56,12 @@ lazy val commonSettings = Seq(
         "net.codingwell" %% "scala-guice" % "7.0.0",
         "org.scala-lang.modules" %% "scala-swing" % "3.0.0",
         "org.scalactic" %% "scalactic" % "3.2.16",
-        ("org.scalatest" %% "scalatest" % "3.2.16" % "test"),
-        "com.typesafe.akka" %% "akka-actor-typed" % "2.8.5",
-        "com.typesafe.akka" %% "akka-stream" % "2.8.5",
-        "com.typesafe.akka" %% "akka-http" % "10.5.3",
-        "org.apache.cassandra" % "cassandra-all" % "4.1.4" excludeAll(
-            ExclusionRule(organization = "org.slf4j", name = "slf4j-log4j12"),
-            ExclusionRule(organization = "log4j", name = "log4j")
-        )
+        ("org.scalatest" %% "scalatest" % "3.2.16" % Test),
+        "com.typesafe.akka" %% "akka-actor-typed" % "2.8.5" % Provided,
+        "com.typesafe.akka" %% "akka-stream" % "2.8.5" % Provided,
+        "com.typesafe.akka" %% "akka-http" % "10.5.3" % Provided
     )
+
 )
 
 lazy val jacocoCoverallsCoverageSettings = Seq(

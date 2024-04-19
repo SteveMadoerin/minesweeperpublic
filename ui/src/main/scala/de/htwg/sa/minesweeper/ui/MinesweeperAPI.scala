@@ -1,13 +1,15 @@
 package de.htwg.sa.minesweeper.ui
 
+
 import de.htwg.sa.minesweeper.controller.controllerComponent.IController
-//import akka.actor.ActorSystem
+import de.htwg.sa.minesweeper.util.Observer
+import de.htwg.sa.minesweeper.util.Event
 
 
-class minesweeperAPI(controller: IController) {
+case class MinesweeperAPI(controller: IController) extends Observer{
 
-    //implicit val system = ActorSystem("minesweeper")
+  override def update(e: Event): Boolean = ???
 
 
-  
+
 }
