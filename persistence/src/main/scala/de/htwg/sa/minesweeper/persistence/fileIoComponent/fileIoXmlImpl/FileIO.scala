@@ -42,24 +42,6 @@ class FileIO extends IFileIO {
 
     override def saveGame(game: IGame): Unit = {scala.xml.XML.save("C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\game.xml", gameToXml(game))}
     
-    def stringToSymbols(s: String) = {
-        s match {
-            case "~" => Symbols.Covered
-            case "F" => Symbols.F
-            case "*" => Symbols.Bomb
-            case " " => Symbols.Empty
-            case "0" => Symbols.Zero
-            case "1" => Symbols.One
-            case "2" => Symbols.Two
-            case "3" => Symbols.Three
-            case "4" => Symbols.Four
-            case "5" => Symbols.Five
-            case "6" => Symbols.Six
-            case "7" => Symbols.Seven
-            case "8" => Symbols.Eight
-            case _ => Symbols.E
-        }
-    }
     
     override def loadField: Option[IField] = {
         val maybeFile: Try[Elem] = Try(scala.xml.XML.loadFile("C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\field.xml"))
@@ -70,15 +52,15 @@ class FileIO extends IFileIO {
 
         val size = (file \\ "field" \@ "size").toInt
 
-        val matrixOption = Some(Default.scalableMatrix(size, Symbols.Covered))
-        val hiddenOption = Some(Default.scalableMatrix(size, Symbols.Covered))
-        val fieldOption = Some(Default.scalableField(size, Symbols.Covered))
+        val matrixOption = Some(Default.scalableMatrix(size, "~"))
+        val hiddenOption = Some(Default.scalableMatrix(size, "~"))
+        val fieldOption = Some(Default.scalableField(size, "~"))
 
         val cellNodesVisible: NodeSeq = (file \\ "field" \\ "matrix" \\ "cell")
         val matrix = cellNodesVisible.foldLeft(matrixOption.get) { (m, cell) =>
             val row: Int = (cell \ "@row").text.toInt
             val col: Int = (cell \ "@col").text.toInt
-            val symbol = stringToSymbols(cell.text.trim)
+            val symbol = (cell.text.trim)
             m.replaceCell(row, col, symbol)
         }
 
@@ -86,7 +68,7 @@ class FileIO extends IFileIO {
         val hidden = cellNodesHidden.foldLeft(hiddenOption.get) { (h, cell) =>
             val row: Int = (cell \ "@row").text.toInt
             val col: Int = (cell \ "@col").text.toInt
-            val symbol = stringToSymbols(cell.text.trim)
+            val symbol = (cell.text.trim)
             h.replaceCell(row, col, symbol)
         }
 

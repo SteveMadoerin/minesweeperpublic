@@ -1,4 +1,4 @@
-package de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl
+/* package de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl
 
 
 enum Symbols(representedAsString: String):
@@ -18,3 +18,4 @@ enum Symbols(representedAsString: String):
     case Seven extends Symbols("7")
     case Eight extends Symbols("8")
     case E extends Symbols("E")
+ */

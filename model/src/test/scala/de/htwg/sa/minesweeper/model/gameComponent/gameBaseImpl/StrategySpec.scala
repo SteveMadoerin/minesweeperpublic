@@ -15,13 +15,13 @@ class StrategySpec extends AnyWordSpec{
             val decider = new Decider()
             var game = new Game(10, 9, 0, "Playing")
             //game.setField()
-            val unsichtbar = Matrix(Vector(Vector(Symbols.One, Symbols.One), Vector(Symbols.One, Symbols.One)))
-            val sichtbar = Matrix(Vector(Vector(Symbols.Covered, Symbols.Covered), Vector(Symbols.Covered, Symbols.Covered)))
+            val unsichtbar = Matrix(Vector(Vector("1", "1"), Vector("1", "1")))
+            val sichtbar = Matrix(Vector(Vector("~", "~"), Vector("~", "~")))
             val field = Field(sichtbar, unsichtbar)
 
             val result = decider.evaluateStrategy(true, 1, 1, field, game)
             val (game2, field2) = result
-            assert(field2.showVisibleCell(1, 1) != Symbols.Bomb)
+            assert(field2.showVisibleCell(1, 1) != "~")
 
         }
     }
@@ -31,13 +31,13 @@ class StrategySpec extends AnyWordSpec{
             val decider2 = new Decider()
             var game2 = new Game(2, 1, 0, "Playing")
             //game2.setField()
-            val unsichtbar = Matrix(Vector(Vector(Symbols.One, Symbols.One), Vector(Symbols.One, Symbols.Bomb)))
-            val sichtbar = Matrix(Vector(Vector(Symbols.Covered, Symbols.Covered), Vector(Symbols.Covered, Symbols.Covered)))
+            val unsichtbar = Matrix(Vector(Vector("1", "1"), Vector("1", "~")))
+            val sichtbar = Matrix(Vector(Vector("~", "~"), Vector("~", "~")))
             val field2 = Field(sichtbar, unsichtbar)
 
             val result2 = decider2.evaluateStrategy(false, 1, 1, field2, game2)
             val (game3, field3) = result2
-            assert(field3.showVisibleCell(1, 1) != Symbols.One)
+            assert(field3.showVisibleCell(1, 1) != "1")
 
         }
     }

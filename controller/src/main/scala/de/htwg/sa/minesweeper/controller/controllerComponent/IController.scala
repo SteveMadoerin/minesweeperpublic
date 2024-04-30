@@ -9,8 +9,8 @@ trait IController extends Observable{
     def loadGame: Unit
     def saveGame: Unit
     def gameOver: Unit
-    def flag(x: Int, y: Int): Unit
-    def unflag(x: Int, y: Int): Unit
+    //def flag(x: Int, y: Int): Unit
+    //def unflag(x: Int, y: Int): Unit
     def openRec(x: Int, y: Int, field: IField): IField
     def helpMenu: Unit
     def cheat: Unit
@@ -27,7 +27,7 @@ trait IController extends Observable{
     def loadPlayerScores(filePath: String): Seq[(String, Int)]
     def saveScoreAndPlayerName(playerName: String, saveScore: Int, filePath: String): Unit
 
-    def showVisibleCell(x: Int, y: Int): String
+    //def showVisibleCell(x: Int, y: Int): String
    
     def field: IField
     def game: IGame

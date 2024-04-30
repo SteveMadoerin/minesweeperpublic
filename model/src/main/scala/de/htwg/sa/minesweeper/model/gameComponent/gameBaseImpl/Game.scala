@@ -5,8 +5,7 @@ import scala.io.StdIn.readLine
 import scala.util.{Random, Try}
 import scala.annotation.tailrec
 import de.htwg.sa.minesweeper.model.gameComponent.config.Default
-/* import de.htwg.sa.minesweeper.Default
-import de.htwg.sa.minesweeper.Default.given */
+import play.api.libs.json.Json
 
 case class Game (bombs : Int, side: Int, time: Int, board : String) extends IGame:
     
@@ -58,7 +57,7 @@ case class Game (bombs : Int, side: Int, time: Int, board : String) extends IGam
     def premierMove(x: Int, y: Int, field: IField): IField = 
         val adjacent = Playfield()
         val adjacentInitialised = adjacent.newField(side, this)
-        val newReplacedbombHidMatrix = if(adjacentInitialised.hidden.cell(y, x) == Symbols.Bomb){
+        val newReplacedbombHidMatrix = if(adjacentInitialised.hidden.cell(y, x) == "*"){
             val replacedHiddenMatrix = replaceBomb(x, y, adjacentInitialised)
             val replacedAdjacentHiddenField = Default.mergeMatrixToField(field.matrix, replacedHiddenMatrix.hidden)
             replacedAdjacentHiddenField
@@ -73,16 +72,16 @@ case class Game (bombs : Int, side: Int, time: Int, board : String) extends IGam
         val indices = 0 until size
         val result = indices
             .flatMap(col => indices.map(row => (row, col)))
-            .filter { case (row, col) => field.hidden.cell(row, col) != Symbols.Bomb }
+            .filter { case (row, col) => field.hidden.cell(row, col) != "*" }
 
         val rand = Random.nextInt(result.size)
         val (newX, newY) = result(rand)
 
-        val newHiddenMatrixWithBomb = field.hidden.replaceCell(newY, newX, Symbols.Bomb)
-        val newHiddenMatrixWithoutBomb = newHiddenMatrixWithBomb.replaceCell(y, x, Symbols.Empty)
+        val newHiddenMatrixWithBomb = field.hidden.replaceCell(newY, newX, "*")
+        val newHiddenMatrixWithoutBomb = newHiddenMatrixWithBomb.replaceCell(y, x, " ")
         val newHiddenMatrixWithNumbers = initializeAdjacentNumbers(newHiddenMatrixWithoutBomb)
 
-        val newVisibleMatrix = field.matrix.replaceCell(y, x, Symbols.Covered)
+        val newVisibleMatrix = field.matrix.replaceCell(y, x, "~")
 
         field match {
             case f: Field => f.copy(
@@ -94,7 +93,7 @@ case class Game (bombs : Int, side: Int, time: Int, board : String) extends IGam
     }
     
     // currying
-    def calcX(symbols:Symbols)(visibleMatrix: Matrix[Symbols]): Int = {
+    def calcX(symbols: String)(visibleMatrix: Matrix[String]): Int = {
         val sizze = visibleMatrix.size -1
         val multiIndex = 0 to sizze
         multiIndex
@@ -102,12 +101,12 @@ case class Game (bombs : Int, side: Int, time: Int, board : String) extends IGam
           .count{ case(row, col) => visibleMatrix.cell(row, col) == symbols && isValid(row, col, sizze)}
     }
 
-    def calcCovered (visibleMatrix: Matrix[Symbols]): Int = calcX(Symbols.Covered)(visibleMatrix)
-    def calcFlag (visibleMatrix: Matrix[Symbols]): Int = calcX(Symbols.F)(visibleMatrix)
+    def calcCovered (visibleMatrix: Matrix[String]): Int = calcX("~")(visibleMatrix)
+    def calcFlag (visibleMatrix: Matrix[String]): Int = calcX("F")(visibleMatrix)
 
-    def calcMineAndFlag(visibleMatrix: Matrix[Symbols]): Int = (this.bombs - calcFlag(visibleMatrix))
+    def calcMineAndFlag(visibleMatrix: Matrix[String]): Int = (this.bombs - calcFlag(visibleMatrix))
 
-    def calcAdjacentMines(row: Int, col: Int, side: Int, invisibleMatrix: Matrix[Symbols]): Int = {
+    def calcAdjacentMines(row: Int, col: Int, side: Int, invisibleMatrix: Matrix[String]): Int = {
 
         val neighbors = List(
             (row - 1, col), // NORTH
@@ -122,49 +121,49 @@ case class Game (bombs : Int, side: Int, time: Int, board : String) extends IGam
         neighbors.count { case (r, c) => isValid(r, c, side) && isMine(r, c, invisibleMatrix) }
     }
 
-    def calcWonOrLost(visibleMatrix: Matrix[Symbols], mines: Int): Boolean = (mines+1 - (calcFlag(visibleMatrix) + calcCovered(visibleMatrix)) == 0)
+    def calcWonOrLost(visibleMatrix: Matrix[String], mines: Int): Boolean = (mines+1 - (calcFlag(visibleMatrix) + calcCovered(visibleMatrix)) == 0)
     
-    def isMine(row: Int, col: Int, m: Matrix[Symbols]): Boolean = {if(m.cell(row, col) == Symbols.Bomb) true else false} // fc
+    def isMine(row: Int, col: Int, m: Matrix[String]): Boolean = {if(m.cell(row, col) == "*") true else false} // fc
     def isValid(row: Int, col: Int, side: Int): Boolean = {row >= 0 && row <= side && col >= 0 && col <= side} // fc
 
-    def initializeAdjacentNumbers(matrix: Matrix[Symbols]): Matrix[Symbols] =
+    def initializeAdjacentNumbers(matrix: Matrix[String]): Matrix[String] =
         val si = matrix.size - 1
         val multiIndex = 0 to si
         multiIndex
             .flatMap(col => multiIndex.map(row => (row, col))) // .flatMap and .map to create collection of all possible (row, col) pairs
             .foldLeft(matrix) { // .foldLeft to iterate over each pair & update Matrix
                 (matr, pos) => val (row, col) = pos
-                if(matr.cell(row, col) != Symbols.Bomb && isValid(row, col, si)) {
+                if(matr.cell(row, col) != "*" && isValid(row, col, si)) {
                     val numero = calcAdjacentMines(row, col, si, matrix)
                     val symb = numero match{
-                        case 0 => Symbols.Zero
-                        case 1 => Symbols.One
-                        case 2 => Symbols.Two
-                        case 3 => Symbols.Three
-                        case 4 => Symbols.Four
-                        case 5 => Symbols.Five
-                        case 6 => Symbols.Six
-                        case 7 => Symbols.Seven
-                        case 8 => Symbols.Eight
+                        case 0 => "0"
+                        case 1 => "1"
+                        case 2 => "2"
+                        case 3 => "3"
+                        case 4 => "4"
+                        case 5 => "5"
+                        case 6 => "6"
+                        case 7 => "7"
+                        case 8 => "8"
                     }
                     matr.replaceCell(row, col, symb)
                 } else matr
             }
     
-    def intitializeBombs(matrix: Matrix[Symbols], bombs: Int): Matrix[Symbols] = {
+    def intitializeBombs(matrix: Matrix[String], bombs: Int): Matrix[String] = {
         val sizze = matrix.size - 1
         val random = new Random()
 
         // recursion
         @tailrec
-        def placeMines(ma: Matrix[Symbols], minesPlaced: Int): Matrix[Symbols] = {
+        def placeMines(ma: Matrix[String], minesPlaced: Int): Matrix[String] = {
             if (minesPlaced >= bombs) ma
             else {
                 val row = random.nextInt(sizze)
                 val col = random.nextInt(sizze)
 
-                if (ma.cell(row, col) != Symbols.Bomb) {
-                    val updatedMatrix = ma.replaceCell(row, col, Symbols.Bomb)
+                if (ma.cell(row, col) != "*") {
+                    val updatedMatrix = ma.replaceCell(row, col,"*")
                     placeMines(updatedMatrix, minesPlaced + 1) // recursion
                 } else {
                     placeMines(ma, minesPlaced) // recursion
@@ -175,6 +174,19 @@ case class Game (bombs : Int, side: Int, time: Int, board : String) extends IGam
     }
     
     def checkExit(status: String) = if status == "Lost" || status == "Won" then true else false
+
+    def gameToJson: String = {
+        Json.prettyPrint(
+            Json.obj(
+                "game" -> Json.obj(
+                    "status" -> this.board,
+                    "bombs" -> this.bombs,
+                    "side" -> this.side,
+                    "time" -> this.time
+                )
+            )
+        )
+    }
 
 
 end Game

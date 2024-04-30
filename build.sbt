@@ -6,43 +6,44 @@ ThisBuild / organization := "de.htwg.sa"
 ThisBuild / organizationName := "minesweeper"
 
 
-lazy val root: Project = project
-    .in(file("."))
+lazy val root: Project = (project in file(""))
     .dependsOn(controller, model, persistence, ui)
     .aggregate(controller, model, persistence, ui)
     .settings(
         name := "Minesweeper",
-        commonSettings,
-        jacocoCoverallsCoverageSettings
+        version:= "0.1.0-SNAPSHOT",
+        commonSettings
     )
-    .enablePlugins(JacocoCoverallsPlugin)
 
-lazy val model = project
-    .in(file("model"))
+
+lazy val model = (project in file("model"))
     .settings(
         name := "model",
+        version:= "0.1.0-SNAPSHOT",
         commonSettings
     )
 
-lazy val persistence = project
-    .in(file("persistence"))
+lazy val persistence = (project in file("persistence"))
     .dependsOn(model)
+    .aggregate(model)
     .settings(
         name := "persistence",
+        version:= "0.1.0-SNAPSHOT",
         commonSettings
     )
 
-lazy val controller = project
-    .in(file("controller"))
+lazy val controller = (project in file("controller"))
     .dependsOn(model, persistence)
+    .aggregate(model, persistence)
     .settings(
         name := "controller",
+        version:= "0.1.0-SNAPSHOT",
         commonSettings
     )
 
-lazy val ui = project
-    .in(file("ui"))
+lazy val ui = (project in file("ui"))
     .dependsOn(model, persistence, controller)
+    .aggregate(model, persistence, controller)
     .settings(
         name := "ui",
         commonSettings,
@@ -50,28 +51,15 @@ lazy val ui = project
 
 
 lazy val commonSettings = Seq(
-    libraryDependencies ++= Seq(
-        ("com.typesafe.play" %% "play-json" % "2.10.0-RC5"),
-         "org.scala-lang.modules" %% "scala-xml" % "2.0.1",
-        "net.codingwell" %% "scala-guice" % "7.0.0",
-        "org.scala-lang.modules" %% "scala-swing" % "3.0.0",
-        "org.scalactic" %% "scalactic" % "3.2.16",
-        ("org.scalatest" %% "scalatest" % "3.2.16" % Test),
-        "com.typesafe.akka" %% "akka-actor-typed" % "2.8.5" % Provided,
-        "com.typesafe.akka" %% "akka-stream" % "2.8.5" % Provided,
-        "com.typesafe.akka" %% "akka-http" % "10.5.3" % Provided
-    )
-
-)
-
-lazy val jacocoCoverallsCoverageSettings = Seq(
-        jacocoExcludes := Seq(
-            "*gui.*"
-        ),
-        jacocoCoverallsServiceName := "github-actions",
-        jacocoCoverallsBranch := sys.env.get("CI_BRANCH"),
-        jacocoCoverallsPullRequest := sys.env.get("GITHUB_EVENT_NAME"),
-        jacocoCoverallsRepoToken := sys.env.get("COVERALLS_REPO_TOKEN"),
+    libraryDependencies += ("com.typesafe.play" %% "play-json" % "2.10.0-RC5"),
+    libraryDependencies += "org.scala-lang.modules" %% "scala-xml" % "2.0.1",
+    libraryDependencies +="net.codingwell" %% "scala-guice" % "7.0.0",
+    libraryDependencies +="org.scala-lang.modules" %% "scala-swing" % "3.0.0",
+    libraryDependencies +="org.scalactic" %% "scalactic" % "3.2.16",
+    libraryDependencies +=("org.scalatest" %% "scalatest" % "3.2.16" % "test"),
+    libraryDependencies += "com.typesafe.akka" %% "akka-actor-typed" % "2.8.5",
+    libraryDependencies += "com.typesafe.akka" %% "akka-http" % "10.5.3",
+    libraryDependencies += "com.typesafe.akka" %% "akka-stream" % "2.8.5",
 )
 
 

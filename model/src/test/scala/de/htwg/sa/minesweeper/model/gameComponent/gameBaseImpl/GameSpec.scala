@@ -11,16 +11,16 @@ class GameSpec extends AnyWordSpec {
     "Method replaceBomb" should {
         val testGame10 = new Game(2, 3, 0, "Playing")
 
-        val sicht1 = new Matrix(4, Symbols.Covered)
-        val unsicht1 = new Matrix(4, Symbols.Empty)
-        val unsicht2 = unsicht1.replaceCell(1, 1, Symbols.Bomb)
+        val sicht1 = new Matrix(4, "~")
+        val unsicht1 = new Matrix(4, " ")
+        val unsicht2 = unsicht1.replaceCell(1, 1, "*")
         val testField1 = new Field(sicht1, unsicht2)
 
 
         "replace matrix and ensure the player doesn't click on bomb at first move" in{
 
             val result33 = testGame10.replaceBomb(1, 1, testField1)
-            result33.showInvisibleCell(1, 1) should not be (Symbols.Bomb)
+            result33.showInvisibleCell(1, 1) should not be ("*")
         }
 
     }
@@ -29,14 +29,14 @@ class GameSpec extends AnyWordSpec {
 
         val game42 = new Game(1, 3, 0, "Playing")
 
-        val sicht11 = new Matrix(4, Symbols.Covered)
-        val unsicht11 = new Matrix(4, Symbols.Empty)
-        val unsicht22 = unsicht11.replaceCell(1, 1, Symbols.Bomb)
+        val sicht11 = new Matrix(4, "~")
+        val unsicht11 = new Matrix(4, " ")
+        val unsicht22 = unsicht11.replaceCell(1, 1, "*")
         val preparedField = new Field(sicht11, unsicht22)
 
         "guarante that you do not loose on first move" in{
             val result42 = game42.premierMove(1, 1, preparedField)
-            result42.showInvisibleCell(1, 1) should not be (Symbols.Bomb)
+            result42.showInvisibleCell(1, 1) should not be ("*")
         }
     }
 
@@ -52,9 +52,9 @@ class GameSpec extends AnyWordSpec {
     "def calcMineAndFlag" should {
         val testGame = new Game(1, 3, 0, "Playing")
 
-        val sicht = new Matrix(4, Symbols.Covered)
-        val unsicht = new Matrix(4, Symbols.Zero)
-        val unsicht2 = unsicht.replaceCell(1, 1, Symbols.Bomb)
+        val sicht = new Matrix(4, "~")
+        val unsicht = new Matrix(4, "0")
+        val unsicht2 = unsicht.replaceCell(1, 1, "*")
         val testField = new Field(sicht, unsicht2)
 
         "return the number of flags minus bombs" in {
@@ -93,7 +93,6 @@ class GameSpec extends AnyWordSpec {
 
     "def getGame" should {
         val testGame = new Game(1, 3, 0, "Playing")
-        //val testField = new Field(testGame.side, Symbols.Covered)
 
         "return the game" in {
             val result = testGame

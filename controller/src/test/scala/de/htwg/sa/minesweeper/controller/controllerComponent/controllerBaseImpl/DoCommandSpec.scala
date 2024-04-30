@@ -18,8 +18,8 @@ class DoCommandSpec extends AnyWordSpec{
         val doCommand3 = new DoCommand(Move("unflag", 1, 1))
 
         val game1 = new Game(4, 4, 0, "Playing") // check
-        val sicht1 = new Matrix(4, Symbols.Covered)
-        val unsicht1 = new Matrix(4, Symbols.Eight)
+        val sicht1 = new Matrix(4, "~")
+        val unsicht1 = new Matrix(4, "8")
         
 
         "have no step open" in{
@@ -31,7 +31,7 @@ class DoCommandSpec extends AnyWordSpec{
         "have do step open" in{
             val testField2 = new Field(sicht1, unsicht1)
             val stepField = doCommand.doStep(testField2)
-            stepField.showVisibleCell(1, 1) should be (Symbols.Eight) 
+            stepField.showVisibleCell(1, 1) should be ("8") 
 
         }
 
@@ -61,7 +61,7 @@ class DoCommandSpec extends AnyWordSpec{
         "have do step flag" in{
             val testField6 = new Field(sicht1, unsicht1)
             val stepField3 = doCommand2.doStep(testField6)
-            stepField3.showVisibleCell(1, 1) should be (Symbols.F) 
+            stepField3.showVisibleCell(1, 1) should be ("F") 
 
         }
 
@@ -91,7 +91,7 @@ class DoCommandSpec extends AnyWordSpec{
         "have do step unflag" in{
             val testField10 = new Field(sicht1, unsicht1)
             val stepField6 = doCommand3.doStep(testField10)
-            stepField6.showVisibleCell(1, 1) should be (Symbols.Covered) 
+            stepField6.showVisibleCell(1, 1) should be ("~") 
 
         }
 

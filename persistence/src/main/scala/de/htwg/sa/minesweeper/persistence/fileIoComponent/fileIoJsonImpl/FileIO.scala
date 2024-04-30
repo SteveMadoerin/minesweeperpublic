@@ -105,60 +105,41 @@ class FileIO extends IFileIO{
         )
     }
 
-    def stringToSymbols(s: String) = {
-        s match {
-            case "~" => Symbols.Covered
-            case "F" => Symbols.F
-            case "*" => Symbols.Bomb
-            case " " => Symbols.Empty
-            case "0" => Symbols.Zero
-            case "1" => Symbols.One
-            case "2" => Symbols.Two
-            case "3" => Symbols.Three
-            case "4" => Symbols.Four
-            case "5" => Symbols.Five
-            case "6" => Symbols.Six
-            case "7" => Symbols.Seven
-            case "8" => Symbols.Eight
-            case _ => Symbols.E
-        }
-    }
-
     override def loadField: Option[IField] = {
 
         val source: String = Source.fromFile("C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\field.json").getLines.mkString
         val json: JsValue = Json.parse(source)
         val size = (json \ "field" \ "size").get.toString.toInt
 
-        val fieldOption: Option[IField] = Some(Default.scalableField(size, Symbols.E))
-        val matrixOption: Option[Matrix[Symbols]] = Some(Default.scalableMatrix(size, Symbols.E))
-        val hiddenOption: Option[Matrix[Symbols]] = Some(Default.scalableMatrix(size, Symbols.E))
+        val fieldOption: Option[IField] = Some(Default.scalableField(size, "E"))
+        val matrixOption: Option[Matrix[String]] = Some(Default.scalableMatrix(size, "E"))
+        val hiddenOption: Option[Matrix[String]] = Some(Default.scalableMatrix(size, "E"))
 
 
         val matrix1 = matrixOption match{
             case Some(matrix) => matrix
-            case None => println("Matrix is not valid"); Default.scalableMatrix(size, Symbols.E)
+            case None => println("Matrix is not valid"); Default.scalableMatrix(size, "E")
         }
 
-        val updatedMatrix: Matrix[Symbols] = (0 until size * size).foldLeft(matrix1) {
+        val updatedMatrix: Matrix[String] = (0 until size * size).foldLeft(matrix1) {
             case (currentMatrix, index) =>
                 val row = (json \ "field" \ "matrix" \\ "row")(index).as[Int]
                 val col = (json \ "field" \ "matrix" \\ "col")(index).as[Int]
                 val cell = (json \ "field" \ "matrix" \\ "cell")(index).as[String]
-                currentMatrix.replaceCell(row, col, stringToSymbols(cell))
+                currentMatrix.replaceCell(row, col, cell)
         }
 
         val hidden1 = hiddenOption match{
             case Some(m) => m
-            case None => println("Hidden is not valid"); Default.scalableMatrix(size, Symbols.E)
+            case None => println("Hidden is not valid"); Default.scalableMatrix(size, "E")
         }
 
-        val updatedHidden: Matrix[Symbols] = (0 until size * size).foldLeft(hidden1) {
+        val updatedHidden: Matrix[String] = (0 until size * size).foldLeft(hidden1) {
             case (currentHidden, index) =>
                 val row = (json \ "field" \ "hidden" \\ "row")(index).as[Int]
                 val col = (json \ "field" \ "hidden" \\ "col")(index).as[Int]
                 val cell = (json \ "field" \ "hidden" \\ "cell")(index).as[String]
-                currentHidden.replaceCell(row, col, stringToSymbols(cell))
+                currentHidden.replaceCell(row, col, cell)
         }
 
         val finalFieldOption = fieldOption match{

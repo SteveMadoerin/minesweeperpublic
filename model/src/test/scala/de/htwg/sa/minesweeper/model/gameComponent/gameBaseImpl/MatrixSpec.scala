@@ -2,7 +2,7 @@ package de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl
 
 import org.scalatest.matchers.should.Matchers._
 import org.scalatest.wordspec.AnyWordSpec
-import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl.{Symbols, Matrix}
+import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl.Matrix
 
 
 
@@ -10,17 +10,17 @@ class MatrixSpec extends AnyWordSpec{
     "Datatype Matrix is made from a Vector of Vectors. It is a Matrix:" when {
         "is empty" should {
             "be created by a Dim & Sample cell" in {
-                val testMatrix = new Matrix[Symbols](3, Symbols.One)
+                val testMatrix = new Matrix[String](3, "1")
                 testMatrix.size should be (3)
             }
             "Matrix created with Vector of Vectors alone" in {
-                val testMatrix2 = Matrix(Vector(Vector(Symbols)))
+                val testMatrix2 = Matrix(Vector(Vector("1")))
                 testMatrix2.size should be (1)
             }
         }
         "fill Matrix" should {
             val testMatrix3 = new Matrix[String](3, "F")
-            val testMatrix4 = new Matrix[String](2, Symbols.Bomb.toString)
+            val testMatrix4 = new Matrix[String](2, "*")
             "access it cells" in {
                 testMatrix3.cell(0, 0) should be ("F")
                 testMatrix4.cell(1, 1) should be ("*")
@@ -42,13 +42,13 @@ class MatrixSpec extends AnyWordSpec{
             }
         }
         "def cell" should {
-            val testMatrix6 = new Matrix(4, Symbols.Covered)
+            val testMatrix6 = new Matrix(4, "~")
             "return the cell" in {
-                testMatrix6.cell(1, 1) should be (Symbols.Covered)
+                testMatrix6.cell(1, 1) should be ("~")
             }
         }
         "def getSize" should {
-            val testMatrix7 = new Matrix(4, Symbols.Covered)
+            val testMatrix7 = new Matrix(4, "~")
             "return the size" in {
                 testMatrix7.size should be (4)
             }

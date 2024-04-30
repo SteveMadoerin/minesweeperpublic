@@ -16,14 +16,14 @@ object Default{
     given IGame = prepareGame(10, 9, 0)
     given IField = createField(prepareGame(10, 9, 0))
     //given IController = Controller()
-    /*given IFileIO = new JsonFileIO() //choose Implementation here
-    val filePathHighScore = "C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\highscore.json"*/
-    given IFileIO = new XmlFileIO() //choose Implementation here
-    val filePathHighScore = "C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\highscore.xml"
+    given IFileIO = new JsonFileIO() //choose Implementation here
+    val filePathHighScore = "C:\\Playground\\minesweeperpublic\\src\\main\\data\\highscore.json"
+/*     given IFileIO = new XmlFileIO() //choose Implementation here
+    val filePathHighScore = "C:\\Playground\\minesweeperpublic\\src\\main\\data\highscore.xml" */
 
-    def scalableMatrix(size: Int, filling: Symbols): Matrix[Symbols] = new Matrix(size, filling)
-    def scalableField(size: Int, filling: Symbols): IField = new Field(size, filling)
-    def mergeMatrixToField(sichtbar: Matrix[Symbols], unsichtbar: Matrix[Symbols] ): IField = new Field(sichtbar, unsichtbar)
+    def scalableMatrix(size: Int, filling: String): Matrix[String] = new Matrix(size, filling)
+    def scalableField(size: Int, filling: String): IField = new Field(size, filling)
+    def mergeMatrixToField(sichtbar: Matrix[String], unsichtbar: Matrix[String] ): IField = new Field(sichtbar, unsichtbar)
 
     def prepareGame(bombs: Int, size: Int, time : Int) : IGame =  Game(bombs, size, time, "Playing")
 
