@@ -2,10 +2,10 @@ name: Scala CI
 on:
   push:
     branches:
-      - SA_04_Microservices
+      - SA_05_REST
   pull_request:
     branches:
-      - SA_04_Microservices
+      - SA_05_REST
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -29,4 +29,3 @@ jobs:
          export CI_BRANCH="${GITHUB_REF#refs/heads/}"
          sbt jacocoAggregate
          sbt clean jacoco jacocoCoveralls
-      
