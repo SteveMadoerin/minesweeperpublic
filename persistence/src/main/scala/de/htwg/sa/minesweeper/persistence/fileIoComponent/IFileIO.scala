@@ -4,8 +4,8 @@ import de.htwg.sa.minesweeper.model.gameComponent.{IGame, IField}
 import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl.GameBox
 
 trait IFileIO {
-    //def loadGame: Option[IGame]
-    def loadGame: GameBox
+    def loadGame: Option[IGame]
+    //def loadGame: GameBox
     def saveGame(game: IGame): Unit
 
     def loadField: Option[IField]

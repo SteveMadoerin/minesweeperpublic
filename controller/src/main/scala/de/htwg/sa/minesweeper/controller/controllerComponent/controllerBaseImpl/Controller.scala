@@ -42,6 +42,7 @@ import akka.http.scaladsl.unmarshalling.Unmarshal
 import scala.concurrent.Future
 import scala.concurrent.duration._
 import de.htwg.sa.minesweeper.util.RestUtil
+import play.api.libs.json.JsArray
 
 
 
@@ -69,8 +70,7 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
         //TODO: replace field with field controller
         val returnField: de.htwg.sa.minesweeper.model.gameComponent.IField = Try {
             val result = Source.fromURL(url).mkString
-            //field.jsonToField(result)
-            RestUtil.jsonToField(result)
+            RestUtil.jsonToField(result) //field.jsonToField(result)
         } match {
             case Success(field) => field
             case Failure(e) =>
@@ -87,17 +87,45 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
     
     def doMove(b: Boolean, move: Move, game: IGame) = 
         synchronized{
-            val (tempGame, tempField): (IGame, IField) = decider.evaluateStrategy(b, move.x, move.y, field, game)
-            field = tempField 
-            this.game = tempGame
-            //val symbol = field.showInvisibleCell(move.y, move.x)
-        
-            //val url = s"http://localhost:8082/model/field/showInvisibleCell?y=${move.y}&x=${move.x}"
+            // attention//val (tempGame, tempField): (IGame, IField) = decider.evaluateStrategy(b, move.x, move.y, field, game)
+            
+            // board parameter should have value 0 if playing and 1 if won and 2 if lost
+            val convertedBoard = game.board match {
+                case "Playing" => 0
+                case "Won" => 1
+                case "Lost" => 2
+            }
+            // TODO: make an ModelAPI call: model/field/decider and give him b, x, y, bombs size, time, board
+            val url = s"http://localhost:8082/model/field/decider?b=${b}&x=${move.x}&y=${move.y}&bombs=${game.bombs}&size=${game.side}&time=${game.time}&board=$convertedBoard"
+            // provide the controller field to the ModelAPI
+            val jsonFieldFirst = RestUtil.fieldToJson(field)
+            val jsonFileContentFirst = jsonFieldFirst.getBytes("UTF-8")
+            // generate put request with the controller field in body
+            val firstRequest = requestPut(url, jsonFileContentFirst)
+            // get response
+            val firstResponseFuture: Future[HttpResponse] = Http().singleRequest(firstRequest)
+            val firstBodyStringFuture: Future[String] = firstResponseFuture.flatMap { response =>
+                response.entity.toStrict(5.seconds).map(_.data.utf8String)
+            }
 
-            import system.dispatcher // to get an execution context
-            val jasonField = field.fieldToJson// TODO: replace fieldToJson with own function for that in Controller
-            //val jasonField = RestUtil.fieldToJson(field)
-            val jsonFileContent = jasonField.getBytes("UTF-8")
+
+            // ____________________________ TESTING ____________________________
+
+            val returnedJsonGameAndField = Await.result(firstBodyStringFuture, 5.seconds)
+            // then get the packed Game and Field in a JsonArray  [Field, Game] returnedJsonGameAndField and unpack it here
+            val (newGame, newField): (IGame, IField) = RestUtil.jsonToGameAndField(returnedJsonGameAndField)
+            println("compared -  game : " + game.board + " newGame: " + newGame.board)
+            println("compared -  game : " + game.bombs + " newGame: " + newGame.bombs)
+            field = newField // attention//
+            this.game = newGame // attention//
+            
+            // ____________________________ TESTING ____________________________
+            
+            // attention//field = tempField 
+            // attention//this.game = tempGame
+            
+            val jasonField3 = RestUtil.fieldToJson(field)//val jasonField = field.fieldToJson
+            val jsonFileContent = jasonField3.getBytes("UTF-8")
 
             val request2 = HttpRequest(
                 method =  HttpMethods.PUT,
@@ -106,7 +134,6 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
             )
 
             val responseFuture: Future[HttpResponse] = Http().singleRequest(request2)
-
             val bodyStringFuture: Future[String] = responseFuture.flatMap { response =>
                 response.entity.toStrict(5.seconds).map(_.data.utf8String)
             }
@@ -115,7 +142,7 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
             bodyStringFuture.onComplete {
                 case Success(bodyString) =>
                     symbol = bodyString
-                    println("\u001B[33m" + symbol + "\u001B[0m")
+                    println("\u001B[33m" + symbol + "_doMove_" + "\u001B[0m")
                 case Failure(ex) =>
                     sys.error(s"something wrong: ${ex.getMessage}")
             }
@@ -124,25 +151,18 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
 
             if(symbol == "E"){println("Error: Symbol not fetched from server");field}
             else if(symbol == "0"){field}
-            else{undoRedoManager.doStep(field, DoCommand(move))}
+            else{undoRedoManager.doStep(field, DoCommand(move))} // TODO doStep 
         }
     
     def loadGame =
-        // TWO TRACK CODE
-        val gameBox = file.loadGame
-        val gameBoxList = List.fill(1)(gameBox)
-        val packGame = new PackGame(gameBoxList)
-        
-        val extractedGameList = for (
-            game <- packGame.games
-        ) yield game.game match {
-            case Some(g) => g
-            case None =>  this.game
+
+        val gameOption = file.loadGame
+        gameOption match {
+            case Some(game) => this.game = game
+            case None =>
         }
 
-        val extractedGame = extractedGameList(0)
-
-        game = Game(extractedGame.bombs, extractedGame.side, extractedGame.time, "Playing")
+        game = Game(gameOption.get.bombs, gameOption.get.side, gameOption.get.time, gameOption.get.board)
 
         val fieldOption = file.loadField
         fieldOption match {
@@ -227,8 +247,11 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
     
     // doMove wird von TUI als parameter übergeben hierzu wird game und field in der TUI Klasse angegeben
     def makeAndPublish(makeThis: (Boolean, Move, IGame) => IField, b: Boolean, move: Move, game: IGame): Unit =
+        
+        // "open" => controller.makeAndPublish(controller.doMove, firstMoveCheck, move, controller.game)
         field = makeThis(b, move, game)  // doMove
-
+        
+        //// -> request to ModelAPi
         import system.dispatcher // to get an execution context
         val jasonField = field.fieldToJson(field) // TODO: fieldToJson nach RestUtil
         val jsonFileContent = jasonField.getBytes("UTF-8")
@@ -257,6 +280,7 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
         if (symbol == "0"){field = openRec(move.x,move.y,field)}
         val firstOrNext = if (b) Event.Start else Event.Next
         notifyObservers(firstOrNext)
+    
 
     def makeAndPublish(makeThis: Move => IField, move: Move): Unit =
         //controller.put, move
@@ -353,8 +377,9 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
     def redo: IField = undoRedoManager.redoStep(field) // Stays in Controller
 
     def saveTime(currentTime: Int): Unit = 
-        val tempGame: de.htwg.sa.minesweeper.entity.Game = de.htwg.sa.minesweeper.entity.Game(game.bombs, game.side, currentTime, "Playing")
-        game = tempGame.asInstanceOf[IGame] // TODO: delete it later
+        val tempGame: IGame = Game(game.bombs, game.side, currentTime, "Playing") // TODO: use Entity Game
+        game = tempGame
+        //game = tempGame.asInstanceOf[IGame] // TODO: delete it later
 
     def requestPut(input_uri: String, jsonContent: Array[Byte]) = {
         HttpRequest(

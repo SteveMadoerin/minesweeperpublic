@@ -39,6 +39,8 @@ import scala.util.{Try, Success, Failure}
 import akka.http.scaladsl.unmarshalling.Unmarshal
 import scala.concurrent.Future
 import scala.concurrent.duration._
+import de.htwg.sa.minesweeper.model.gameComponent.IGame
+import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl.Game
 /* import de.htwg.sa.minesweeper.entity.Field
 import de.htwg.sa.minesweeper.entity.Matrix */
 
@@ -48,42 +50,30 @@ object RestUtil{
     implicit val materializer: Materializer = Materializer(system)
     implicit val executionContext: ExecutionContextExecutor = system.dispatcher
     
+    // only use it for Command.scala !!!
     def requestShowInvisibleCell(x: Int, y: Int, field: IField): String = {
-        //field.showInvisibleCell(move.y, move.x)
-        field.showInvisibleCell(x, y)
-/*         import system.dispatcher // to get an execution context
+        //field.showInvisibleCell(x, y)
+        import system.dispatcher // to get an execution context
 
-        //val jasonField = field.fieldToJson// TODO: replace fieldToJson with own function for that in Controller
-        val jasonField = field.fieldToJson(field)
+    
+        val jasonField = fieldToJson(field)
         val jsonFileContent = jasonField.getBytes("UTF-8")
 
+        // take care in the uri -> this is only valid for Command.scala replacement
         val request2 = HttpRequest(
             method =  HttpMethods.PUT,
-            uri = s"http://localhost:8082/model/field/showInvisibleCell?y=${y}&x=${x}",
+            uri = s"http://localhost:8082/model/field/showInvisibleCell?y=${x}&x=${y}" ,
             entity = HttpEntity(ContentTypes.`application/json`, jsonFileContent)
         )
 
         val responseFuture: Future[HttpResponse] = Http().singleRequest(request2)
-
         val bodyStringFuture: Future[String] = responseFuture.flatMap { response =>
             response.entity.toStrict(5.seconds).map(_.data.utf8String)
         }
 
-        var symbol = "E"
-
-        bodyStringFuture.onComplete {
-            case Success(bodyString) =>
-                symbol = bodyString
-                val ANSI_PURPLE = "\u001B[35m"
-                val ANSI_RESET = "\u001B[0m"
-
-                println(ANSI_PURPLE + symbol + ANSI_RESET)
-            case Failure(ex) =>
-                sys.error(s"something wrong: ${ex.getMessage}")
-        }
-
         val result = Await.result(bodyStringFuture, 5.seconds)
-        result */
+        println("\u001B[35m" + result + "\u001B[0m") // TODO: delete
+        result
     }
         
 
@@ -143,6 +133,73 @@ object RestUtil{
     
     
     // field.put("F", move.y, move.x)
+
+/*     def jsonToGame(jsonString: String): IGame = {
+        val json: JsValue = Json.parse(jsonString)
+
+        val status = (json \ "game" \ "status").get.toString
+        val bombs = (json \ "game" \ "bombs").get.toString.toInt
+        val side = (json \ "game" \ "side").get.toString.toInt
+        val time = (json \ "game" \ "time").get.toString.toInt
+        
+        Game(0, 0, 0, "").insertBomb(bombs).insertSide(side).insertTime(time).insertBoard(status)
+
+
+    } */
+
+    def jsonToGameAndField(jsonString: String): (IGame, IField) = {
+        val json: JsValue = Json.parse(jsonString)
+        val jsonGame: Option[JsValue] = (json \\ "game").headOption
+        val status = (jsonGame.get \ "status").get.toString
+        val bombs = (jsonGame.get \ "bombs").get.toString.toInt
+        val side = (jsonGame.get \ "side").get.toString.toInt
+        val time = (jsonGame.get \ "time").get.toString.toInt
+        val statusWithoutQuotes = status.replace("\"", "")
+        val game = Game(0, 0, 0, "").insertBomb(bombs).insertSide(side).insertTime(time).insertBoard(statusWithoutQuotes)
+
+        val jsonField: Option[JsValue] = (json \\ "field").headOption
+
+        val jsonValue = jsonField.get
+
+        val size = (jsonValue \ "size").get.toString.toInt
+
+        val fieldVectorOption: Option[IField] = Some(Field(Matrix(Vector.tabulate(size, size) {(row, col) => "E"}), (Matrix(Vector.tabulate(size, size) {(row, col) => "E"}))))
+        val matrixVectorOption: Option[Vector[Vector[String]]] = Some(Vector.tabulate(size, size) {(row, col) => "E"})
+        val hiddenVectorOption: Option[Vector[Vector[String]]] = Some(Vector.tabulate(size, size) {(row, col) => "E"})
+
+        val matrixVector1 = matrixVectorOption match{
+            case Some(matrix) => matrix
+            case None => println("Matrix is not valid"); Vector.tabulate(size, size) {(row, col) => "E"}
+        }
+
+        val updatedMatrixVector: Vector[Vector[String]] = (0 until size * size).foldLeft(matrixVector1) {
+            case (currentMatrix, index) =>
+                val row = (jsonValue \ "matrix" \\ "row")(index).as[Int]
+                val col = (jsonValue \ "matrix" \\ "col")(index).as[Int]
+                val cell = (jsonValue \ "matrix" \\ "cell")(index).as[String]
+                currentMatrix.updated(row, currentMatrix(row).updated(col, cell))
+        }
+
+        val hiddenVector1 = hiddenVectorOption match{
+            case Some(m) => m
+            case None => println("Hidden is not valid"); Vector.tabulate(size, size) {(row, col) => "E"}
+        }
+        
+        val updatedHiddenVector: Vector[Vector[String]] = (0 until size * size).foldLeft(hiddenVector1) {
+            case (currentHidden, index) =>
+                val row = (jsonValue \ "hidden" \\ "row")(index).as[Int]
+                val col = (jsonValue \ "hidden" \\ "col")(index).as[Int]
+                val cell = (jsonValue \ "hidden" \\ "cell")(index).as[String]
+                currentHidden.updated(row, currentHidden(row).updated(col, cell))
+        }
+
+        val finalFieldOption = fieldVectorOption match{
+            case Some(f) => Some(Field(Matrix(updatedMatrixVector), Matrix(updatedHiddenVector)))
+            case None => println("Field is not valid"); None
+        }
+
+        (game, finalFieldOption.get) //finalFieldOption.get
+    }
 
 
 

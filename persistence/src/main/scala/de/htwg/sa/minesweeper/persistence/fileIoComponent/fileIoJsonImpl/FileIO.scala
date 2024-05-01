@@ -39,7 +39,7 @@ class FileIO extends IFileIO{
         
     }
 
-    override def loadGame: GameBox = 
+    override def loadGame: Option[IGame] = 
         import java.io._
         val maybeSource = Try(Source.fromFile("C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\game.json").getLines.mkString)
         val source = maybeSource match {
@@ -58,7 +58,7 @@ class FileIO extends IFileIO{
         val side = (json \ "game" \ "side").get.toString.toInt
         val time = (json \ "game" \ "time").get.toString.toInt
         // TWO TRACK CODE   
-        GameBox(Some(new Game(0, 0, 0, ""))).insertBomb(bombs).insertSide(side).insertTime(time)
+        Some(new Game(bombs, side, time, "Playing")) // after loading should always be playing
     
     override def saveField(field: IField) = {
         import java.io._

@@ -16,7 +16,7 @@ import java.io._
 class FileIO extends IFileIO {
 
 
-    override def loadGame: GameBox = {
+    override def loadGame: Option[IGame] = {
         // TRY OPTION for file
         val maybeFile: Try[Elem] = Try(scala.xml.XML.loadFile("C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\game.xml"))
         val file = maybeFile match {
@@ -29,7 +29,7 @@ class FileIO extends IFileIO {
         val side = (file \\ "side").text.toInt
         val time = (file \\ "time").text.toInt
         // HERE IS THE TWO TRACK CODE
-        GameBox(Some(new Game(0, 0, 0, ""))).insertBomb(bombs).insertSide(side).insertTime(time)
+        Some(new Game(0, 0, 0, "Playing")) // after loading should always be playing
     }
 
     def gameToXml(game: IGame) = {

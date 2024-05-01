@@ -13,7 +13,6 @@ import de.htwg.sa.minesweeper.persistence.fileIoComponent.fileIoJsonImpl.{FileIO
 object Default{
     
     given IGame = Game(10, 9, 0, "Playing")
-    //given IGame = prepareGame(10, 9, 0)
     given IField = new Field(10 , "~")
     given IController = Controller()
 

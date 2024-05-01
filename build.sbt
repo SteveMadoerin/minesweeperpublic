@@ -67,4 +67,3 @@ import org.scoverage.coveralls.Imports.CoverallsKeys.*
 
 coverallsTokenFile := sys.env.get("COVERALLS_REPO_TOKEN")
 coverallsService := Some(GitHubActions)
-coverageExcludedPackages := "de.htwg.sa.minesweeper.ui.gui.*"

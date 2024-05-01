@@ -22,9 +22,9 @@ class FileIOJasonSpec extends AnyWordSpec {
       "save the game status, bombs, side and time and reload it" in {
         fileIO1.saveGame(game)
         val loadGameTest = fileIO1.loadGame
-        loadGameTest.game.get.bombs should be (10)
-        loadGameTest.game.get.side should be (10)
-        loadGameTest.game.get.time should be (10)
+        loadGameTest.get.bombs should be (10)
+        loadGameTest.get.side should be (10)
+        loadGameTest.get.time should be (10)
       }
     }
 

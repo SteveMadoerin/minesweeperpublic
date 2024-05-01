@@ -69,6 +69,7 @@ class ModelApi(using var game: IGame, var field: IField){
                 }
             } ~
             path("domove") {
+                //TODO: decomment this
                 // TODO: Controller when creating new game should call here (1.)
                 parameter("b".as[Boolean], "moveValue".as[String], "mx".as[Int], "my".as[Int], "gameStatus".as[String], "gameBombs".as[Int], "gameSide".as[Int], "gameTime".as[Int]) { (b, moveValue, mx, my, gameStatus, gameBombs, gameSide, gameTime) =>
                 val (tempGame, tempField): (IGame, IField) = decider.evaluateStrategy(b, mx, my, this.field, this.game)
@@ -90,6 +91,28 @@ class ModelApi(using var game: IGame, var field: IField){
             }
         } ~
         put {
+            path("field"/"decider") {
+                parameter("b".as[Boolean], "x".as[Int], "y".as[Int], "bombs".as[Int], "size".as[Int], "time".as[Int], "board".as[Int]) { (b, x, y, bombs, size, time, board) =>
+                    entity(as[String]) { feld =>
+
+                        val newBoard = board.match
+                        {
+                            case 0 => "Playing"
+                            case 1 => "Won"
+                            case 2 => "Lost"
+                        }
+
+                        val jasonStringField = feld
+                        val controllerField = field.jsonToField(jasonStringField) // TODO: check jasonToField
+                        val controllerGame = Game(bombs, size, time, newBoard)
+                        val (tempGame, tempField): (IGame, IField) = decider.evaluateStrategy(b, x, y, controllerField, controllerGame)
+                        val jsonGame = Json.parse(tempGame.gameToJson)
+                        val jsonField = Json.parse(field.fieldToJson(tempField))
+                        val jsonGameFieldArray = Json.arr(jsonGame, jsonField)
+                        complete(HttpEntity(ContentTypes.`application/json`, jsonGameFieldArray.toString))
+                    }
+                }
+            } ~
             path("field"/"showInvisibleCell") {
                 parameter("y".as[Int], "x".as[Int]) { (y, x) =>
                     entity(as[String]) { feld =>

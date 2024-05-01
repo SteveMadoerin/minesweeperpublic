@@ -22,7 +22,7 @@ class FileIOXmlSpec extends AnyWordSpec {
       "save the game status, bombs, side and time and reload it" in {
         fileIO1.saveGame(game)
         val loadGameOption = fileIO1.loadGame
-        val loadGameTest = loadGameOption.game.get
+        val loadGameTest = loadGameOption.get
         loadGameTest.bombs should be (10)
         loadGameTest.side should be (9)
         loadGameTest.time should be (0)

@@ -42,7 +42,8 @@ case class Field(matrix: Matrix[String], hidden: Matrix[String]) extends IField:
 
     def put(symbol: String, x: Int, y: Int) = copy(matrix.replaceCell(x, y, symbol))
     def showVisibleCell(x: Int, y: Int): String = matrix.cell(x, y)
-    def showInvisibleCell(x: Int, y: Int): String = hidden.cell(x, y)
+    def showInvisibleCell(x: Int, y: Int): String =  hidden.cell(x, y)
+    //def showInvisibleCell(x: Int, y: Int): String = if (hidden.cell(x, y) == "" || hidden.cell(x, y) == " "  ) "0" else hidden.cell(x, y)
     def isValidF(row: Int, col: Int, side: Int): Boolean = {row >= 0 && row <= side && col >= 0 && col <= side}
     def openNew(x: Int, y: Int, field: IField): IField = field.put(field.showInvisibleCell(y, x), y, x) // function chaining
     

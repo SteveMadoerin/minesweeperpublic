@@ -16,7 +16,7 @@ object Default{
 
     given IController = Controller()
 
-    given IGame = prepareGame(10, 9, 0)
+    given IGame = Game(10, 9, 0, "Playing")
     given IField = createField(prepareGame(10, 9, 0))
 
     def scalableMatrix(size: Int, filling: String): Matrix[String] = new Matrix(size, filling)
