@@ -156,6 +156,17 @@ class ModelApi(using var game: IGame, var field: IField){
                         complete(HttpEntity(ContentTypes.`application/json`, Json.parse(flaggedJsonField).toString()))
                     }
                 }
+            } ~
+            path("field"/"recursiveOpen") {
+                parameter("x".as[Int], "y".as[Int]) { (x, y) =>
+                    entity(as[String]) { feld =>
+                        val jasonStringField = feld
+                        val saveControllerField = field.jsonToField(jasonStringField)
+                        val saveField = saveControllerField.recursiveOpen(x, y, saveControllerField)
+                        val openedField = saveField.fieldToJson(saveField)
+                        complete(HttpEntity(ContentTypes.`application/json`, Json.parse(openedField).toString()))
+                    }
+                }
             }
 /*             path("putField") {
                 entity(as[String]) { field =>

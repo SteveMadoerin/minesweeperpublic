@@ -50,12 +50,11 @@ object RestUtil{
     implicit val materializer: Materializer = Materializer(system)
     implicit val executionContext: ExecutionContextExecutor = system.dispatcher
     
-    // only use it for Command.scala !!!
+    // is working now - only use it for Command.scala !!!
     def requestShowInvisibleCell(x: Int, y: Int, field: IField): String = {
         //field.showInvisibleCell(x, y)
         import system.dispatcher // to get an execution context
 
-    
         val jasonField = fieldToJson(field)
         val jsonFileContent = jasonField.getBytes("UTF-8")
 
@@ -72,25 +71,25 @@ object RestUtil{
         }
 
         val result = Await.result(bodyStringFuture, 5.seconds)
-        println("\u001B[35m" + result + "\u001B[0m") // TODO: delete
-        result
-    }
+        //println("\u001B[35m" + result + "\u001B[0m") // TODO: delete
         
-
-    //field.put(extractedSymbol, move.y, move.x)
+        if (result.length()>3) {"E"} else {result}
+    }
+    
+    // is working now - only use it for Command.scala !!!
     def requestFieldPut(extractedSymbol: String, x: Int, y: Int, field: IField): IField = {
-        //field.put(extractedSymbol, move.y, move.x)
         val AINSI_PINK = "\u001B[35m"
         val AINSI_RESET = "\u001B[0m"
         println(   AINSI_PINK + s"$extractedSymbol <- Track it" + AINSI_RESET)
         field.put(extractedSymbol, x, y)
-/* 
+
+        // ________________________________________________________________________________________
         import system.dispatcher // to get an execution context
 
-        val jasonField = field.fieldToJson(field) // TODO: replace fieldToJson with own function for that in Controller
+        val jasonField = fieldToJson(field)
         val jsonFileContent = jasonField.getBytes("UTF-8")
-
-        //val secureSymbol = if (extractedSymbol == " "){"-"} else if (extractedSymbol == "*"){"b"} else extractedSymbol
+        
+        if (extractedSymbol.length()>3) {"E"} else {extractedSymbol}
 
         val ANSI_RED = "\u001B[31m"
         val ANSI_RESET = "\u001B[0m"
@@ -98,7 +97,7 @@ object RestUtil{
 
         val request2 = HttpRequest(
             method =  HttpMethods.PUT,
-            uri = s"http://localhost:8082/model/field/put?symbol=${extractedSymbol}&x=${x}&y=${y}",
+            uri = s"http://localhost:8082/model/field/put?symbol=$extractedSymbol&x=${x}&y=${y}",
             entity = HttpEntity(ContentTypes.`application/json`, jsonFileContent)
         )
 
@@ -108,28 +107,58 @@ object RestUtil{
             response.entity.toStrict(5.seconds).map(_.data.utf8String)
         }
 
-        var jsonBodyField = "E"
+        var jsonBodyField = jasonField
 
         bodyFieldFuture.onComplete {
             case Success(bodyField) =>
                 jsonBodyField = bodyField
-                val ANSI_YELLOW = "\u001B[33m"
-                val ANSI_RESET = "\u001B[0m"
 
-                println(ANSI_YELLOW + jsonBodyField + ANSI_RESET)
             case Failure(ex) =>
                 sys.error(s"something wrong: ${ex.getMessage}")
         }
 
         val result = Await.result(bodyFieldFuture, 5.seconds)
         jsonBodyField = result
+        val ANSI_YELLOW = "\u001B[33m"
 
-        val fieldFromController = field.jsonToField(jsonBodyField)
-        fieldFromController */
+        println(ANSI_YELLOW + jsonBodyField + ANSI_RESET)
+
+        val fieldFromController = jsonToField(jsonBodyField)
+        fieldFromController
+        //Additionally check the field
+
+        // ________________________________________________________________________________________
     }
 
-    //field.recursiveOpen(move.x,move.y,field)
-    def requestRecursiveOpen(x: Int, y: Int, field: IField): IField = field.recursiveOpen(x, y, field)
+    // is working now - only use it for Command.scala !!!
+    def requestRecursiveOpen(x: Int, y: Int, field: IField): IField = 
+    {
+        // def recursiveOpen(x: Int, y: Int, field: IField): IField
+        import system.dispatcher // to get an execution context
+        // We need a request with a field in json format
+        val jasonField = fieldToJson(field)
+        val jsonFileContent = jasonField.getBytes("UTF-8")
+        // then we need to send x and y as a parameter
+        val request = HttpRequest(
+            method =  HttpMethods.PUT,
+            uri = s"http://localhost:8082/model/field/recursiveOpen?x=${x}&y=${y}",
+            entity = HttpEntity(ContentTypes.`application/json`, jsonFileContent)
+        )
+
+        val responseFuture: Future[HttpResponse] = Http().singleRequest(request)
+        val bodyFieldFuture: Future[String] = responseFuture.flatMap { response =>
+            response.entity.toStrict(5.seconds).map(_.data.utf8String)
+        }
+        val result = Await.result(bodyFieldFuture, 5.seconds)
+        //if (result.length()<50) {"E"} else {result}
+        val fieldFromController = jsonToField(result)
+        fieldFromController
+
+        //__________________________________________________________________________________________
+        // attention: //field.recursiveOpen(x, y, field)
+        
+    }
+        
     
     
     // field.put("F", move.y, move.x)
