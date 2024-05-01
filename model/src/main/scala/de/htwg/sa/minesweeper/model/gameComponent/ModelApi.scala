@@ -83,11 +83,6 @@ class ModelApi(using var game: IGame, var field: IField){
             } ~
             path("field") {
                 complete(HttpEntity(ContentTypes.`application/json`,field.fieldToJson.toString()))
-            } ~
-            path("field"/"gameOverField") {
-                // TODO: Link Controller
-                this.field = field.gameOverField
-                complete(HttpEntity(ContentTypes.`application/json`,field.fieldToJson))
             }
         } ~
         put {
@@ -167,7 +162,23 @@ class ModelApi(using var game: IGame, var field: IField){
                         complete(HttpEntity(ContentTypes.`application/json`, Json.parse(openedField).toString()))
                     }
                 }
+            } ~
+            path("field"/"gameOverField") {
+                entity(as[String]) { feld =>
+                    val jasonStringField = feld
+                    val fieldFromController = field.jsonToField(jasonStringField) // TODO: check jasonToField
+                    val saveField = fieldFromController.gameOverField
+                    val prepareJsonField = fieldFromController.fieldToJson(saveField)
+                    // Use both jsonField and symbol as needed
+                    complete(HttpEntity(ContentTypes.`application/json`, Json.parse(prepareJsonField).toString()))
+                }
             }
+             /* ~
+            path("field"/"gameOverField") {
+                // TODO: Link Controller
+                this.field = field.gameOverField
+                complete(HttpEntity(ContentTypes.`application/json`,field.fieldToJson))
+            } */
 /*             path("putField") {
                 entity(as[String]) { field =>
                     val jsonField = field

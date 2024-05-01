@@ -78,10 +78,10 @@ object RestUtil{
     
     // is working now - only use it for Command.scala !!!
     def requestFieldPut(extractedSymbol: String, x: Int, y: Int, field: IField): IField = {
-        val AINSI_PINK = "\u001B[35m"
+/*         val AINSI_PINK = "\u001B[35m"
         val AINSI_RESET = "\u001B[0m"
-        println(   AINSI_PINK + s"$extractedSymbol <- Track it" + AINSI_RESET)
-        field.put(extractedSymbol, x, y)
+        println(   AINSI_PINK + s"$extractedSymbol <- Track it" + AINSI_RESET) */
+        //field.put(extractedSymbol, x, y)
 
         // ________________________________________________________________________________________
         import system.dispatcher // to get an execution context
@@ -89,15 +89,15 @@ object RestUtil{
         val jasonField = fieldToJson(field)
         val jsonFileContent = jasonField.getBytes("UTF-8")
         
-        if (extractedSymbol.length()>3) {"E"} else {extractedSymbol}
+        val extractedSymbolNew = if (extractedSymbol.length()>3) {"E"} else {extractedSymbol}
 
-        val ANSI_RED = "\u001B[31m"
+/*         val ANSI_RED = "\u001B[31m"
         val ANSI_RESET = "\u001B[0m"
-        println(ANSI_RED + extractedSymbol + " <- Track it"+ ANSI_RESET)
+        println(ANSI_RED + extractedSymbolNew + " <- Track it"+ ANSI_RESET) */
 
         val request2 = HttpRequest(
             method =  HttpMethods.PUT,
-            uri = s"http://localhost:8082/model/field/put?symbol=$extractedSymbol&x=${x}&y=${y}",
+            uri = s"http://localhost:8082/model/field/put?symbol=$extractedSymbolNew&x=${x}&y=${y}",
             entity = HttpEntity(ContentTypes.`application/json`, jsonFileContent)
         )
 
@@ -109,19 +109,20 @@ object RestUtil{
 
         var jsonBodyField = jasonField
 
-        bodyFieldFuture.onComplete {
+/*         bodyFieldFuture.onComplete {
             case Success(bodyField) =>
                 jsonBodyField = bodyField
 
             case Failure(ex) =>
                 sys.error(s"something wrong: ${ex.getMessage}")
-        }
+        } */
 
         val result = Await.result(bodyFieldFuture, 5.seconds)
         jsonBodyField = result
-        val ANSI_YELLOW = "\u001B[33m"
 
-        println(ANSI_YELLOW + jsonBodyField + ANSI_RESET)
+/*         val ANSI_YELLOW = "\u001B[33m"
+
+        println(ANSI_YELLOW + jsonBodyField + ANSI_RESET) */
 
         val fieldFromController = jsonToField(jsonBodyField)
         fieldFromController

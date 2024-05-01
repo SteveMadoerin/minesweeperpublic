@@ -59,7 +59,7 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
     // Field(Matrix[Symbol], Matrix[Symbol])
 
     var field: IField = createField(game)
-    val decider = new Decider()
+    //val decider = new Decider()
     val undoRedoManager = new UndoRedoManager[IField]
 
 
@@ -84,7 +84,7 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
         returnField
     }
 
-    
+    // doMove is working
     def doMove(b: Boolean, move: Move, game: IGame) = 
         synchronized{
             // attention//val (tempGame, tempField): (IGame, IField) = decider.evaluateStrategy(b, move.x, move.y, field, game)
@@ -95,7 +95,7 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
                 case "Won" => 1
                 case "Lost" => 2
             }
-            // TODO: make an ModelAPI call: model/field/decider and give him b, x, y, bombs size, time, board
+            // ModelAPI call: model/field/decider with parameters b, x, y, bombs size, time, board
             val url = s"http://localhost:8082/model/field/decider?b=${b}&x=${move.x}&y=${move.y}&bombs=${game.bombs}&size=${game.side}&time=${game.time}&board=$convertedBoard"
             // provide the controller field to the ModelAPI
             val jsonFieldFirst = RestUtil.fieldToJson(field)
@@ -108,14 +108,13 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
                 response.entity.toStrict(5.seconds).map(_.data.utf8String)
             }
 
-
             // ____________________________ TESTING ____________________________
 
             val returnedJsonGameAndField = Await.result(firstBodyStringFuture, 5.seconds)
             // then get the packed Game and Field in a JsonArray  [Field, Game] returnedJsonGameAndField and unpack it here
             val (newGame, newField): (IGame, IField) = RestUtil.jsonToGameAndField(returnedJsonGameAndField)
-            println("compared -  game : " + game.board + " newGame: " + newGame.board)
-            println("compared -  game : " + game.bombs + " newGame: " + newGame.bombs)
+            //println("compared -  game : " + game.board + " newGame: " + newGame.board)
+            //println("compared -  game : " + game.bombs + " newGame: " + newGame.bombs)
             field = newField // attention//
             this.game = newGame // attention//
             
@@ -138,22 +137,26 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
                 response.entity.toStrict(5.seconds).map(_.data.utf8String)
             }
 
-            var symbol = "E"
+/*             var symbol = "E"
             bodyStringFuture.onComplete {
                 case Success(bodyString) =>
                     symbol = bodyString
                     println("\u001B[33m" + symbol + "_doMove_" + "\u001B[0m")
                 case Failure(ex) =>
                     sys.error(s"something wrong: ${ex.getMessage}")
-            }
+            } */
 
-            symbol = Await.result(bodyStringFuture, 5.seconds)
+            //symbol = Await.result(bodyStringFuture, 5.seconds)
+            val result = Await.result(bodyStringFuture, 5.seconds)
+            val symbol = if (result.length()>3) {"E"} else {result}
+            //println("\u001B[33m" + symbol + "_doMove_" + "\u001B[0m")
 
-            if(symbol == "E"){println("Error: Symbol not fetched from server");field}
+            if(symbol == "E"){/* println("Error: Symbol not fetched from server"); */field}
             else if(symbol == "0"){field}
             else{undoRedoManager.doStep(field, DoCommand(move))} // TODO doStep 
         }
     
+    // TODO: implement
     def loadGame =
 
         val gameOption = file.loadGame
@@ -183,29 +186,34 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
     
     def exit = notifyObservers(Event.Exit)
 
+    // is working now and rest conform
     def gameOver =
-        field = field.gameOverField
+        //field = field.gameOverField
         val url = s"http://localhost:8082/model/field/gameOverField"
+        // provide the controller field to the ModelAPI
+        val jsonField = RestUtil.fieldToJson(field)
+        val jsonFileContent = jsonField.getBytes("UTF-8")
         // make a getRequest
-        val request2 = HttpRequest(
-            method =  HttpMethods.GET,
-            uri = url
+        val request = HttpRequest(
+            method =  HttpMethods.PUT,
+            uri = url,
+            entity = HttpEntity(ContentTypes.`application/json`, jsonFileContent)
         )
-        val responseFuture: Future[HttpResponse] = Http().singleRequest(request2)
+        val responseFuture: Future[HttpResponse] = Http().singleRequest(request)
         val bodyStringFuture: Future[String] = responseFuture.flatMap { response =>
             response.entity.toStrict(5.seconds).map(_.data.utf8String)
         }
         val bodyString = Await.result(bodyStringFuture, 5.seconds)
         val gameOverField = RestUtil.jsonToField(bodyString)
-        println(gameOverField.toString())
-        //field = gameOverField
-
-
+        //println(gameOverField.toString())
+        field = gameOverField
 
         notifyObservers(Event.GameOver)
     
+    // is working via Rest
     def openRec(x: Int, y: Int, field: IField): IField = undoRedoManager.doStep(field, DoCommand(Move("recursion", x, y))) // is approved
 
+    // TODO: implement
     def helpMenu = 
         game.helpMessage
         println(field.toString)
@@ -219,15 +227,15 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
             case _ => infoMessages(">> Invalid Input"); false
         }
     } */
+    // TODO: implement
     def cheat = 
         field.reveal
         notifyObservers(Event.Cheat)
-    
+    // TODO: implement
     def checkGameOver(status: String) = game.checkExit(status)
 
     def newGameGUI =
         game = Game(game.bombs, game.side, game.time, "Playing")
-
         notifyObservers(Event.Input)
     
     //for GUI
@@ -244,7 +252,7 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
         game = Game(bombs, side, game.time, "Playing")
         field = createField(game)
         notifyObservers(Event.NewGame)
-    
+    // Is jetzt rest conform
     // doMove wird von TUI als parameter übergeben hierzu wird game und field in der TUI Klasse angegeben
     def makeAndPublish(makeThis: (Boolean, Move, IGame) => IField, b: Boolean, move: Move, game: IGame): Unit =
         
@@ -261,7 +269,7 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
             response.entity.toStrict(5.seconds).map(_.data.utf8String)
         }
 
-        var symbol = "E"
+/*         var symbol = "E"
         bodyStringFuture.onComplete {
             case Success(bodyString) =>
                 symbol = bodyString
@@ -271,10 +279,18 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
                 println(ANSI_BLUE + symbol + ANSI_RESET)
             case Failure(ex) =>
                 sys.error(s"something wrong: ${ex.getMessage}")
-        }
+        } */
 
+        //TOTOOTOTOTOTOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+/*         val result = Await.result(bodyStringFuture, 5.seconds)
+        symbol = result */
         val result = Await.result(bodyStringFuture, 5.seconds)
-        symbol = result
+        val symbol = if(result.length > 3){"E"} else {result}
+
+/*         val ANSI_BLUE = "\u001B[34m"
+        val ANSI_RESET = "\u001B[0m"
+
+        println(ANSI_BLUE + symbol + ANSI_RESET) */
 
         //if (field.showInvisibleCell(move.y, move.x) == "0"){field = openRec(move.x,move.y,field)}
         if (symbol == "0"){field = openRec(move.x,move.y,field)}
@@ -282,6 +298,7 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
         notifyObservers(firstOrNext)
     
 
+    // is rest conform now and working
     def makeAndPublish(makeThis: Move => IField, move: Move): Unit =
         //controller.put, move
         move.value match {
@@ -358,16 +375,17 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
         //field = makeThis(move)
         notifyObservers(Event.Next)
 
-    
-    // for undo and redo
+    // should be restconform and working
     def makeAndPublish(makeThis: => IField) =
         field = makeThis
         notifyObservers(Event.Next)
-
+    
+    // TODO implement
     def saveScoreAndPlayerName(playerName: String, saveScore: Int, filePath: String) = {
         file.savePlayerScore(playerName, saveScore, filePath)
     }
 
+    // TODO implement
     def loadPlayerScores(filePath: String) = {
         file.loadPlayerScores(filePath)
     }
@@ -376,6 +394,7 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
     def undo: IField = undoRedoManager.undoStep(field) // Stays in Controller
     def redo: IField = undoRedoManager.redoStep(field) // Stays in Controller
 
+    // works now
     def saveTime(currentTime: Int): Unit = 
         val tempGame: IGame = Game(game.bombs, game.side, currentTime, "Playing") // TODO: use Entity Game
         game = tempGame
