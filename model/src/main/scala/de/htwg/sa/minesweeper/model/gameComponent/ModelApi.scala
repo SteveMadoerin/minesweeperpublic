@@ -60,6 +60,12 @@ class ModelApi(using var game: IGame, var field: IField){
 
                 }
             } ~
+            path("game"/"checkExit") {
+                parameter("board".as[String]) { (board) =>
+                val boolean = game.checkExit(board)
+                complete(HttpEntity(ContentTypes.`application/json`, boolean.toString())) // boolean to json
+                }
+            } ~
             path("field"/"new") {
                 // TODO: Controller when creating new field should call here (1.)
                 parameter("bombs".as[Int], "size".as[Int], "time".as[Int]) { (bombs, size, time) =>

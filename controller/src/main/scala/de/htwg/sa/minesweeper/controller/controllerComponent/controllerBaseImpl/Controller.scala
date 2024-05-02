@@ -241,9 +241,23 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
         //field.reveal
         notifyObservers(Event.Cheat)
     
-    // TODO: implement
-    def checkGameOver(status: String) = game.checkExit(status)
-
+    // approved
+    def checkGameOver(status: String) = {
+        //game.checkExit(status)
+        val url = s"http://localhost:8082/model/game/checkExit?board=$status"
+        val request = HttpRequest(
+            method =  HttpMethods.GET,
+            uri = url
+        )
+        val responseFuture: Future[HttpResponse] = Http().singleRequest(request)
+        val bodyStringFuture: Future[String] = responseFuture.flatMap { response =>
+            response.entity.toStrict(5.seconds).map(_.data.utf8String)
+        }
+        val bodyString = Await.result(bodyStringFuture, 5.seconds)
+        bodyString.toBoolean // parse String to boolean
+    }
+        
+    // approved
     def newGameGUI =
         game = Game(game.bombs, game.side, game.time, "Playing")
         notifyObservers(Event.Input)
