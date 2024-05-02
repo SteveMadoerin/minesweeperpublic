@@ -296,9 +296,10 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
         
         notifyObservers(Event.NewGame)
         
+    // approved
     def newGame(side: Int, bombs: Int) =
         game = Game(bombs, side, game.time, "Playing")
-        field = createField(game)
+        field = createField(game) // TODO: replace with GameEntity
         notifyObservers(Event.NewGame)
     
     // approved - doMove from TUI transfered as param -> game & field in TUI declared
@@ -396,9 +397,23 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
         field = makeThis
         notifyObservers(Event.Next)
     
-    // TODO implement
+    // approved
     def saveScoreAndPlayerName(playerName: String, saveScore: Int, filePath: String) = {
-        file.savePlayerScore(playerName, saveScore, filePath)
+        //file.savePlayerScore(playerName, saveScore, filePath)
+        val queryParameters = Uri.Query(
+            "player" -> s"${playerName}",
+            "score"  -> s"${saveScore}"
+        )
+
+        val uri = Uri("http://localhost:8083/persistence/putHighscore").withQuery(queryParameters)
+        val request = HttpRequest(method = HttpMethods.PUT, uri = uri)
+
+        val responseFuture: Future[HttpResponse] = Http().singleRequest(request)
+
+        responseFuture.onComplete {
+        case Success(res) => println(s"Request successful: $res")
+        case Failure(ex)  => println(s"Request failed: $ex")
+        }
     }
 
     // TODO implement
