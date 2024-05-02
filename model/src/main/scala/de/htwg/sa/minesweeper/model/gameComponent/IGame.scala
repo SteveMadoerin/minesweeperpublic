@@ -20,7 +20,7 @@ trait IGame {
     def intitializeBombs(matrix: Matrix[String], bombs: Int): Matrix[String]
 
     def checkExit(status: String): Boolean
-    def helpMessage: Unit
+    def helpMessage: String
 
     def side: Int
     def bombs: Int

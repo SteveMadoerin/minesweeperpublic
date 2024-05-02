@@ -47,6 +47,10 @@ class ModelApi(using var game: IGame, var field: IField){
                 val game = new Game(10, 9, 0, "Playing")
                 complete(HttpEntity(ContentTypes.`application/json`,game.gameToJson))
             } ~
+            path("game"/"helpMessage") {
+                val message = game.helpMessage
+                complete(HttpEntity(ContentTypes.`application/json`, message))
+            } ~
             path("game"/"new") {
                 // TODO: Controller when creating new game should call here (1.)
                 parameter("bombs".as[Int], "size".as[Int], "time".as[Int]) { (bombs, size, time) =>
@@ -68,19 +72,6 @@ class ModelApi(using var game: IGame, var field: IField){
 
                 }
             } ~
-            path("domove") {
-                //TODO: decomment this
-                // TODO: Controller when creating new game should call here (1.)
-                parameter("b".as[Boolean], "moveValue".as[String], "mx".as[Int], "my".as[Int], "gameStatus".as[String], "gameBombs".as[Int], "gameSide".as[Int], "gameTime".as[Int]) { (b, moveValue, mx, my, gameStatus, gameBombs, gameSide, gameTime) =>
-                val (tempGame, tempField): (IGame, IField) = decider.evaluateStrategy(b, mx, my, this.field, this.game)
-                this.field = tempField 
-                this.game = tempGame
-
-                //returns a field in json
-                complete(HttpEntity(ContentTypes.`application/json`,field.fieldToJson))
-
-                }
-            } ~
             path("field") {
                 complete(HttpEntity(ContentTypes.`application/json`,field.fieldToJson.toString()))
             }
@@ -89,7 +80,7 @@ class ModelApi(using var game: IGame, var field: IField){
             path("field"/"decider") {
                 parameter("b".as[Boolean], "x".as[Int], "y".as[Int], "bombs".as[Int], "size".as[Int], "time".as[Int], "board".as[Int]) { (b, x, y, bombs, size, time, board) =>
                     entity(as[String]) { feld =>
-
+                        // doMove
                         val newBoard = board.match
                         {
                             case 0 => "Playing"
@@ -169,16 +160,26 @@ class ModelApi(using var game: IGame, var field: IField){
                     val fieldFromController = field.jsonToField(jasonStringField) // TODO: check jasonToField
                     val saveField = fieldFromController.gameOverField
                     val prepareJsonField = fieldFromController.fieldToJson(saveField)
-                    // Use both jsonField and symbol as needed
                     complete(HttpEntity(ContentTypes.`application/json`, Json.parse(prepareJsonField).toString()))
                 }
-            }
-             /* ~
-            path("field"/"gameOverField") {
-                // TODO: Link Controller
-                this.field = field.gameOverField
-                complete(HttpEntity(ContentTypes.`application/json`,field.fieldToJson))
-            } */
+            } ~
+            path("field"/"toString") {
+                entity(as[String]) { feld =>
+                    val jasonStringField = feld
+                    val fieldFromController = field.jsonToField(jasonStringField) // TODO: check jasonToField
+                    val saveField = fieldFromController.toString
+                    complete(HttpEntity(ContentTypes.`application/json`, saveField))
+                }
+            } ~
+            path("field"/"cheat") {
+                entity(as[String]) { feld =>
+                    val jasonStringField = feld
+                    val fieldFromController = field.jsonToField(jasonStringField) // TODO: check jasonToField
+                    val saveField = fieldFromController.reveal
+                    val prepareJsonField = saveField.toString
+                    complete(HttpEntity(ContentTypes.`application/json`, prepareJsonField))
+                }
+            } 
 /*             path("putField") {
                 entity(as[String]) { field =>
                     val jsonField = field

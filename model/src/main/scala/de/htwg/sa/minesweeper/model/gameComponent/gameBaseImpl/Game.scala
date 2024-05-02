@@ -52,7 +52,8 @@ case class Game (bombs : Int, side: Int, time: Int, board : String) extends IGam
             |******************************************************************************""".stripMargin
             
         println(s"$helpMsg")
-
+        helpMsg
+    
     
     def premierMove(x: Int, y: Int, field: IField): IField = 
         val adjacent = Playfield()
