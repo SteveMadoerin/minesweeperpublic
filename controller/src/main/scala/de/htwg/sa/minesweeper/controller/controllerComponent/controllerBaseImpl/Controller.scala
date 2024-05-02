@@ -262,13 +262,37 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
         game = Game(game.bombs, game.side, game.time, "Playing")
         notifyObservers(Event.Input)
     
-    //for GUI
+    // approved
     def newGameField(optionString: Option[String]) =
         game = Game(game.bombs, game.side, game.time, "Playing")
-        val prepareWithDifficulty = game.prepareBoard(optionString)_ // partially applied and get a function
-        val (feld, spiel): (IField, IGame) = prepareWithDifficulty(game)// complete preparation with game instance
-        field = feld
-        game = spiel
+        //val (feld, spiel): (IField, IGame) = game.prepareBoard(optionString)(game)
+
+        val oString = optionString.get match {
+            case "SuperEasy" => 0
+            case "Easy" => 1 
+            case "Medium" => 2
+            case "Hard" => 3
+        }
+        
+        val url = s"http://localhost:8082/model/game/newGameField?optionString=$oString" // we need a url
+        //println(s"newGameField: url = $url")
+
+        val bodyGame = RestUtil.gameToJson(game) // prepare the game
+        val body = bodyGame.getBytes("UTF-8")
+
+        val request = requestPut(url, body)  // prepare the PUT request
+
+        val responseFuture: Future[HttpResponse] = Http().singleRequest(request)
+        val bodyStringFuture: Future[String] = responseFuture.flatMap { response =>
+            response.entity.toStrict(5.seconds).map(_.data.utf8String)
+        }
+        val returnedJsonGameAndField = Await.result(bodyStringFuture, 5.seconds)
+        val (newGame, newField): (IGame, IField) = RestUtil.jsonToGameAndField(returnedJsonGameAndField)
+        field = newField                
+        game = Game(newGame.bombs, newGame.side, newGame.time, newGame.board) 
+
+        //field = feld
+        //game = spiel
         
         notifyObservers(Event.NewGame)
         

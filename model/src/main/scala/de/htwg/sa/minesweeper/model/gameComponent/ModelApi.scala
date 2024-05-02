@@ -185,7 +185,29 @@ class ModelApi(using var game: IGame, var field: IField){
                     val prepareJsonField = saveField.toString
                     complete(HttpEntity(ContentTypes.`application/json`, prepareJsonField))
                 }
-            } 
+            } ~
+            path("game"/"newGameField") {
+                parameter("optionString".as[Int]) { (optionString) =>
+                    entity(as[String]) { currentGame =>
+                        val jasonStringGame = currentGame
+                        val saveControllerGame: Game = game.jsonToGame(jasonStringGame).asInstanceOf[Game]
+                        val convertedOptionString = optionString match {
+                            case 0 => "SuperEasy" 
+                            case 1 => "Easy"
+                            case 2 => "Medium"
+                            case 3 => "Hard"
+                            case _ => "Easy"
+                        }
+                        val controllerOptionString = Some(convertedOptionString)
+                        val(feldy, spiely) = saveControllerGame.prepareBoard2(controllerOptionString)(saveControllerGame)
+
+                        val jsonGame = Json.parse(spiely.gameToJson)
+                        val jsonField = Json.parse(feldy.fieldToJson(feldy))
+                        val jsonGameFieldArray = Json.arr(jsonGame, jsonField)
+                        complete(HttpEntity(ContentTypes.`application/json`, jsonGameFieldArray.toString))
+                    }
+                }
+            }
 /*             path("putField") {
                 entity(as[String]) { field =>
                     val jsonField = field

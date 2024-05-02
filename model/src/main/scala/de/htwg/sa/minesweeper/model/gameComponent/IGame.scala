@@ -30,6 +30,7 @@ trait IGame {
     def prepareBoard(s: Option[String])(game: IGame): (IField, IGame) // currying
 
     def gameToJson: String
+    def jsonToGame(jsonString: String): IGame
 }
 
 trait IField{

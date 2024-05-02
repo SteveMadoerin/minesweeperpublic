@@ -50,7 +50,7 @@ object RestUtil{
     implicit val materializer: Materializer = Materializer(system)
     implicit val executionContext: ExecutionContextExecutor = system.dispatcher
     
-    // is working now - only use it for Command.scala !!!
+    // approved
     def requestShowInvisibleCell(x: Int, y: Int, field: IField): String = {
         //field.showInvisibleCell(x, y)
         import system.dispatcher // to get an execution context
@@ -71,17 +71,12 @@ object RestUtil{
         }
 
         val result = Await.result(bodyStringFuture, 5.seconds)
-        //println("\u001B[35m" + result + "\u001B[0m") // TODO: delete
         
         if (result.length()>3) {"E"} else {result}
     }
     
-    // is working now - only use it for Command.scala !!!
+    // approved
     def requestFieldPut(extractedSymbol: String, x: Int, y: Int, field: IField): IField = {
-/*         val AINSI_PINK = "\u001B[35m"
-        val AINSI_RESET = "\u001B[0m"
-        println(   AINSI_PINK + s"$extractedSymbol <- Track it" + AINSI_RESET) */
-        //field.put(extractedSymbol, x, y)
 
         // ________________________________________________________________________________________
         import system.dispatcher // to get an execution context
@@ -90,10 +85,6 @@ object RestUtil{
         val jsonFileContent = jasonField.getBytes("UTF-8")
         
         val extractedSymbolNew = if (extractedSymbol.length()>3) {"E"} else {extractedSymbol}
-
-/*         val ANSI_RED = "\u001B[31m"
-        val ANSI_RESET = "\u001B[0m"
-        println(ANSI_RED + extractedSymbolNew + " <- Track it"+ ANSI_RESET) */
 
         val request2 = HttpRequest(
             method =  HttpMethods.PUT,
@@ -109,29 +100,16 @@ object RestUtil{
 
         var jsonBodyField = jasonField
 
-/*         bodyFieldFuture.onComplete {
-            case Success(bodyField) =>
-                jsonBodyField = bodyField
-
-            case Failure(ex) =>
-                sys.error(s"something wrong: ${ex.getMessage}")
-        } */
-
         val result = Await.result(bodyFieldFuture, 5.seconds)
         jsonBodyField = result
-
-/*         val ANSI_YELLOW = "\u001B[33m"
-
-        println(ANSI_YELLOW + jsonBodyField + ANSI_RESET) */
 
         val fieldFromController = jsonToField(jsonBodyField)
         fieldFromController
         //Additionally check the field
-
         // ________________________________________________________________________________________
     }
 
-    // is working now - only use it for Command.scala !!!
+    // approved
     def requestRecursiveOpen(x: Int, y: Int, field: IField): IField = 
     {
         // def recursiveOpen(x: Int, y: Int, field: IField): IField
@@ -162,20 +140,28 @@ object RestUtil{
         
     
     
-    // field.put("F", move.y, move.x)
-
-/*     def jsonToGame(jsonString: String): IGame = {
+    def jsonToGame(jsonString: String): IGame = {
         val json: JsValue = Json.parse(jsonString)
-
         val status = (json \ "game" \ "status").get.toString
         val bombs = (json \ "game" \ "bombs").get.toString.toInt
         val side = (json \ "game" \ "side").get.toString.toInt
         val time = (json \ "game" \ "time").get.toString.toInt
-        
-        Game(0, 0, 0, "").insertBomb(bombs).insertSide(side).insertTime(time).insertBoard(status)
+        val statusWithoutQuotes = status.replace("\"", "") // \Playing\ -> Playing
+        Game(bombs, side, time, statusWithoutQuotes)
+    }
 
-
-    } */
+    def gameToJson(currentGame: IGame): String = {
+        Json.prettyPrint(
+            Json.obj(
+                "game" -> Json.obj(
+                    "status" -> currentGame.board,
+                    "bombs" -> currentGame.bombs,
+                    "side" -> currentGame.side,
+                    "time" -> currentGame.time
+                )
+            )
+        )
+    }
 
     def jsonToGameAndField(jsonString: String): (IGame, IField) = {
         val json: JsValue = Json.parse(jsonString)

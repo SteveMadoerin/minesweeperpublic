@@ -6,6 +6,7 @@ import scala.util.{Random, Try}
 import scala.annotation.tailrec
 import de.htwg.sa.minesweeper.model.gameComponent.config.Default
 import play.api.libs.json.Json
+import play.api.libs.json.JsValue
 
 case class Game (bombs : Int, side: Int, time: Int, board : String) extends IGame:
     
@@ -25,8 +26,14 @@ case class Game (bombs : Int, side: Int, time: Int, board : String) extends IGam
         }
     }
 
-    // currying
-    def prepareBoard(s: Option[String])(game: IGame): (IField, IGame) = {
+    // currying // leGame: Game
+    def prepareBoard2(s: Option[String])(leGame: Game): (IField, IGame) = {
+        val realGame = leGame.copy(optionToList(s)(1), optionToList(s)(0))
+        val adjacentField = Playfield()
+        (adjacentField.newField(optionToList(s)(0), realGame), realGame)
+    }
+
+    def prepareBoard(s: Option[String])(leGame: IGame): (IField, IGame) = {
         val realGame = this.copy(optionToList(s)(1), optionToList(s)(0))
         val adjacentField = Playfield()
         (adjacentField.newField(optionToList(s)(0), realGame), realGame)
@@ -187,6 +194,16 @@ case class Game (bombs : Int, side: Int, time: Int, board : String) extends IGam
                 )
             )
         )
+    }
+
+    def jsonToGame(jsonString: String): IGame = {
+        val json: JsValue = Json.parse(jsonString)
+        val status = (json \ "game" \ "status").get.toString
+        val bombs = (json \ "game" \ "bombs").get.toString.toInt
+        val side = (json \ "game" \ "side").get.toString.toInt
+        val time = (json \ "game" \ "time").get.toString.toInt
+        val statusWithoutQuotes = status.replace("\"", "") // \Playing\ -> Playing
+        Game(bombs, side, time, statusWithoutQuotes)
     }
 
 
