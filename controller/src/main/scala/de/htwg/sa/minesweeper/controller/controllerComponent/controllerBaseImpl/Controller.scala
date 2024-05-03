@@ -48,6 +48,9 @@ import play.api.libs.json.JsResult
 import play.api.libs.json.JsSuccess
 import play.api.libs.json.JsError
 
+import java.nio.file.{Files, Paths}
+import scala.util.{Failure, Success}
+
 
 
 class Controller(using var game: IGame, var file: IFileIO) extends IController with Observable:
@@ -134,24 +137,67 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
             else{undoRedoManager.doStep(field, DoCommand(move))}
         }
     
-    // TODO: implement
-    def loadGame =
+    // approved
+    def loadGame = {
 
-        val gameOption = file.loadGame
+        // _____________________________________________________________________________________________________
+        // url
+        val uri = Uri("http://localhost:8083/persistence/game") // load the game
+
+        val request = HttpRequest(method = HttpMethods.GET, uri = uri)
+        val responseFuture: Future[HttpResponse] = Http().singleRequest(request)
+        val bodyStringFuture: Future[String] = responseFuture.flatMap { response =>
+            response.entity.toStrict(5.seconds).map(_.data.utf8String)
+        }
+        val result = Await.result(bodyStringFuture, 5.seconds)
+
+        // now we need to parse the resulting jsong string representig the Game
+        val loadedGame: Option[IGame] = Try {
+            RestUtil.jsonToGame(result)
+        } match {
+            case Success(game) => println("game loaded"); Some(game)
+            case Failure(e) => None
+        }
+
+        val gameOption = loadedGame
+
+        //val gameOption = file.loadGame
         gameOption match {
             case Some(game) => this.game = game
             case None =>
         }
-
+        // _____________________________________________________________________________________________________
         game = Game(gameOption.get.bombs, gameOption.get.side, gameOption.get.time, gameOption.get.board)
+        // _____________________________________________________________________________________________________
+        // we need to load the field too
+        val uriField = Uri("http://localhost:8083/persistence/field") // load the field
 
-        val fieldOption = file.loadField
+        val requestField = HttpRequest(method = HttpMethods.GET, uri = uriField)
+        val responseFutureField: Future[HttpResponse] = Http().singleRequest(requestField)
+        val bodyStringFutureField: Future[String] = responseFutureField.flatMap { response =>
+            response.entity.toStrict(5.seconds).map(_.data.utf8String)
+        }
+        val resultField = Await.result(bodyStringFutureField, 5.seconds)
+        val loadedField: Option[IField] = Try {
+            RestUtil.jsonToField(resultField)
+        } match {
+            case Success(field) => println("field loaded"); Some(field)
+            case Failure(e) => None
+        }
+
+        val fieldOption = loadedField
+
+        //val fieldOption = file.loadField
         fieldOption match {
             case Some(field) => this.field = field
             case None =>
         }
 
         notifyObservers(Event.Load)
+        // _____________________________________________________________________________________________________
+    }
+
+
     
     // approved
     def saveGame =
@@ -176,20 +222,13 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
             case Failure(ex)  => println(s"Request failed: $ex")
         }
 
-        file.saveGame(game)
+        //file.saveGame(game)
         // _____________________________________________________________________________________________________
 
         // _____________________________________________________________________________________________________
-
-        import java.nio.file.{Files, Paths}
-        import scala.util.{Failure, Success}
-
-
-        import system.dispatcher // to get an execution context
 
         val jasonField = field.fieldToJson
         val jsonFileContent = jasonField.getBytes("UTF-8")
-
 
         val request2 = HttpRequest(
             method =  HttpMethods.PUT,
@@ -200,7 +239,7 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
         val responseFuture2: Future[HttpResponse] = Http().singleRequest(request2)
 
         responseFuture2.onComplete {
-            case Success(res) => println(s"Successfully put JSON file: ${res.entity}")
+            case Success(res) => println(s"Successfully saved JSON file field: ${res.entity}")
             case Failure(ex)  => println(s"Failed to put JSON file: ${ex.getMessage}")
         }
 

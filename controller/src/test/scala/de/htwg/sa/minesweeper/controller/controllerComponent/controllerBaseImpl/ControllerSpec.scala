@@ -440,8 +440,9 @@ class ControllerSpec extends AnyWordSpec{
         }
 
         "make and publish a move" in {
-            val filePathHighScore = Default.filePathHighScore
-            controller25.loadPlayerScores(filePathHighScore)
+/*             val filePathHighScore = Default.filePathHighScore
+            controller25.loadPlayerScores(filePathHighScore) */
+            controller25.loadPlayerScores
         }
     }
 
