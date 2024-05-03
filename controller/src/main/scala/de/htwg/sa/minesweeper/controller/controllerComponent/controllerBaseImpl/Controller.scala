@@ -43,6 +43,10 @@ import scala.concurrent.Future
 import scala.concurrent.duration._
 import de.htwg.sa.minesweeper.util.RestUtil
 import play.api.libs.json.JsArray
+import play.api.libs.json.Format
+import play.api.libs.json.JsResult
+import play.api.libs.json.JsSuccess
+import play.api.libs.json.JsError
 
 
 
@@ -416,9 +420,32 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
         }
     }
 
-    // TODO implement
-    def loadPlayerScores(filePath: String) = {
-        file.loadPlayerScores(filePath)
+    // approved
+    def loadPlayerScores = {
+        
+        val url = "http://localhost:8083/persistence/highscore"
+        val request = HttpRequest(method = HttpMethods.GET, uri = url)
+        val responseFuture: Future[HttpResponse] = Http().singleRequest(request)
+        val bodyFuture: Future[String] = responseFuture.flatMap { response =>
+            response.entity.toStrict(5.seconds).map(_.data.utf8String)
+        }
+        val jsonStringApiResult: String = Await.result(bodyFuture, 5.seconds)
+        
+        // body needs to be convertoed to a Seq[(String, Int)]
+        case class PlayerScore(player: String, score: Int)
+        implicit val playerScoreFormat: Format[PlayerScore] = Json.format[PlayerScore]
+        
+        val json: JsValue = Json.parse(jsonStringApiResult) // Parse the JSON string into a sequence of PlayerScore objects
+        val playerScoresResult: JsResult[Seq[PlayerScore]] = Json.fromJson[Seq[PlayerScore]](json)
+
+        // Map the sequence of PlayerScore objects to the desired Seq[(String, Int)]
+        val playerScores: Seq[(String, Int)] = playerScoresResult match {
+        case JsSuccess(scores, _) => scores.map(ps => (ps.player, ps.score))
+        case JsError(errors) => Seq.empty // Handle the error appropriately
+        }
+
+        //file.loadPlayerScores
+        playerScores
     }
     
     def put(move: Move): IField = undoRedoManager.doStep(field, DoCommand(move)) // approved

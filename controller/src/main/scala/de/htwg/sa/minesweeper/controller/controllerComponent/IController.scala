@@ -24,7 +24,8 @@ trait IController extends Observable{
     def makeAndPublish(makeThis: Move => IField, move: Move): Unit
     def makeAndPublish(makeThis: => IField): Unit
 
-    def loadPlayerScores(filePath: String): Seq[(String, Int)]
+    def loadPlayerScores: Seq[(String, Int)]
+    //def loadPlayerScores(filePath: String): Seq[(String, Int)]
     def saveScoreAndPlayerName(playerName: String, saveScore: Int, filePath: String): Unit
 
     //def showVisibleCell(x: Int, y: Int): String

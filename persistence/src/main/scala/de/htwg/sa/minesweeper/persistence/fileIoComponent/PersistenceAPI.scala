@@ -53,7 +53,7 @@ class PersistenceApi(using var file: IFileIO) {
     implicit val materializer: Materializer = Materializer(system)
     implicit val executionContext: ExecutionContextExecutor = system.dispatcher
 
-    val pathToFile = "highscore.json" // TODO: change path to highscore.json
+    val pathToFile = Default.filePathHighScore
 
     // we net also a put method to save the game
     
@@ -123,7 +123,7 @@ class PersistenceApi(using var file: IFileIO) {
         .flatMap(_.unbind())
         .onComplete(_ => system.terminate())
 
-        def loadPlayerScoresToJson(filePath: String): JsValue = {
+    def loadPlayerScoresToJson(filePath: String): JsValue = {
 
         val file = new File(filePath)
         val source = Source.fromFile(file)

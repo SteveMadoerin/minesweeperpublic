@@ -169,6 +169,7 @@ class FileIO extends IFileIO{
         maybeFinalScores.getOrElse(Seq.empty)
     }
 
+    // try to make only a JsArray
     def savePlayerScore(playerName: String, score: Int, filePath: String): Unit = {
         
         val maybeFile =  Try{ new File(filePath) } 

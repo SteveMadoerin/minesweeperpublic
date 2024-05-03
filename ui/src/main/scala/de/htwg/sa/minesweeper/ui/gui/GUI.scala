@@ -275,9 +275,8 @@ class GUI(using var controller: IController) extends Frame with Observer:
 
     def loadScoreNew = {
 
-        val filePath = Default.filePathHighScore
         val loadAndDisplayScores = () => {
-            val scores = controller.loadPlayerScores(filePath)
+            val scores = controller.loadPlayerScores // path is set in Persistence
             val top10 = scores.sortBy(-_._2).take(10)
             val message = top10.zipWithIndex.map { case ((name, score), index) =>
                 s"${index + 1}. $name: $score"
