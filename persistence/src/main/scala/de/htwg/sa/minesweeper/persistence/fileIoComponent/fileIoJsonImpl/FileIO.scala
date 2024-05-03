@@ -14,9 +14,8 @@ import de.htwg.sa.minesweeper.persistence.fileIoComponent.config.Default
 
 class FileIO extends IFileIO{
 
-    
     override def saveGame(game: IGame): Unit = {
-        val pw = Try (new PrintWriter(new File("C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\game.json")))
+        val pw = Try (new PrintWriter(new File("C:\\Playground\\minesweeperpublic\\src\\main\\data\\game.json")))
         pw match {
             case Success(pw) => pw.write(gameToJson(game).+('\n'))
             case Failure(e) => println("Error: " + e)
@@ -41,7 +40,7 @@ class FileIO extends IFileIO{
 
     override def loadGame: Option[IGame] = 
         import java.io._
-        val maybeSource = Try(Source.fromFile("C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\game.json").getLines.mkString)
+        val maybeSource = Try(Source.fromFile("C:\\Playground\\minesweeperpublic\\src\\main\\data\\game.json").getLines.mkString)
         val source = maybeSource match {
             case Success(source) => source
             case Failure(exception) => throw exception
@@ -60,9 +59,9 @@ class FileIO extends IFileIO{
         // TWO TRACK CODE   
         Some(new Game(bombs, side, time, "Playing")) // after loading should always be playing
     
-    override def saveField(field: IField) = {
+    def saveField(field: IField) = {
         import java.io._
-        val pw = Try (new PrintWriter(new File("C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\field.json")))
+        val pw = Try (new PrintWriter(new File("C:\\Playground\\minesweeperpublic\\src\\main\\data\\field.json")))
         pw match {
             case Success(pw) => pw.write(fieldToJson(field))
             case Failure(e) => println("Error: " + e)
@@ -107,7 +106,7 @@ class FileIO extends IFileIO{
 
     override def loadField: Option[IField] = {
 
-        val source: String = Source.fromFile("C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\field.json").getLines.mkString
+        val source: String = Source.fromFile("C:\\Playground\\minesweeperpublic\\src\\main\\data\\field.json").getLines.mkString
         val json: JsValue = Json.parse(source)
         val size = (json \ "field" \ "size").get.toString.toInt
 

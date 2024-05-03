@@ -153,12 +153,59 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
 
         notifyObservers(Event.Load)
     
-    // TODO: implement
+    // approved
     def saveGame =
 
         notifyObservers(Event.SaveTime)
+
+        // _____________________________________________________________________________________________________
+        val queryParameters = Uri.Query(
+            "bombs" -> s"${game.bombs}",
+            "size"  -> s"${game.side}",
+            "time"  -> s"${game.time}",
+            "board" -> s"${game.board}"
+        )
+
+        val uri = Uri("http://localhost:8083/persistence/putGame").withQuery(queryParameters)
+        val request = HttpRequest(method = HttpMethods.PUT, uri = uri)
+
+        val responseFuture: Future[HttpResponse] = Http().singleRequest(request)
+
+        responseFuture.onComplete {
+            case Success(res) => println(s"Request successful: $res")
+            case Failure(ex)  => println(s"Request failed: $ex")
+        }
+
         file.saveGame(game)
-        file.saveField(field)
+        // _____________________________________________________________________________________________________
+
+        // _____________________________________________________________________________________________________
+
+        import java.nio.file.{Files, Paths}
+        import scala.util.{Failure, Success}
+
+
+        import system.dispatcher // to get an execution context
+
+        val jasonField = field.fieldToJson
+        val jsonFileContent = jasonField.getBytes("UTF-8")
+
+
+        val request2 = HttpRequest(
+            method =  HttpMethods.PUT,
+            uri = "http://localhost:8083/persistence/putField",
+            entity = HttpEntity(ContentTypes.`application/json`, jsonFileContent)
+        )
+
+        val responseFuture2: Future[HttpResponse] = Http().singleRequest(request2)
+
+        responseFuture2.onComplete {
+            case Success(res) => println(s"Successfully put JSON file: ${res.entity}")
+            case Failure(ex)  => println(s"Failed to put JSON file: ${ex.getMessage}")
+        }
+
+        //file.saveField(field)
+        // _____________________________________________________________________________________________________
 
         game = Game(game.bombs, game.side, game.time, "Playing")
         notifyObservers(Event.Save)
@@ -349,10 +396,6 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
                 bodyFieldFuture.onComplete {
                     case Success(bodyField) =>
                         jsonBodyField = bodyField
-/*                         val ANSI_BLUE = "\u001B[34m"
-                        val ANSI_RESET = "\u001B[0m"
-
-                        println(ANSI_BLUE + jsonBodyField + ANSI_RESET) */
                     case Failure(ex) =>
                         sys.error(s"something wrong: ${ex.getMessage}")
                 }
@@ -457,7 +500,7 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
         val tempGame: IGame = Game(game.bombs, game.side, currentTime, "Playing") // TODO: use Entity Game
         game = tempGame
     
-
+    // approved
     def requestPut(input_uri: String, jsonContent: Array[Byte]) = {
         HttpRequest(
             method =  HttpMethods.PUT,
