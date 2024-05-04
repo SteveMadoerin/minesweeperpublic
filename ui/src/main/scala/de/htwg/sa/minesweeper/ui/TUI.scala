@@ -10,21 +10,84 @@ import scala.util.{Try, Success, Failure}
 import scala.compiletime.ops.string
 import scala.util.matching.Regex
 
+import play.api.libs.json.{JsValue, Json}
+import scala.io.Source
+import akka.http.scaladsl.model.HttpRequest
+import akka.http.scaladsl.model.HttpMethods
+import akka.http.scaladsl.model.HttpEntity
+import akka.http.scaladsl.model.ContentTypes
+import akka.http.scaladsl.Http
+import scala.concurrent.Future
+import akka.http.scaladsl.model.HttpResponse
+import scala.concurrent.duration._
+import scala.concurrent.ExecutionContext
+import scala.concurrent.ExecutionContextExecutor
+import akka.actor.ActorSystem
+import akka.stream.Materializer
+import scala.concurrent.Await
+import play.api.libs.json.JsObject
+import play.api.libs.json.JsString
+import scala.annotation.internal.Body
+import akka.util.ByteString
+import akka.actor.ActorSystem
+import akka.http.scaladsl.Http
+import akka.http.scaladsl.model._
+import akka.stream.ActorMaterializer
+import scala.concurrent.Future
+import scala.util.{Failure, Success}
 
-class TUI(using var controller: IController) extends Observer:
+import scala.util.{Try, Success, Failure}
+import akka.http.scaladsl.unmarshalling.Unmarshal
+import scala.concurrent.Future
+import scala.concurrent.duration._
+import de.htwg.sa.minesweeper.util.RestUtil
+import play.api.libs.json.JsArray
+import play.api.libs.json.Format
+import play.api.libs.json.JsResult
+import play.api.libs.json.JsSuccess
+import play.api.libs.json.JsError
+
+import java.nio.file.{Files, Paths}
+import scala.util.{Failure, Success}
+
+import akka.actor.ActorSystem
+import akka.stream.{ActorMaterializer, Materializer}
+import scala.concurrent.ExecutionContext
+import akka.http.scaladsl.server.Route
+import akka.http.scaladsl.server.directives.RouteDirectives
+import akka.http.scaladsl.Http
+import akka.http.scaladsl.model.{ContentTypes, HttpEntity}
+import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.{Route, StandardRoute}
+import de.htwg.sa.minesweeper.ui.config.Default.{given}
+import scala.concurrent.ExecutionContextExecutor
+import scala.util.Failure
+import scala.util.Success
+import scala.util.matching.Regex
+import scala.util.Try
+
+// TODO replace controller with API calls
+class TUI(using var controller: IController):
     
-    controller.add(this)
+    //controller.add(this) // TODO: implement
+    implicit val system: ActorSystem = ActorSystem()
+    implicit val materializer: Materializer = Materializer(system)
+    implicit val executionContext: ExecutionContextExecutor = system.dispatcher
+
+    // using var controller: IController
+
 
     def run = 
         infoMessages("Welcome to Minesweeper")
         resize
         parseInputandPrintLoop(firstMoveCheck = true)
         
-    override def update(e: Event): Boolean = 
+    def update(e: Event): Boolean = 
         e match
             case Event.NewGame | Event.Start | Event.Next | Event.Load => infoMessages(controller.field.toString()); true
             case Event.GameOver => infoMessages(s"The Game is ${controller.game.board} !", controller.field.toString()); true
             case Event.Exit => System.exit(0); false
+            case Event.Help => /* requestControllerHelpMenue; */infoMessages(requestControllerFieldToString); true
             case _ => false
     
     def userInX(rawInput: String): Option[Move] = {
@@ -38,12 +101,12 @@ class TUI(using var controller: IController) extends Observer:
         
         input match
             case "q" => System.exit(0); None
-            case "h" => controller.helpMenu; None
-            case "r" => controller.cheat; None
-            case "z" => controller.makeAndPublish(controller.undo); None
-            case "y" => controller.makeAndPublish(controller.redo); None
-            case "s" => controller.saveGame; None
-            case "l" => controller.loadGame; None
+            case "h" => requestControllerHelpMenue; None // TODO implement help menu
+            case "r" => requestControllerCheat; None
+            case "z" => requestControllerMakeAndPublishUndo; None
+            case "y" => requestControllerMakeAndPublishRedo; None
+            case "s" => requestControllerSaveGame; None
+            case "l" => requestControllerLoadGame; None
             case "e" => None
             case _ => {
                 val charAccumulator = input.toCharArray()
@@ -135,3 +198,97 @@ class TUI(using var controller: IController) extends Observer:
     def infoMessages(text: String*) = {
         text.foreach(println)
     }
+
+    def requestControllerHelpMenue= {
+
+        val url = "http://localhost:8081/controller/helpMenu"
+        val request = HttpRequest(
+            method =  HttpMethods.GET,
+            uri = url
+        )
+
+        val bodyStringHelpMessage = Await.result(Http().singleRequest(request).flatMap(_.entity.toStrict(5.seconds).map(_.data.utf8String)), 5.seconds)
+        infoMessages(">> Help Menu in TUI:", bodyStringHelpMessage)
+        update(Event.Help)
+        //controller.helpMenu
+        //println(// controller.field.toString)
+    }
+
+    def requestControllerCheat: Unit = {
+        controller.cheat
+    }
+
+    def requestControllerMakeAndPublishUndo: Unit = {
+        controller.makeAndPublish(controller.undo)
+    }
+
+    def requestControllerMakeAndPublishRedo: Unit = {
+        controller.makeAndPublish(controller.redo)
+    }
+
+    def requestControllerSaveGame: Unit = {
+        controller.saveGame
+    }
+
+    def requestControllerLoadGame: Unit = {
+        controller.loadGame
+    }
+
+    def requestControllerFieldToString: String = {
+        val url = "http://localhost:8081/controller/field/toString"
+
+        val request = HttpRequest(
+            method =  HttpMethods.GET,
+            uri = url
+        )
+
+        val responseFuture: Future[HttpResponse] = Http().singleRequest(request)
+        val bodyStringFuture: Future[String] = responseFuture.flatMap { response =>
+            response.entity.toStrict(5.seconds).map(_.data.utf8String)
+        }
+        val bodyStringField = Await.result(bodyStringFuture, 5.seconds)
+        bodyStringField
+        /* infoMessages(controller.field.toString()) */
+        
+    }
+
+    val route: Route = {
+        get {
+            path("tui") {
+                complete("TUI")
+            } ~ 
+            path("tui"/"hello") {
+                complete("hello")
+            } 
+        } ~
+        put {
+            path("tui"/"notify") {
+                    parameter("event".as[String]) { (event) =>
+                        //
+                        event match
+                            case "NewGame" => update(Event.NewGame)
+                            case "Start" => update(Event.Start)
+                            case "Next" => update(Event.Next)
+                            case "GameOver" => update(Event.GameOver)
+                            case "Cheat" => update(Event.Cheat)
+                            case "Help" => update(Event.Help)
+                            case "Input" => update(Event.Input)
+                            case "Load" => update(Event.Load)
+                            case "Save" => update(Event.Save)
+                            case "SaveTime" => update(Event.SaveTime)
+                            case "Exit" => update(Event.Exit)
+                            case _ => false
+                            
+                        complete("success notify" + event)
+                    }
+            }
+        }
+        
+    }
+
+
+    val bindFuture = Http().bindAndHandle(route, "localhost", 8088)
+
+    def unbind = bindFuture
+        .flatMap(_.unbind())
+        .onComplete(_ => system.terminate())

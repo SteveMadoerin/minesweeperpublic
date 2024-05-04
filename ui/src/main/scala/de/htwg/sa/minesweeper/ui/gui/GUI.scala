@@ -21,11 +21,76 @@ import java.util.concurrent.atomic._
 import java.util.{Timer, TimerTask}
 import java.io.{File, PrintWriter, FileWriter}
 
+import scala.util.{Try, Success, Failure}
+
+import scala.compiletime.ops.string
+import scala.util.matching.Regex
+
+import play.api.libs.json.{JsValue, Json}
+import scala.io.Source
+import akka.http.scaladsl.model.HttpRequest
+import akka.http.scaladsl.model.HttpMethods
+import akka.http.scaladsl.model.HttpEntity
+import akka.http.scaladsl.model.ContentTypes
+import akka.http.scaladsl.Http
+import scala.concurrent.Future
+import akka.http.scaladsl.model.HttpResponse
+import scala.concurrent.duration._
+import scala.concurrent.ExecutionContext
+import scala.concurrent.ExecutionContextExecutor
+import akka.actor.ActorSystem
+import akka.stream.Materializer
+import scala.concurrent.Await
+import play.api.libs.json.JsObject
+import play.api.libs.json.JsString
+import scala.annotation.internal.Body
+import akka.util.ByteString
+import akka.actor.ActorSystem
+import akka.http.scaladsl.Http
+import akka.http.scaladsl.model._
+import akka.stream.ActorMaterializer
+import scala.concurrent.Future
+import scala.util.{Failure, Success}
+
+import scala.util.{Try, Success, Failure}
+import akka.http.scaladsl.unmarshalling.Unmarshal
+import scala.concurrent.Future
+import scala.concurrent.duration._
+import de.htwg.sa.minesweeper.util.RestUtil
+import play.api.libs.json.JsArray
+import play.api.libs.json.Format
+import play.api.libs.json.JsResult
+import play.api.libs.json.JsSuccess
+import play.api.libs.json.JsError
+
+import java.nio.file.{Files, Paths}
+import scala.util.{Failure, Success}
+
+import akka.actor.ActorSystem
+import akka.stream.{ActorMaterializer, Materializer}
+import scala.concurrent.ExecutionContext
+import akka.http.scaladsl.server.Route
+import akka.http.scaladsl.server.directives.RouteDirectives
+import akka.http.scaladsl.Http
+import akka.http.scaladsl.model.{ContentTypes, HttpEntity}
+import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.{Route, StandardRoute}
+import de.htwg.sa.minesweeper.ui.config.Default.{given}
+import scala.concurrent.ExecutionContextExecutor
+import scala.util.Failure
+import scala.util.Success
+import scala.util.matching.Regex
+import scala.util.Try
 
 
-class GUI(using var controller: IController) extends Frame with Observer:
 
-    controller.add(this)
+class GUI(using var controller: IController) extends Frame:
+
+    //controller.add(this)
+    implicit val system: ActorSystem = ActorSystem()
+    implicit val materializer: Materializer = Materializer(system)
+    implicit val executionContext: ExecutionContextExecutor = system.dispatcher
+
     private var boardBounds = controller.field.matrix.size -1
     private var firstMoveControl = new AtomicBoolean(true)
     private var timerStarted: Boolean = false
@@ -100,7 +165,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
                 contents += new MenuItem(Action("Redo") { controller.makeAndPublish(controller.redo) })
             }
             contents += new Menu("Help"){
-                contents += new MenuItem(Action("Help") { controller.helpMenu })
+                contents += new MenuItem(Action("Help") { showHelp/* controller.helpMenu */ }) // TODO:
                 contents += new MenuItem(Action("Cheat") { controller.cheat })
             }
         }
@@ -124,7 +189,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
 
     }
 
-    override def update(e: Event): Boolean = {
+    def update(e: Event): Boolean = {
         e match {
 
             case Event.NewGame =>
@@ -182,20 +247,7 @@ class GUI(using var controller: IController) extends Frame with Observer:
                 false
             
             case Event.Help =>
-                val text = 
-                    """This is Minesweeper Help - Menu
-                    |                                                                                                    
-                    |Left klick on a cell to open. Avoid any Bombs. If you see a number         
-                    |eg. 1 it means it has a bomb in one of the surronding neighboring cells.   
-                    |You can flag a cell, where u think there is a bomb.                        
-                    |                                                        
-                    |Now lets play and have fun :-)                                             
-                    |                                                        
-                    |Copyright: Steve Madoerin                                                  
-                    |                                                   
-                    |""".stripMargin
-    
-                showMessage(None.orNull, text, "Help Menu", Message.Info)
+
                 false
             
             case Event.Input =>
@@ -228,6 +280,64 @@ class GUI(using var controller: IController) extends Frame with Observer:
             
             case Event.Exit => false
         }
+    }
+
+    val route: Route = {
+        get {
+            path("gui") {
+                complete("gui")
+            } ~ 
+            path("gui"/"hello") {
+                complete("hello")
+            } 
+        } ~
+        put {
+            path("gui"/"notify") {
+                    parameter("event".as[String]) { (event) =>
+                        //
+                        event match
+                            case "NewGame" => update(Event.NewGame)
+                            case "Start" => update(Event.Start)
+                            case "Next" => update(Event.Next)
+                            case "GameOver" => update(Event.GameOver)
+                            case "Cheat" => update(Event.Cheat)
+                            case "Help" => update(Event.Help)
+                            case "Input" => update(Event.Input)
+                            case "Load" => update(Event.Load)
+                            case "Save" => update(Event.Save)
+                            case "SaveTime" => update(Event.SaveTime)
+                            case "Exit" => update(Event.Exit)
+                            case _ => false
+                            
+                        complete("success notify" + event)
+                    }
+            }
+        }
+        
+    }
+
+
+    val bindFuture = Http().bindAndHandle(route, "localhost", 8087)
+
+    def unbind = bindFuture
+        .flatMap(_.unbind())
+        .onComplete(_ => system.terminate())
+
+    def showHelp: Unit = {
+        val text = 
+            """This is Minesweeper Help - Menu
+            |                                                                                                    
+            |Left klick on a cell to open. Avoid any Bombs. If you see a number         
+            |eg. 1 it means it has a bomb in one of the surronding neighboring cells.   
+            |You can flag a cell, where u think there is a bomb.                        
+            |                                                        
+            |Now lets play and have fun :-)                                             
+            |                                                        
+            |Copyright: Steve Madoerin                                                  
+            |                                                   
+            |""".stripMargin
+
+        showMessage(None.orNull, text, "Help Menu", Message.Info)
     }
     
     def scaleImage(kind: String): ImageIcon = {

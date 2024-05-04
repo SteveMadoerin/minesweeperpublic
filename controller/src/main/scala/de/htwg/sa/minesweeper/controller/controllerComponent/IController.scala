@@ -13,6 +13,8 @@ trait IController extends Observable{
     //def unflag(x: Int, y: Int): Unit
     def openRec(x: Int, y: Int, field: IField): IField
     def helpMenu: Unit
+    def helpMenuRest: String
+    def fieldToString: String
     def cheat: Unit
     
     def checkGameOver(status: String): Boolean

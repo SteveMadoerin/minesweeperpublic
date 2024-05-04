@@ -1,4 +1,4 @@
-/* package de.htwg.sa.minesweeper
+package de.htwg.sa.minesweeper
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
@@ -9,15 +9,35 @@ import java.net.{HttpURLConnection, URL}
 import scala.concurrent.ExecutionContext
 import de.htwg.sa.minesweeper.util.Observer
 import de.htwg.sa.minesweeper.controller.controllerComponent.IController
+import de.htwg.sa.minesweeper.util.RestUtil
+import de.htwg.sa.minesweeper.util.Event
+import akka.stream.Materializer
+import scala.concurrent.ExecutionContextExecutor
 
 
-final case class ControllerApi(controller: IController) extends Observer:
+class ControllerApi(using var controller: IController) extends Observer:
     controller.add(this)
     
-    implicit val system: ActorSystem = ActorSystem()
-    implicit val executionContext: ExecutionContext = system.dispatcher
     
-    Http().newServerAt("localhost", 9006).bind(
+    implicit val system: ActorSystem = ActorSystem()
+    implicit val materializer: Materializer = Materializer(system)
+    implicit val executionContext: ExecutionContextExecutor = system.dispatcher
+
+
+    // update TUI and GUI when an event occurs ->
+    @Override def update(e: Event): Boolean = 
+        e match
+            case Event.NewGame | Event.Start | Event.Next | Event.Load => infoMessages(controller.field.toString()); true
+            case Event.GameOver => infoMessages(s"The Game is ${controller.game.board} !", controller.field.toString()); true
+            case Event.Exit => System.exit(0); false
+            case _ => false
+
+    def infoMessages(text: String*) = {
+        text.foreach(println)
+    }
+
+    
+    Http().newServerAt("localhost", 8081).bind(
     concat(
       pathPrefix("controller") {
         concat(
@@ -27,51 +47,57 @@ final case class ControllerApi(controller: IController) extends Observer:
                 complete(controller.toString)
               },
               path("controller") {
-                complete(controller.toJson.toString)
+                complete(controller.toString()/* controller.toJson.toString */)
               },
               path("field") {
-                complete(controller.field.toJson.toString)
+                complete(RestUtil.fieldToJson(controller.field).toString)
+              },
+              path("field"/"toString") {
+                complete(controller.fieldToString)
               },
               path("game") {
-                complete(controller.game.toJson.toString)
+                complete(RestUtil.gameToJson(controller.game).toString)
               },
-              path("diceCup") {
-                complete(controller.diceCup.toJson.toString)
+              path("helpMenu") {
+                controller.helpMenu // this also notifies the observer
+                complete(controller.helpMenuRest)
               },
               path("loadGame") {
-                complete(controller.loadGame)
+                controller.loadGame
+                complete("controller.loadGame")
               },
               path("next") {
-                complete(controller.next())
+                complete("next"/* controller.next() */)
               },
               pathPrefix("makeAndPublish") {
                 concat(
                   path("doMove") {
-                    complete(controller.makeAndPublish(controller.doMove(b, move, game, field))) // "open"
+                    complete("controller.makeAndPublish(controller.doMove(b, move, game, field))" ) // "open"
                   },
                   path("put") {
-                    val c = controller.makeAndPublish(controller.put, move) // falg or unflag
-                    print(c)
-                    complete(c)
+/*                     val c = controller.makeAndPublish(controller.put, move) // flg or unflag
+                    print(c) */
+                    complete("c")
                   },
                   path("undo") {
-                    /* (pi: List[Int]) => */
-                      complete(controller.makeAndPublish(controller.undo))
+                      complete("controller.makeAndPublish(controller.undo)")
                   },
                   path("redo") {
-                    /* (po: List[Int]) => */
-                      complete(controller.makeAndPublish(controller.redo))
+                      complete("controller.makeAndPublish(controller.redo)")
                   }
                 )
               },
               path("saveGame") {
-                complete(controller.saveGame)
+                controller.saveGame
+                complete("successfully saved")
               },
               path("undo") {
-                complete(controller.undo())
+                controller.undo
+                complete(RestUtil.fieldToJson(controller.field).toString)
               },
               path("redo") {
-                complete(controller.redo())
+                controller.redo
+                complete(RestUtil.fieldToJson(controller.field).toString)
               },
 /*               path("writeDown" / StringValue) {
                 (value: String) =>
@@ -89,18 +115,19 @@ final case class ControllerApi(controller: IController) extends Observer:
               }
             )
           },
-          post {
+          put {
             concat(
               path("put") {
                 entity(as[String]) { requestBody =>
-                  complete(controller.put(controller.jsonStringToMove(requestBody)))
+                  complete("controller.put(controller.jsonStringToMove(requestBody))")
                 }
               },
               path("quit") {
-                complete(controller.quit())
+                complete("controller.quit()")
               },
-              path("nextRound") {
-                complete(controller.nextRound().toJson.toString)
+              path("notify") {
+                // 
+                complete("event")
               },
               path("") {
                 sys.error("No such POST route")
@@ -111,4 +138,7 @@ final case class ControllerApi(controller: IController) extends Observer:
       }
     )
   )
- */
+
+
+
+end ControllerApi

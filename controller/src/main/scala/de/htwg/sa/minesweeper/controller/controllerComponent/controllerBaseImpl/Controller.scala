@@ -193,7 +193,8 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
             case None =>
         }
 
-        notifyObservers(Event.Load)
+        //notifyObservers(Event.Load)
+        notifyObserversRest("Load")
         // _____________________________________________________________________________________________________
     }
 
@@ -202,7 +203,8 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
     // approved
     def saveGame =
 
-        notifyObservers(Event.SaveTime)
+        //notifyObservers(Event.SaveTime)
+        notifyObserversRest("SaveTime")
 
         // _____________________________________________________________________________________________________
         val queryParameters = Uri.Query(
@@ -247,9 +249,10 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
         // _____________________________________________________________________________________________________
 
         game = Game(game.bombs, game.side, game.time, "Playing")
-        notifyObservers(Event.Save)
+        //notifyObservers(Event.Save)
+        notifyObserversRest("Save")
     
-    def exit = notifyObservers(Event.Exit) // approved
+    def exit = notifyObserversRest("Exit")//notifyObservers(Event.Exit) // approved
 
     // approved
     def gameOver =
@@ -269,12 +272,58 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
         val bodyString = Await.result(bodyStringFuture, 5.seconds)
         field = RestUtil.jsonToField(bodyString)
 
-        notifyObservers(Event.GameOver)
+        //notifyObservers(Event.GameOver)
+        notifyObserversRest("GameOver")
     
     def openRec(x: Int, y: Int, field: IField): IField = undoRedoManager.doStep(field, DoCommand(Move("recursion", x, y))) // approved
 
     // approved
     def helpMenu = 
+        helpMenuRest
+/*         val url = s"http://localhost:8082/model/game/helpMessage"
+        // prepare the GET request
+        val request = HttpRequest(
+            method =  HttpMethods.GET,
+            uri = url
+        )
+        // now get the message from the modelApi
+        val responseFuture: Future[HttpResponse] = Http().singleRequest(request)
+        val bodyStringFuture: Future[String] = responseFuture.flatMap { response =>
+            response.entity.toStrict(5.seconds).map(_.data.utf8String)
+        }
+        val bodyStringHelpMessage = Await.result(bodyStringFuture, 5.seconds)
+        // println(bodyString) maybe later !!!
+        println("this is helpMenue from Controller")
+ */
+        //game.helpMessage 
+
+
+        
+        //notifyObservers(Event.Help)
+        notifyObserversRest("Help")
+    
+    def fieldToString: String = {
+        val url2 = s"http://localhost:8082/model/field/toString"
+        // prepare the Field
+        val bodyField = RestUtil.fieldToJson(field)
+        // prepare the PUT request
+        val request2 = HttpRequest(
+            method =  HttpMethods.PUT,
+            uri = url2,
+            entity = HttpEntity(ContentTypes.`application/json`, bodyField)
+        )
+        // now get the printed field from the modelApi
+        val responseFuture2: Future[HttpResponse] = Http().singleRequest(request2)
+        val bodyStringFuture2: Future[String] = responseFuture2.flatMap { response =>
+            response.entity.toStrict(5.seconds).map(_.data.utf8String)
+        }
+        val bodyString2 = Await.result(bodyStringFuture2, 5.seconds)
+        
+        //println(field.toString)
+        bodyString2
+
+    }
+    def helpMenuRest: String = 
         val url = s"http://localhost:8082/model/game/helpMessage"
         // prepare the GET request
         val request = HttpRequest(
@@ -286,8 +335,10 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
         val bodyStringFuture: Future[String] = responseFuture.flatMap { response =>
             response.entity.toStrict(5.seconds).map(_.data.utf8String)
         }
-        val bodyString = Await.result(bodyStringFuture, 5.seconds)
+        val bodyStringHelpMessage = Await.result(bodyStringFuture, 5.seconds)
         // println(bodyString) maybe later !!!
+
+/*         println("this is helpMenue from Controller")
 
         //game.helpMessage
 
@@ -306,9 +357,10 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
             response.entity.toStrict(5.seconds).map(_.data.utf8String)
         }
         val bodyString2 = Await.result(bodyStringFuture2, 5.seconds)
-        println(bodyString2) // !!!
+        println(bodyString2) // !!!  */
         //println(field.toString)
-        notifyObservers(Event.Help)
+        //notifyObservers(Event.Help) <--
+        bodyStringHelpMessage
     
     //approved
     def cheat = 
@@ -329,7 +381,8 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
         val bodyString = Await.result(bodyStringFuture, 5.seconds)
         //println(bodyString) maybe later !!!
         //field.reveal
-        notifyObservers(Event.Cheat)
+        //notifyObservers(Event.Cheat)
+        notifyObserversRest("Cheat")
     
     // approved
     def checkGameOver(status: String) = {
@@ -350,7 +403,8 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
     // approved
     def newGameGUI =
         game = Game(game.bombs, game.side, game.time, "Playing")
-        notifyObservers(Event.Input)
+        //notifyObservers(Event.Input)
+        notifyObserversRest("Input")
     
     // approved
     def newGameField(optionString: Option[String]) =
@@ -384,13 +438,15 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
         //field = feld
         //game = spiel
         
-        notifyObservers(Event.NewGame)
+        //notifyObservers(Event.NewGame)
+        notifyObserversRest("NewGame")
         
     // approved
     def newGame(side: Int, bombs: Int) =
         game = Game(bombs, side, game.time, "Playing")
         field = createField(game) // TODO: replace with GameEntity
-        notifyObservers(Event.NewGame)
+        //notifyObservers(Event.NewGame)
+        notifyObserversRest("NewGame")
     
     // approved - doMove from TUI transfered as param -> game & field in TUI declared
     def makeAndPublish(makeThis: (Boolean, Move, IGame) => IField, b: Boolean, move: Move, game: IGame): Unit =
@@ -409,8 +465,10 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
         val symbol = if(result.length > 3){"E"} else {result}
 
         if (symbol == "0"){field = openRec(move.x,move.y,field)}
-        val firstOrNext = if (b) Event.Start else Event.Next
-        notifyObservers(firstOrNext)
+/*         val firstOrNext = if (b) Event.Start else Event.Next
+        notifyObservers(firstOrNext) */
+        val firstOrNext = if (b) "Start" else "Next"
+        notifyObserversRest(firstOrNext)
     
 
     // approved
@@ -476,12 +534,14 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
         }
 
         field = makeThis(move)
-        notifyObservers(Event.Next)
+        //notifyObservers(Event.Next)
+        notifyObserversRest("Next")
 
     // approved
     def makeAndPublish(makeThis: => IField) =
         field = makeThis
-        notifyObservers(Event.Next)
+        //notifyObservers(Event.Next)
+        notifyObserversRest("Next")
     
     // approved
     def saveScoreAndPlayerName(playerName: String, saveScore: Int, filePath: String) = {
@@ -546,6 +606,45 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
             uri = input_uri,
             entity = HttpEntity(ContentTypes.`application/json`, jsonContent)
         )
+    }
+
+    // approved - but only to notify the TUI
+    def notifyObserversRest(event: String) = {
+        // TODO: maybe register the logic
+
+        // _________________________ NOTIFY TUI _________________________
+
+        val uri = s"http://localhost:8088/tui/notify" + "?event=" + event
+
+        val request = HttpRequest(
+            method =  HttpMethods.PUT,
+            uri = uri
+        )
+        
+        val responseFuture: Future[HttpResponse] = Http().singleRequest(request)
+        val bodyFieldFuture: Future[String] = responseFuture.flatMap { response =>
+            response.entity.toStrict(5.seconds).map(_.data.utf8String)
+        }
+/*         val result = Await.result(bodyFieldFuture, 5.seconds)
+        println(result) */
+
+        // _________________________ NOTIFY GUI _________________________
+        val uri2 = s"http://localhost:8087/gui/notify" + "?event=" + event
+
+        val request2 = HttpRequest(
+            method =  HttpMethods.PUT,
+            uri = uri2
+        )
+        
+        val responseFuture2: Future[HttpResponse] = Http().singleRequest(request2)
+        val bodyFieldFuture2: Future[String] = responseFuture2.flatMap { response =>
+            response.entity.toStrict(5.seconds).map(_.data.utf8String)
+        }
+/*         val result2 = Await.result(bodyFieldFuture2, 5.seconds)
+        println(result2) */
+
+
+        
     }
 
     

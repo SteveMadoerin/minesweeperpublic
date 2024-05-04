@@ -23,6 +23,7 @@ import akka.stream.ActorMaterializer
 import akka.actor._
 import akka.actor.TypedActor.dispatcher                                                                                                            
 import concurrent.ExecutionContext.Implicits.global   
+import de.htwg.sa.minesweeper.ui.WebGuiApi
 
 object Minesweeper {
     
@@ -31,12 +32,15 @@ object Minesweeper {
         if (args.length >= 1){
             return
         } else {
-
+            
+            
             ModelApi() // on Port 8082
             PersistenceApi() // on Port 8083
+            ControllerApi() // on Port 8081
+            WebGuiApi() // on Port 8080
 
-            GUI().run
-            TUI().run
+            GUI().run // on Port 8087
+            TUI().run // on Port 8088
         }
         
     }

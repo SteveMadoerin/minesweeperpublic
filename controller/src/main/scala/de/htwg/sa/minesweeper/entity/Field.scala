@@ -1,3 +1,3 @@
 package de.htwg.sa.minesweeper.entity
 
-case class Field(matrix: Matrix[String], hidden: Matrix[String]) extends IField
+case class FieldDTO(matrix: MatrixDTO[String], hidden: MatrixDTO[String]) extends IFieldDTO

@@ -58,7 +58,8 @@ case class Game (bombs : Int, side: Int, time: Int, board : String) extends IGam
             |*                                                                            *
             |******************************************************************************""".stripMargin
             
-        println(s"$helpMsg")
+        //println(s"$helpMsg")
+        //println("This is helpMenue from Game: ")
         helpMsg
     
     

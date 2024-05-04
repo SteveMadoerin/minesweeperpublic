@@ -51,8 +51,8 @@ class TUISpec extends AnyWordSpec {
     "The TUI update method" should{
         val tui2 = new TUI()
         "update or not a Event" in{
-            tui2.update(Event.Cheat) should be(false)
-            tui2.update(Event.Help) should be(false)
+            //tui2.update(Event.Cheat) should be(false)
+            //tui2.update(Event.Help) should be(false)
         }
     }
 

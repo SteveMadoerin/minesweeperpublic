@@ -1,4 +1,5 @@
-package de.htwg.sa.minesweeper.entity
+/* package de.htwg.sa.minesweeper.entity
 
 class Decider(): 
 end Decider
+ */
