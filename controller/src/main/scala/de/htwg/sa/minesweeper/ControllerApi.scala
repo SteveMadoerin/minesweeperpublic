@@ -36,6 +36,7 @@ import scala.compiletime.ops.boolean
 import play.api.libs.json.Json
 import de.htwg.sa.minesweeper.util.Move
 import play.api.libs.json.JsValue
+import de.htwg.sa.minesweeper.entity.GameDTO
 
 
 class ControllerApi(using var controller: IController) extends Observer:
@@ -81,17 +82,18 @@ class ControllerApi(using var controller: IController) extends Observer:
                 complete(controller.toString()/* controller.toJson.toString */)
               },
               path("field") {
-                complete(RestUtil.fieldToJson(controller.field).toString)
+                /* complete(RestUtil.fieldToJson(controller.field).toString) */
+                complete(RestUtil.fieldDtoToJson(controller.field).toString)
               },
               path("gameOver") {
                 controller.gameOver
-                complete(RestUtil.fieldToJson(controller.field).toString)
+                complete(RestUtil.fieldDtoToJson(controller.field).toString)
               },
               path("field"/"toString") {
                 complete(controller.fieldToString)
               },
               path("game") {
-                complete(RestUtil.gameToJson(controller.game).toString)
+                complete(RestUtil.gameDtoToJson(controller.game).toString)
               },
               path("helpMenu") {
                 controller.helpMenu // this also notifies the observer
@@ -121,7 +123,7 @@ class ControllerApi(using var controller: IController) extends Observer:
                           val requestBody = Json.parse(moveEntitiy)
                           val move = jsonToMove(requestBody)
                           //controller.makeAndPublish(controller.doMove, firstMoveCheck, move, controller.game)
-                          controller.makeAndPublish(controller.doMove, firstMoveCheck, move, Game(bombs, size, time, newBoard))
+                          controller.makeAndPublish(controller.doMove, firstMoveCheck, move, GameDTO(bombs, size, time, newBoard))
                           //controller.makeAndPublish(controller.put, move)
                           print("move: " + move.value + " x: " + move.x + " y: " + move.y)
 
@@ -157,11 +159,11 @@ class ControllerApi(using var controller: IController) extends Observer:
               },
               path("undo") {
                 controller.undo
-                complete(RestUtil.fieldToJson(controller.field).toString)
+                complete(RestUtil.fieldDtoToJson(controller.field).toString)
               },
               path("redo") {
                 controller.redo
-                complete(RestUtil.fieldToJson(controller.field).toString)
+                complete(RestUtil.fieldDtoToJson(controller.field).toString)
               },
 /*               path("writeDown" / StringValue) {
                 (value: String) =>
@@ -202,8 +204,8 @@ class ControllerApi(using var controller: IController) extends Observer:
                   controller.newGame(side, bombs)
                   val feld = controller.field
                   val game = controller.game
-                  val jsonField = Json.parse(feld.fieldToJson(feld)) // TODO: check fieldToJson
-                  val jsonGame = Json.parse(game.gameToJson) // TODO: check gameToJson
+                  val jsonField = Json.parse(RestUtil.fieldDtoToJson(feld))
+                  val jsonGame = Json.parse(RestUtil.gameDtoToJson(game))
 
                   val jsonGameFieldArray = Json.arr(jsonGame, jsonField)
                   complete(HttpEntity(ContentTypes.`application/json`, jsonGameFieldArray.toString))

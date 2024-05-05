@@ -41,6 +41,9 @@ import scala.concurrent.Future
 import scala.concurrent.duration._
 import de.htwg.sa.minesweeper.model.gameComponent.IGame
 import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl.Game
+import de.htwg.sa.minesweeper.entity.FieldDTO
+import de.htwg.sa.minesweeper.entity.MatrixDTO
+import de.htwg.sa.minesweeper.entity.GameDTO
 /* import de.htwg.sa.minesweeper.entity.Field
 import de.htwg.sa.minesweeper.entity.Matrix */
 
@@ -51,11 +54,11 @@ object RestUtil{
     implicit val executionContext: ExecutionContextExecutor = system.dispatcher
     
     // approved
-    def requestShowInvisibleCell(x: Int, y: Int, field: IField): String = {
+    def requestShowInvisibleCell(x: Int, y: Int, field: FieldDTO): String = {
         //field.showInvisibleCell(x, y)
         import system.dispatcher // to get an execution context
 
-        val jasonField = fieldToJson(field)
+        val jasonField = /* fieldToJson(field) */ fieldDtoToJson(field)
         val jsonFileContent = jasonField.getBytes("UTF-8")
 
         // take care in the uri -> this is only valid for Command.scala replacement
@@ -76,12 +79,12 @@ object RestUtil{
     }
     
     // approved
-    def requestFieldPut(extractedSymbol: String, x: Int, y: Int, field: IField): IField = {
+    def requestFieldPut(extractedSymbol: String, x: Int, y: Int, field: FieldDTO): FieldDTO = {
 
         // ________________________________________________________________________________________
         import system.dispatcher // to get an execution context
 
-        val jasonField = fieldToJson(field)
+        val jasonField = /* fieldToJson(field) */fieldDtoToJson(field)
         val jsonFileContent = jasonField.getBytes("UTF-8")
         
         val extractedSymbolNew = if (extractedSymbol.length()>3) {"E"} else {extractedSymbol}
@@ -103,19 +106,19 @@ object RestUtil{
         val result = Await.result(bodyFieldFuture, 5.seconds)
         jsonBodyField = result
 
-        val fieldFromController = jsonToField(jsonBodyField)
+        val fieldFromController = /* jsonToField(jsonBodyField) */jsontToFieldDTO(jsonString = jsonBodyField )
         fieldFromController
         //Additionally check the field
         // ________________________________________________________________________________________
     }
 
     // approved
-    def requestRecursiveOpen(x: Int, y: Int, field: IField): IField = 
+    def requestRecursiveOpen(x: Int, y: Int, field: FieldDTO): FieldDTO = 
     {
         // def recursiveOpen(x: Int, y: Int, field: IField): IField
         import system.dispatcher // to get an execution context
         // We need a request with a field in json format
-        val jasonField = fieldToJson(field)
+        val jasonField = /* fieldToJson(field) */ fieldDtoToJson(field)
         val jsonFileContent = jasonField.getBytes("UTF-8")
         // then we need to send x and y as a parameter
         val request = HttpRequest(
@@ -130,14 +133,23 @@ object RestUtil{
         }
         val result = Await.result(bodyFieldFuture, 5.seconds)
         //if (result.length()<50) {"E"} else {result}
-        val fieldFromController = jsonToField(result)
+        val fieldFromController = /* jsonToField(result) */ jsontToFieldDTO(result)
         fieldFromController
 
         //__________________________________________________________________________________________
         // attention: //field.recursiveOpen(x, y, field)
         
     }
-        
+    
+    def jsonToGameDTO(jsonString: String): GameDTO = {
+        val json: JsValue = Json.parse(jsonString)
+        val status = (json \ "game" \ "status").get.toString
+        val bombs = (json \ "game" \ "bombs").get.toString.toInt
+        val side = (json \ "game" \ "side").get.toString.toInt
+        val time = (json \ "game" \ "time").get.toString.toInt
+        val statusWithoutQuotes = status.replace("\"", "") // \Playing\ -> Playing
+        GameDTO(bombs, side, time, statusWithoutQuotes)
+    }
     
     
     def jsonToGame(jsonString: String): IGame = {
@@ -161,6 +173,73 @@ object RestUtil{
                 )
             )
         )
+    }
+
+    def gameDtoToJson(currentGame: GameDTO): String = {
+        Json.prettyPrint(
+            Json.obj(
+                "game" -> Json.obj(
+                    "status" -> currentGame.board,
+                    "bombs" -> currentGame.bombs,
+                    "side" -> currentGame.side,
+                    "time" -> currentGame.time
+                )
+            )
+        )
+    }
+
+    def jsonToGameAndFieldDTO(jsonString: String): (GameDTO, FieldDTO) = {
+        val json: JsValue = Json.parse(jsonString)
+        val jsonGame: Option[JsValue] = (json \\ "game").headOption
+        val status = (jsonGame.get \ "status").get.toString
+        val bombs = (jsonGame.get \ "bombs").get.toString.toInt
+        val side = (jsonGame.get \ "side").get.toString.toInt
+        val time = (jsonGame.get \ "time").get.toString.toInt
+        val statusWithoutQuotes = status.replace("\"", "")
+        val game = GameDTO(bombs, side, time, statusWithoutQuotes)
+
+        val jsonField: Option[JsValue] = (json \\ "field").headOption
+
+        val jsonValue = jsonField.get
+
+        val size = (jsonValue \ "size").get.toString.toInt
+
+        val fieldVectorOption: Option[FieldDTO] = Some(FieldDTO(MatrixDTO(Vector.tabulate(size, size) {(row, col) => "E"}), (MatrixDTO(Vector.tabulate(size, size) {(row, col) => "E"}))))
+        val matrixVectorOption: Option[Vector[Vector[String]]] = Some(Vector.tabulate(size, size) {(row, col) => "E"})
+        val hiddenVectorOption: Option[Vector[Vector[String]]] = Some(Vector.tabulate(size, size) {(row, col) => "E"})
+
+        val matrixVector1 = matrixVectorOption match{
+            case Some(matrix) => matrix
+            case None => println("Matrix is not valid"); Vector.tabulate(size, size) {(row, col) => "E"}
+        }
+
+        val updatedMatrixVector: Vector[Vector[String]] = (0 until size * size).foldLeft(matrixVector1) {
+            case (currentMatrix, index) =>
+                val row = (jsonValue \ "matrix" \\ "row")(index).as[Int]
+                val col = (jsonValue \ "matrix" \\ "col")(index).as[Int]
+                val cell = (jsonValue \ "matrix" \\ "cell")(index).as[String]
+                currentMatrix.updated(row, currentMatrix(row).updated(col, cell))
+        }
+
+        val hiddenVector1 = hiddenVectorOption match{
+            case Some(m) => m
+            case None => println("Hidden is not valid"); Vector.tabulate(size, size) {(row, col) => "E"}
+        }
+        
+        val updatedHiddenVector: Vector[Vector[String]] = (0 until size * size).foldLeft(hiddenVector1) {
+            case (currentHidden, index) =>
+                val row = (jsonValue \ "hidden" \\ "row")(index).as[Int]
+                val col = (jsonValue \ "hidden" \\ "col")(index).as[Int]
+                val cell = (jsonValue \ "hidden" \\ "cell")(index).as[String]
+                currentHidden.updated(row, currentHidden(row).updated(col, cell))
+        }
+
+        val finalFieldOption = fieldVectorOption match{
+            case Some(f) => Some(FieldDTO(MatrixDTO(updatedMatrixVector), MatrixDTO(updatedHiddenVector)))
+            case None => println("Field is not valid"); None
+        }
+
+        (game, finalFieldOption.get) //finalFieldOption.get
     }
 
     def jsonToGameAndField(jsonString: String): (IGame, IField) = {
@@ -218,6 +297,49 @@ object RestUtil{
     }
 
 
+    def jsontToFieldDTO(jsonString: String): FieldDTO = {
+        // T0DO: Replace Field gameComponent with Field Controller
+
+        val json: JsValue = Json.parse(jsonString)
+        val size = (json \ "field" \ "size").get.toString.toInt
+
+        val fieldVectorOption: Option[FieldDTO] = Some(FieldDTO(MatrixDTO(Vector.tabulate(size, size) {(row, col) => "E"}), (MatrixDTO(Vector.tabulate(size, size) {(row, col) => "E"}))))
+        val matrixVectorOption: Option[Vector[Vector[String]]] = Some(Vector.tabulate(size, size) {(row, col) => "E"})
+        val hiddenVectorOption: Option[Vector[Vector[String]]] = Some(Vector.tabulate(size, size) {(row, col) => "E"})
+
+        val matrixVector1 = matrixVectorOption match{
+            case Some(matrix) => matrix
+            case None => println("Matrix is not valid"); Vector.tabulate(size, size) {(row, col) => "E"}
+        }
+
+        val updatedMatrixVector: Vector[Vector[String]] = (0 until size * size).foldLeft(matrixVector1) {
+            case (currentMatrix, index) =>
+                val row = (json \ "field" \ "matrix" \\ "row")(index).as[Int]
+                val col = (json \ "field" \ "matrix" \\ "col")(index).as[Int]
+                val cell = (json \ "field" \ "matrix" \\ "cell")(index).as[String]
+                currentMatrix.updated(row, currentMatrix(row).updated(col, cell))
+        }
+
+        val hiddenVector1 = hiddenVectorOption match{
+            case Some(m) => m
+            case None => println("Hidden is not valid"); Vector.tabulate(size, size) {(row, col) => "E"}
+        }
+        
+        val updatedHiddenVector: Vector[Vector[String]] = (0 until size * size).foldLeft(hiddenVector1) {
+            case (currentHidden, index) =>
+                val row = (json \ "field" \ "hidden" \\ "row")(index).as[Int]
+                val col = (json \ "field" \ "hidden" \\ "col")(index).as[Int]
+                val cell = (json \ "field" \ "hidden" \\ "cell")(index).as[String]
+                currentHidden.updated(row, currentHidden(row).updated(col, cell))
+        }
+
+        val finalFieldOption = fieldVectorOption match{
+            case Some(f) => Some(FieldDTO(MatrixDTO(updatedMatrixVector), MatrixDTO(updatedHiddenVector)))
+            case None => println("Field is not valid"); None
+        }
+
+        finalFieldOption.get
+    }
 
     def jsonToField(jsonString: String): IField = {
         // T0DO: Replace Field gameComponent with Field Controller
@@ -290,6 +412,41 @@ object RestUtil{
                                 "row" -> row,
                                 "col" -> col,
                                 "cell" -> fieldInput.showInvisibleCell(row, col).toString
+                            )
+                        }
+                    )
+                )
+            )
+        )
+    }
+
+    def fieldDtoToJson(fieldInput: FieldDTO): String = {
+        import play.api.libs.json._
+        Json.prettyPrint(
+            Json.obj(
+                "field" -> Json.obj(
+                    "size" -> fieldInput.matrix.rows.size,
+                    "matrix" -> Json.toJson(
+                        for {
+                            row <- 0 until fieldInput.matrix.rows.size
+                            col <- 0 until fieldInput.matrix.rows.size
+                        } yield {
+                            Json.obj(
+                                "row" -> row,
+                                "col" -> col,
+                                "cell" -> fieldInput.matrix.rows(row)(col).toString // def cell(row: Int, col: Int): T = rows(row)(col)
+                            )
+                        }
+                    ),
+                    "hidden" -> Json.toJson(
+                        for {
+                            row <- 0 until fieldInput.matrix.rows.size
+                            col <- 0 until fieldInput.matrix.rows.size
+                        } yield {
+                            Json.obj(
+                                "row" -> row,
+                                "col" -> col,
+                                "cell" -> fieldInput.hidden.rows(row)(col).toString //fieldInput.showInvisibleCell(row, col).toString
                             )
                         }
                     )

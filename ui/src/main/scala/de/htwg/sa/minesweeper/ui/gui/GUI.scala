@@ -81,6 +81,9 @@ import scala.util.Failure
 import scala.util.Success
 import scala.util.matching.Regex
 import scala.util.Try
+import de.htwg.sa.minesweeper.entity.MatrixDTO
+import de.htwg.sa.minesweeper.entity.GameDTO
+import de.htwg.sa.minesweeper.entity.FieldDTO
 
 
 
@@ -91,7 +94,7 @@ class GUI(using var controller: IController) extends Frame:
     implicit val materializer: Materializer = Materializer(system)
     implicit val executionContext: ExecutionContextExecutor = system.dispatcher
 
-    private var boardBounds = controller.field.matrix.size -1
+    private var boardBounds = controller.field.matrix.rows.size-1
     private var firstMoveControl = new AtomicBoolean(true)
     private var timerStarted: Boolean = false
     private var timeLoaded: Boolean = false
@@ -194,7 +197,7 @@ class GUI(using var controller: IController) extends Frame:
 
             case Event.NewGame =>
                 firstMoveControl.set(true)
-                boardBounds = controller.field.matrix.size -1
+                boardBounds = controller.field.matrix.rows.size -1
                 if(digitBar.rightDigit>0){
                     stopTimer()
                     resetTimer()
@@ -242,7 +245,8 @@ class GUI(using var controller: IController) extends Frame:
             
             case Event.Cheat =>
 
-                val text = s"${controller.field.gameOverField}"
+                /* val text = s"${controller.field.gameOverField}" */
+                val text = s"${FieldDTO(controller.field.hidden, controller.field.hidden)}"
                 showMessage(None.orNull, text, "Cheat Menu", Message.Plain)
                 false
             
@@ -260,7 +264,7 @@ class GUI(using var controller: IController) extends Frame:
 
                 setLoadedTimer(new AtomicInteger(controller.game.time))
                 timeLoaded = true
-                boardBounds = controller.field.matrix.size -1
+                boardBounds = controller.field.matrix.rows.size -1
                 contents = updateContents
                 repaint()
                 true
@@ -401,7 +405,7 @@ class GUI(using var controller: IController) extends Frame:
         (for(
             x <- 0 to bounds;
             y <- 0 to bounds
-            ) yield(x,y, controller.field.showVisibleCell(x,y))).foreach(t => contents += new CellButton(t._1, t._2, t._3, first))
+            ) yield(x,y, controller.field.matrix.rows(x)(y))).foreach(t => contents += new CellButton(t._1, t._2, t._3, first))
     }
     
     def setTime = synchronized {
@@ -427,7 +431,7 @@ class GUI(using var controller: IController) extends Frame:
     }
 
     def calculateScore: Int =
-        val score = ((controller.field.matrix.size * controller.field.matrix.size)) * 10 - (digitBar.leftDigit*100+digitBar.middleDigit*10+digitBar.rightDigit)
+        val score = ((controller.field.matrix.rows.size * controller.field.matrix.rows.size)) * 10 - (digitBar.leftDigit*100+digitBar.middleDigit*10+digitBar.rightDigit)
         if controller.game.board == "Won" then score else 0
     
     def resetTimer() = {
@@ -436,7 +440,22 @@ class GUI(using var controller: IController) extends Frame:
         timerStarted = false
     }
 
-    def calcFlagCount: Int = controller.game.calcMineAndFlag(controller.field.matrix)
+    /* def calcFlagCount: Int = controller.game.calcMineAndFlag(controller.field.matrix) */
+    def calcFlagCount: Int = calcMineAndFlag(controller.field.matrix, controller.game)
+
+    def calcMineAndFlag(visibleMatrix: MatrixDTO[String], gamely: GameDTO) = {
+        (gamely.bombs - calcX("F")(visibleMatrix))
+    }
+
+    def calcX(symbols: String)(visibleMatrix: MatrixDTO[String]): Int = {
+        val sizze = visibleMatrix.rows.size -1
+        val multiIndex = 0 to sizze
+        multiIndex
+          .flatMap(row => multiIndex.map(col => (row, col)))
+          .count{ case(row, col) => visibleMatrix.rows(row)(col) == symbols && isValid(row, col, sizze)}
+    
+    }
+    def isValid(row: Int, col: Int, side: Int): Boolean = {row >= 0 && row <= side && col >= 0 && col <= side}
 
     def buildFlagCountDisplay: (ImageIcon, ImageIcon, ImageIcon) =
         val leftDigit =  calcFlagCount / 100
@@ -465,9 +484,9 @@ class GUI(using var controller: IController) extends Frame:
             case e: MouseClicked if (controller.game.board == "Won" || controller.game.board == "Lost") =>
             
             case e: MouseClicked if e.peer.getButton == MouseEvent.BUTTON3 => 
-                if (controller.field.showVisibleCell(x,y) == "~"){
+                if (/* controller.field.showVisibleCell(x,y) */controller.field.matrix.rows(x)(y) == "~"){
                     controller.makeAndPublish(controller.put, Move("flag", y, x))
-                } else if (controller.field.showVisibleCell(x,y) == "F"){
+                } else if (controller.field.matrix.rows(x)(y) == "F"){
                     controller.makeAndPublish(controller.put, Move("unflag", y, x))
                 } else {
                     println(">> You can't flag an open field")

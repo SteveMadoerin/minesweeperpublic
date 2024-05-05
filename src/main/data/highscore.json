@@ -400,4 +400,7 @@
 }, {
   "player" : "Sly",
   "score" : 245
+}, {
+  "player" : "Default",
+  "score" : 0
 } ]

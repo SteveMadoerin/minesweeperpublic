@@ -14,10 +14,11 @@ object Default{
     
     given IGame = Game(10, 9, 0, "Playing")
     given IField = new Field(10 , "~")
-    given IController = Controller()
+    
 
     given IFileIO = new JsonFileIO() //choose Implementation here
     val filePathHighScore = "C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\highscore.json"
+    given IController = Controller()
 /*     given IFileIO = new XmlFileIO() //choose Implementation here
     
     val filePathHighScore = "C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\highscore.xml" */

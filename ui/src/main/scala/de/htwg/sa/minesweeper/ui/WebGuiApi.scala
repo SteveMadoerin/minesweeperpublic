@@ -28,6 +28,7 @@ import scala.util.Try
 import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl.Matrix
 import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl.Field
 import de.htwg.sa.minesweeper.model.gameComponent.IField
+import de.htwg.sa.minesweeper.entity.FieldDTO
 
 
 class WebGuiApi(using var controller: IController) extends Observer{
@@ -64,7 +65,7 @@ class WebGuiApi(using var controller: IController) extends Observer{
                     if (controller.game.board == "Playing") {
                         fieldWithGameStateToHTML(fieldToHTML(controller.field), controller.game.board)
                     } else {
-                        fieldWithGameStateToHTML(fieldToHTML(controller.field.gameOverField), controller.game.board)
+                        fieldWithGameStateToHTML(fieldToHTML(/* controller.field.gameOverField */FieldDTO(controller.field.hidden, controller.field.hidden)), controller.game.board)
                     }
                 } 
             } 
@@ -115,7 +116,7 @@ class WebGuiApi(using var controller: IController) extends Observer{
     }
 
     def gameOverFieldHtml: StandardRoute =  {
-        complete(HttpEntity(ContentTypes.`text/html(UTF-8)`,fieldToHTML(controller.field.gameOverField)))
+        complete(HttpEntity(ContentTypes.`text/html(UTF-8)`,fieldToHTML(FieldDTO(controller.field.hidden, controller.field.hidden)/* controller.field.gameOverField */)))
     }
 
     def fieldToHtmlNew: StandardRoute =  {
@@ -208,16 +209,16 @@ class WebGuiApi(using var controller: IController) extends Observer{
 
     def charArrayToInt(s: Array[Char]): Try[(Int, Int)] = Try(((s(1).toString + s(2).toString).toInt, (s(3).toString + s(4).toString).toInt))
 
-    def fieldToHTML(controllerField: IField): String = {
+    def fieldToHTML(controllerField: FieldDTO): String = {
         val matrix = controllerField.matrix
-        val size = controllerField.matrix.size
+        val size = controllerField.matrix.rows.size
         val html = new StringBuilder
         html.append("<table>")
         for (row <- 0 until size) {
             html.append("<tr>")
             for (col <- 0 until size) {
                 html.append("<td>")
-                html.append(matrix.cell(row, col))
+                html.append(matrix.rows(row)(col))
                 html.append("</td>")
             }
             html.append("</tr>")
