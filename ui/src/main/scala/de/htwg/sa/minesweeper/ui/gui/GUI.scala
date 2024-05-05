@@ -246,7 +246,7 @@ class GUI(using var controller: IController) extends Frame:
             case Event.Cheat =>
 
                 /* val text = s"${controller.field.gameOverField}" */
-                val text = s"${FieldDTO(controller.field.hidden, controller.field.hidden)}"
+                val text = s"${prettyFormat(FieldDTO(controller.field.hidden, controller.field.hidden))}"
                 showMessage(None.orNull, text, "Cheat Menu", Message.Plain)
                 false
             
@@ -442,6 +442,10 @@ class GUI(using var controller: IController) extends Frame:
 
     /* def calcFlagCount: Int = controller.game.calcMineAndFlag(controller.field.matrix) */
     def calcFlagCount: Int = calcMineAndFlag(controller.field.matrix, controller.game)
+
+    def prettyFormat(fieldDto: FieldDTO): String = {
+        fieldDto.matrix.rows.map(_.mkString(" ")).mkString("\n")
+    }
 
     def calcMineAndFlag(visibleMatrix: MatrixDTO[String], gamely: GameDTO) = {
         (gamely.bombs - calcX("F")(visibleMatrix))

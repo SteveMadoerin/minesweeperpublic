@@ -1,10 +1,7 @@
 package de.htwg.sa.minesweeper.util
 
-import de.htwg.sa.minesweeper.model.gameComponent.IField
 import play.api.libs.json.JsValue
 import play.api.libs.json.Json
-import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl.Field
-import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl.Matrix
 import play.api.libs.json.{JsValue, Json}
 import scala.io.Source
 
@@ -39,13 +36,9 @@ import scala.util.{Try, Success, Failure}
 import akka.http.scaladsl.unmarshalling.Unmarshal
 import scala.concurrent.Future
 import scala.concurrent.duration._
-import de.htwg.sa.minesweeper.model.gameComponent.IGame
-import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl.Game
 import de.htwg.sa.minesweeper.entity.FieldDTO
 import de.htwg.sa.minesweeper.entity.MatrixDTO
 import de.htwg.sa.minesweeper.entity.GameDTO
-/* import de.htwg.sa.minesweeper.entity.Field
-import de.htwg.sa.minesweeper.entity.Matrix */
 
 object RestUtil{
 
@@ -53,9 +46,7 @@ object RestUtil{
     implicit val materializer: Materializer = Materializer(system)
     implicit val executionContext: ExecutionContextExecutor = system.dispatcher
     
-    // approved
     def requestShowInvisibleCell(x: Int, y: Int, field: FieldDTO): String = {
-        //field.showInvisibleCell(x, y)
         import system.dispatcher // to get an execution context
 
         val jasonField = /* fieldToJson(field) */ fieldDtoToJson(field)
@@ -132,12 +123,8 @@ object RestUtil{
             response.entity.toStrict(5.seconds).map(_.data.utf8String)
         }
         val result = Await.result(bodyFieldFuture, 5.seconds)
-        //if (result.length()<50) {"E"} else {result}
-        val fieldFromController = /* jsonToField(result) */ jsontToFieldDTO(result)
+        val fieldFromController = jsontToFieldDTO(result)
         fieldFromController
-
-        //__________________________________________________________________________________________
-        // attention: //field.recursiveOpen(x, y, field)
         
     }
     
@@ -152,7 +139,7 @@ object RestUtil{
     }
     
     
-    def jsonToGame(jsonString: String): IGame = {
+/*     def jsonToGame(jsonString: String): IGame = {
         val json: JsValue = Json.parse(jsonString)
         val status = (json \ "game" \ "status").get.toString
         val bombs = (json \ "game" \ "bombs").get.toString.toInt
@@ -160,9 +147,9 @@ object RestUtil{
         val time = (json \ "game" \ "time").get.toString.toInt
         val statusWithoutQuotes = status.replace("\"", "") // \Playing\ -> Playing
         Game(bombs, side, time, statusWithoutQuotes)
-    }
+    } */
 
-    def gameToJson(currentGame: IGame): String = {
+/*     def gameToJson(currentGame: IGame): String = {
         Json.prettyPrint(
             Json.obj(
                 "game" -> Json.obj(
@@ -173,7 +160,7 @@ object RestUtil{
                 )
             )
         )
-    }
+    } */
 
     def gameDtoToJson(currentGame: GameDTO): String = {
         Json.prettyPrint(
@@ -242,7 +229,7 @@ object RestUtil{
         (game, finalFieldOption.get) //finalFieldOption.get
     }
 
-    def jsonToGameAndField(jsonString: String): (IGame, IField) = {
+    /* def jsonToGameAndField(jsonString: String): (IGame, IField) = {
         val json: JsValue = Json.parse(jsonString)
         val jsonGame: Option[JsValue] = (json \\ "game").headOption
         val status = (jsonGame.get \ "status").get.toString
@@ -294,12 +281,10 @@ object RestUtil{
         }
 
         (game, finalFieldOption.get) //finalFieldOption.get
-    }
+    } */
 
 
     def jsontToFieldDTO(jsonString: String): FieldDTO = {
-        // T0DO: Replace Field gameComponent with Field Controller
-
         val json: JsValue = Json.parse(jsonString)
         val size = (json \ "field" \ "size").get.toString.toInt
 
@@ -340,7 +325,7 @@ object RestUtil{
 
         finalFieldOption.get
     }
-
+/* 
     def jsonToField(jsonString: String): IField = {
         // T0DO: Replace Field gameComponent with Field Controller
 
@@ -383,9 +368,9 @@ object RestUtil{
         }
 
         finalFieldOption.get
-    }
+    } */
 
-    def fieldToJson(fieldInput: IField): String = {
+/*     def fieldToJson(fieldInput: IField): String = {
         import play.api.libs.json._
         Json.prettyPrint(
             Json.obj(
@@ -418,7 +403,7 @@ object RestUtil{
                 )
             )
         )
-    }
+    } */
 
     def fieldDtoToJson(fieldInput: FieldDTO): String = {
         import play.api.libs.json._

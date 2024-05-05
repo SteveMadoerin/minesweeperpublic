@@ -1,8 +1,5 @@
 package de.htwg.sa.minesweeper.controller.controllerComponent.controllerBaseImpl
 
-import de.htwg.sa.minesweeper.model.gameComponent._
-import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl._
-
 import de.htwg.sa.minesweeper.util.{Command, UndoRedoManager, Move}
 import de.htwg.sa.minesweeper.controller.controllerComponent.config.Default.{given}
 import de.htwg.sa.minesweeper.util.RestUtil

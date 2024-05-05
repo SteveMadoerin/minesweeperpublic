@@ -68,9 +68,9 @@ import scala.util.Try
 import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl.Game
 import scala.languageFeature.reflectiveCalls
 
-class TUI(/* using var controller: IController */):
+class TUI():
     
-    //controller.add(this) // TODO: implement
+    //controller.add(this)
     implicit val system: ActorSystem = ActorSystem()
     implicit val materializer: Materializer = Materializer(system)
     implicit val executionContext: ExecutionContextExecutor = system.dispatcher
@@ -110,12 +110,12 @@ class TUI(/* using var controller: IController */):
         
         input match
             case "q" => System.exit(0); None
-            case "h" => requestControllerHelpMenue; None // approved
-            case "r" => requestControllerCheat; None // TODO: implement
-            case "z" => requestControllerMakeAndPublishUndo; None // TODO: implement
-            case "y" => requestControllerMakeAndPublishRedo; None // TODO: implement
-            case "s" => requestControllerSaveGame; None // TODO: implement
-            case "l" => requestControllerLoadGame; None // TODO: implement
+            case "h" => requestControllerHelpMenue; None
+            case "r" => requestControllerCheat; None
+            case "z" => requestControllerMakeAndPublishUndo; None
+            case "y" => requestControllerMakeAndPublishRedo; None
+            case "s" => requestControllerSaveGame; None
+            case "l" => requestControllerLoadGame; None
             case "e" => None
             case _ => {
                 val charAccumulator = input.toCharArray()
@@ -133,7 +133,6 @@ class TUI(/* using var controller: IController */):
                 controllerGame = requestControllerGame
 
                 val validCoordinates: Option[Move] = coordinates match {
-                    //case Some(i) => {if controller.game.side > i._1 && controller.game.side > i._2 then Some(Move(action, i._1, i._2)) else { infoMessages(">> Invalid Move: Coordinates out of bounds"); None}}
                     case Some(i) => {if controllerGame.side > i._1 && controllerGame.side > i._2 then Some(Move(action, i._1, i._2)) else { infoMessages(">> Invalid Move: Coordinates out of bounds"); None}}
                     case None => None
                 }
@@ -152,15 +151,13 @@ class TUI(/* using var controller: IController */):
                 false
         }
 
-        // replace controller.checkGameOver
+        controllerGame = requestControllerGame // replace controller.checkGameOver
 
-        controllerGame = requestControllerGame
-        //Todo implement
         requestCheckGameOver(controllerGame.board) match {
             case false =>
                 parseInputandPrintLoop(stillFirstMove)
             case true =>
-                /* controller.gameOver */ requestGameOver // TODO: implement
+                requestGameOver
                 restart
         }
     }
@@ -215,9 +212,8 @@ class TUI(/* using var controller: IController */):
 
     // works
     def requestNewGame(side: Int, bombs: Int) = {
-        val url = "http://localhost:8081/controller/newGame" + s"?side=$side&bombs=$bombs"
-        // parameters side and bombs
 
+        val url = "http://localhost:8081/controller/newGame" + s"?side=$side&bombs=$bombs"
         val request = HttpRequest(
             method =  HttpMethods.PUT,
             uri = url
@@ -231,12 +227,10 @@ class TUI(/* using var controller: IController */):
         val (newGame, newField): (GameTui, FieldTui) = jsonToGameAndField(bodyString)
         println(newGame.bombs)
         println(newField.hidden.rows.size)
-        // here we could do something like
+
         controllerField = newField
         controllerGame = newGame
         //_____________________________________ 
-
-
         //controller.newGame(side, bombs)
     }
 
@@ -248,8 +242,6 @@ class TUI(/* using var controller: IController */):
             method =  HttpMethods.PUT,
             uri = url
         )
-        
-        //controller.exit
     }
 
     // works
@@ -266,7 +258,6 @@ class TUI(/* using var controller: IController */):
             response.entity.toStrict(5.seconds).map(_.data.utf8String)
         }
         val bodyString = Await.result(bodyStringFuture, 5.seconds)
-        //println(bodyString)
         bodyString.toBoolean
         
         //controller.checkGameOver(status)
@@ -292,8 +283,6 @@ class TUI(/* using var controller: IController */):
         val field = jsonToFieldTui(bodyString) 
 
         //-------------------- TODO: implement maybe later controllerfield = field ...
-
-
         //controller.gameOver
     }
 
@@ -309,13 +298,10 @@ class TUI(/* using var controller: IController */):
 
         val bodyString = Await.result(Http().singleRequest(request).flatMap(_.entity.toStrict(5.seconds).map(_.data.utf8String)), 5.seconds)
         val field = jsonToFieldTui(bodyString)
-        //println("field: " + field)
         field
     }
 
     def jsonToFieldTui(jsonString: String): FieldTui = {
-        // T0DO: Replace Field gameComponent with Field Controller
-
         val json: JsValue = Json.parse(jsonString)
         val size = (json \ "field" \ "size").get.toString.toInt
 
@@ -392,10 +378,8 @@ class TUI(/* using var controller: IController */):
             case "Won" => 1
             case "Lost" => 2    
         }
-        //val url = "http://localhost:8081/controller/makeAndPublish/doMove?b=" + firstMoveCheck + "bombs=" + game.bombs + "size=" + game.side + "time=" + game.time + "board=" + newBoard
-        //val url = "http://localhost:8081/controller/makeAndPublish/doMove"
-        val url = s"http://localhost:8081/controller/makeAndPublish/doMove?b=$firstMoveCheck&bombs=${game.bombs}&size=${game.side}&time=${game.time}&board=$newBoard"
 
+        val url = s"http://localhost:8081/controller/makeAndPublish/doMove?b=$firstMoveCheck&bombs=${game.bombs}&size=${game.side}&time=${game.time}&board=$newBoard"
         val moveRaw = move
 
         def moveToJson(move: Move): JsValue = {
@@ -410,7 +394,6 @@ class TUI(/* using var controller: IController */):
         ).withEntity(HttpEntity(ContentTypes.`application/json`, bodyField.toString()))
 
         val bodyString = Await.result(Http().singleRequest(request).flatMap(_.entity.toStrict(5.seconds).map(_.data.utf8String)), 5.seconds)
-
         println(bodyString) // success
 
     }
@@ -419,7 +402,6 @@ class TUI(/* using var controller: IController */):
     def requestControllerMakeAndPublishPut(move: Move) = {
         //controller.makeAndPublish(controller.put, move)
         val url = "http://localhost:8081/controller/makeAndPublish/put"
-
         val moveRaw = move
 
         def moveToJson(move: Move): JsValue = {
@@ -434,8 +416,6 @@ class TUI(/* using var controller: IController */):
         ).withEntity(HttpEntity(ContentTypes.`application/json`, bodyField.toString()))
 
         val bodyString = Await.result(Http().singleRequest(request).flatMap(_.entity.toStrict(5.seconds).map(_.data.utf8String)), 5.seconds)
-
-        //println(bodyString) // success
 
     }
 
@@ -450,33 +430,26 @@ class TUI(/* using var controller: IController */):
 
         val bodyStringHelpMessage = Await.result(Http().singleRequest(request).flatMap(_.entity.toStrict(5.seconds).map(_.data.utf8String)), 5.seconds)
         infoMessages(">> Help Menu in TUI:", bodyStringHelpMessage)
-        //update(Event.Help)
-        //controller.helpMenu
-        //println(// controller.field.toString)
     }
 
     // working
     def requestControllerCheat: Unit = {
 
-        // // possibly make a mechanism to make a put request an transfert the controller.field and controller.game to ControllerApi late - just keep in mind
-
-        // "http://localhost:8081/controller/cheat"
+        // possibly make a mechanism to make a put request an transfer the controller.field and controller.game to ControllerApi late - just keep in mind
         val url = "http://localhost:8081/controller/cheat"
-        // get request
+
         val request = HttpRequest(
             method =  HttpMethods.GET,
             uri = url
         )
 
         val responseFuture: Future[HttpResponse] = Http().singleRequest(request)
-
         val bodyStringFuture: Future[String] = responseFuture.flatMap { response =>
             response.entity.toStrict(5.seconds).map(_.data.utf8String)
         }
 
         val bodyStringCheat = Await.result(bodyStringFuture, 5.seconds)
         println(bodyStringCheat)
-        //controller.cheat
     }
 
     // working
@@ -489,7 +462,6 @@ class TUI(/* using var controller: IController */):
         )
 
         val responseFuture: Future[HttpResponse] = Http().singleRequest(request)
-
         val bodyStringFuture: Future[String] = responseFuture.flatMap { response =>
             response.entity.toStrict(5.seconds).map(_.data.utf8String)
         }
@@ -508,7 +480,6 @@ class TUI(/* using var controller: IController */):
         )
 
         val responseFuture: Future[HttpResponse] = Http().singleRequest(request)
-
         val bodyStringFuture: Future[String] = responseFuture.flatMap { response =>
             response.entity.toStrict(5.seconds).map(_.data.utf8String)
         }
@@ -528,7 +499,6 @@ class TUI(/* using var controller: IController */):
         )
 
         val responseFuture: Future[HttpResponse] = Http().singleRequest(request)
-
         val bodyStringFuture: Future[String] = responseFuture.flatMap { response =>
             response.entity.toStrict(5.seconds).map(_.data.utf8String)
         }
@@ -548,7 +518,6 @@ class TUI(/* using var controller: IController */):
         )
 
         val responseFuture: Future[HttpResponse] = Http().singleRequest(request)
-
         val bodyStringFuture: Future[String] = responseFuture.flatMap { response =>
             response.entity.toStrict(5.seconds).map(_.data.utf8String)
         }
@@ -572,7 +541,6 @@ class TUI(/* using var controller: IController */):
         }
         val bodyStringField = Await.result(bodyStringFuture, 5.seconds)
         bodyStringField
-        /* infoMessages(controller.field.toString()) */
         
     }
 
@@ -588,7 +556,6 @@ class TUI(/* using var controller: IController */):
         put {
             path("tui"/"notify") {
                     parameter("event".as[String]) { (event) =>
-                        //
                         event match
                             case "NewGame" => update(Event.NewGame)
                             case "Start" => update(Event.Start)

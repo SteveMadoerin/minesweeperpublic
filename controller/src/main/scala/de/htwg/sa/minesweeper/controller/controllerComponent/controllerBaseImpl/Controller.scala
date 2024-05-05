@@ -44,7 +44,7 @@ import de.htwg.sa.minesweeper.entity.{FieldDTO, GameDTO, MatrixDTO}
 
 
 
-class Controller(/* using var game: IGame, */ /* using var file: IFileIO */) extends IController with Observable:
+class Controller() extends IController with Observable:
     
     
     implicit val system: ActorSystem = ActorSystem()
@@ -54,36 +54,14 @@ class Controller(/* using var game: IGame, */ /* using var file: IFileIO */) ext
     var game: GameDTO = GameDTO(10, 9, 0, "Playing")
     var field: FieldDTO = createFieldDTO(game)
 
-    //var field: IField = createField(game)
-    //val undoRedoManager = new UndoRedoManager[IField]
     val undoRedoManager = new UndoRedoManager[FieldDTO]
 
-    // approved
-/*     def createField(leGame: IGame): de.htwg.sa.minesweeper.model.gameComponent.IField = {
-        val url = s"http://localhost:8082/model/field/new?bombs=${leGame.bombs}&size=${leGame.side}&time=${leGame.time}"
-
-        //TODO: replace field with field controller
-        val returnField: de.htwg.sa.minesweeper.model.gameComponent.IField = Try {
-            val result = Source.fromURL(url).mkString
-            RestUtil.jsonToField(result)
-        } match {
-            case Success(field) => field
-            case Failure(e) =>
-                println(s"Error fetching or parsing field data: ${e.getMessage}")
-                Field(new Matrix[String](leGame.side, ""), new Matrix[String](leGame.side, "")) // Return a default field or handle the error appropriately
-            
-        }
-        returnField
-    } */
-
-    // TODO: replace field with field controller
     def createFieldDTO(leGame: GameDTO): FieldDTO = {
         val url = s"http://localhost:8082/model/field/new?bombs=${leGame.bombs}&size=${leGame.side}&time=${leGame.time}"
 
-        //TODO: replace field with field controller
         val returnField: FieldDTO = Try {
             val result = Source.fromURL(url).mkString
-            RestUtil.jsonToField(result)
+            /* RestUtil.jsonToField(result) */
             RestUtil.jsontToFieldDTO(result)
         } match {
             case Success(field) => field
@@ -92,13 +70,11 @@ class Controller(/* using var game: IGame, */ /* using var file: IFileIO */) ext
                 FieldDTO(MatrixDTO[String](Vector.empty), new MatrixDTO[String](Vector.empty)) // Return a default field or handle the error appropriately
             
         }
-        //println(returnField.matrix.toString()) // TODO: remove
-        //println(returnField.hidden.toString()) // TODO: remove
         returnField
     }
 
-    // approved
-    def doMove(b: Boolean, move: Move, /* game: IGame */game: GameDTO) = 
+
+    def doMove(b: Boolean, move: Move, game: GameDTO) = 
         synchronized{            
 
             val convertedBoard = game.board match {
@@ -119,12 +95,11 @@ class Controller(/* using var game: IGame, */ /* using var file: IFileIO */) ext
             }
 
             val returnedJsonGameAndField = Await.result(firstBodyStringFuture, 5.seconds)
-            /* val (newGame, newField): (IGame, IField) = RestUtil.jsonToGameAndField(returnedJsonGameAndField) */ // JsonArray with Game and Field converting
             val (newGame, newField): (GameDTO, FieldDTO) = RestUtil.jsonToGameAndFieldDTO(returnedJsonGameAndField) // JsonArray with Game and Field converting
             field = newField
             this.game = newGame
             
-            val jasonField2 = /* RestUtil.fieldToJson(field) */ RestUtil.fieldDtoToJson(field)
+            val jasonField2 = RestUtil.fieldDtoToJson(field)
             val jsonFileContent2 = jasonField2.getBytes("UTF-8")
 
             val request2 = HttpRequest(
@@ -146,11 +121,9 @@ class Controller(/* using var game: IGame, */ /* using var file: IFileIO */) ext
             else{undoRedoManager.doStep(field, DoCommand(move))}
         }
     
-    // approved
     def loadGame = {
 
         val uri = Uri("http://localhost:8083/persistence/game") // load the game
-
         val request = HttpRequest(method = HttpMethods.GET, uri = uri)
         val responseFuture: Future[HttpResponse] = Http().singleRequest(request)
         val bodyStringFuture: Future[String] = responseFuture.flatMap { response =>
@@ -160,7 +133,6 @@ class Controller(/* using var game: IGame, */ /* using var file: IFileIO */) ext
 
         // now we need to parse the resulting jsong string representig the Game
         val loadedGame: Option[GameDTO] = Try {
-            /* RestUtil.jsonToGame(result) */
             RestUtil.jsonToGameDTO(result)
         } match {
             case Success(game) => println("game loaded"); Some(game)
@@ -168,16 +140,13 @@ class Controller(/* using var game: IGame, */ /* using var file: IFileIO */) ext
         }
 
         val gameOption = loadedGame
-
-        //val gameOption = file.loadGame
         gameOption match {
             case Some(game) => this.game = game
             case None =>
         }
-        // _____________________________________________________________________________________________________
         game = GameDTO(gameOption.get.bombs, gameOption.get.side, gameOption.get.time, gameOption.get.board)
         // _____________________________________________________________________________________________________
-        // we need to load the field too
+        
         val uriField = Uri("http://localhost:8083/persistence/field") // load the field
 
         val requestField = HttpRequest(method = HttpMethods.GET, uri = uriField)
@@ -187,7 +156,6 @@ class Controller(/* using var game: IGame, */ /* using var file: IFileIO */) ext
         }
         val resultField = Await.result(bodyStringFutureField, 5.seconds)
         val loadedField: Option[FieldDTO] = Try {
-            /* RestUtil.jsonToField(resultField) */
             RestUtil.jsontToFieldDTO(resultField)
         } match {
             case Success(field) => println("field loaded"); Some(field)
@@ -195,24 +163,18 @@ class Controller(/* using var game: IGame, */ /* using var file: IFileIO */) ext
         }
 
         val fieldOption: Option[FieldDTO] = loadedField
-
-        //val fieldOption = file.loadField
         fieldOption match {
             case Some(field) => this.field = field
             case None =>
         }
 
-        notifyObserversRest("Load") //notifyObservers(Event.Load)
+        notifyObserversRest("Load")
     }
 
-
-    
-    // approved
     def saveGame =
 
-        notifyObserversRest("SaveTime") //notifyObservers(Event.SaveTime)
+        notifyObserversRest("SaveTime") 
 
-        // _____________________________________________________________________________________________________
         val queryParameters = Uri.Query(
             "bombs" -> s"${game.bombs}",
             "size"  -> s"${game.side}",
@@ -230,12 +192,9 @@ class Controller(/* using var game: IGame, */ /* using var file: IFileIO */) ext
             case Failure(ex)  => println(s"Request failed: $ex")
         }
 
-        //file.saveGame(game)
         // _____________________________________________________________________________________________________
 
-        // _____________________________________________________________________________________________________
-
-        val jasonField = /* field.fieldToJson */ RestUtil.fieldDtoToJson(field)
+        val jasonField = RestUtil.fieldDtoToJson(field)
         val jsonFileContent = jasonField.getBytes("UTF-8")
 
         val request2 = HttpRequest(
@@ -245,25 +204,20 @@ class Controller(/* using var game: IGame, */ /* using var file: IFileIO */) ext
         )
 
         val responseFuture2: Future[HttpResponse] = Http().singleRequest(request2)
-
         responseFuture2.onComplete {
             case Success(res) => println(s"Successfully saved JSON file field: ${res.entity}")
             case Failure(ex)  => println(s"Failed to put JSON file: ${ex.getMessage}")
         }
 
-        //file.saveField(field)
-        // _____________________________________________________________________________________________________
-
         game = GameDTO(game.bombs, game.side, game.time, "Playing")
-        //notifyObservers(Event.Save)
-        notifyObserversRest("Save")
+        notifyObserversRest("Save") //notifyObservers(Event.Save)
     
     def exit = notifyObserversRest("Exit")
 
     // approved
     def gameOver =
         val url = s"http://localhost:8082/model/field/gameOverField"
-        val jsonField = /* RestUtil.fieldToJson(field) */ RestUtil.fieldDtoToJson(field) // provide the controller field to the ModelAPI
+        val jsonField =  RestUtil.fieldDtoToJson(field) // provide the controller field to the ModelAPI
         val jsonFileContent = jsonField.getBytes("UTF-8")
         
         val request = HttpRequest(
@@ -276,41 +230,34 @@ class Controller(/* using var game: IGame, */ /* using var file: IFileIO */) ext
             response.entity.toStrict(5.seconds).map(_.data.utf8String)
         }
         val bodyString = Await.result(bodyStringFuture, 5.seconds)
-        field = /* RestUtil.jsonToField(bodyString) */ RestUtil.jsontToFieldDTO(bodyString)
+        field = RestUtil.jsontToFieldDTO(bodyString)
 
         notifyObserversRest("GameOver")
     
     def openRec(x: Int, y: Int, field: FieldDTO): FieldDTO = undoRedoManager.doStep(field, DoCommand(Move("recursion", x, y))) // approved
 
-    // approved
     def helpMenu = 
         helpMenuRest
         notifyObserversRest("Help")
     
-    // approved
     def fieldToString: String = {
         val url2 = s"http://localhost:8082/model/field/toString"
-        // prepare the Field
-        val bodyField = /* RestUtil.fieldToJson(field) */ RestUtil.fieldDtoToJson(field)
-        // prepare the PUT request
+        val bodyField = RestUtil.fieldDtoToJson(field)
+
         val request2 = HttpRequest(
             method =  HttpMethods.PUT,
             uri = url2,
             entity = HttpEntity(ContentTypes.`application/json`, bodyField)
         )
-        // now get the printed field from the modelApi
-        val responseFuture2: Future[HttpResponse] = Http().singleRequest(request2)
+
+        val responseFuture2: Future[HttpResponse] = Http().singleRequest(request2) 
         val bodyStringFuture2: Future[String] = responseFuture2.flatMap { response =>
             response.entity.toStrict(5.seconds).map(_.data.utf8String)
         }
-        val bodyString2 = Await.result(bodyStringFuture2, 5.seconds)
-        
-        //println(field.toString)
+        val bodyString2 = Await.result(bodyStringFuture2, 5.seconds) // now get the printed field from the modelApi
         bodyString2
-
     }
 
-    // approved
     def helpMenuRest: String = 
         val url = s"http://localhost:8082/model/game/helpMessage"
         // prepare the GET request
@@ -318,68 +265,38 @@ class Controller(/* using var game: IGame, */ /* using var file: IFileIO */) ext
             method =  HttpMethods.GET,
             uri = url
         )
-        // now get the message from the modelApi
-        val responseFuture: Future[HttpResponse] = Http().singleRequest(request)
+
+        val responseFuture: Future[HttpResponse] = Http().singleRequest(request) // now get the message from the modelApi
         val bodyStringFuture: Future[String] = responseFuture.flatMap { response =>
             response.entity.toStrict(5.seconds).map(_.data.utf8String)
         }
         val bodyStringHelpMessage = Await.result(bodyStringFuture, 5.seconds)
-        // println(bodyString) maybe later !!!
-
-/*         println("this is helpMenue from Controller")
-
-        //game.helpMessage
-
-        val url2 = s"http://localhost:8082/model/field/toString"
-        // prepare the Field
-        val bodyField = RestUtil.fieldToJson(field)
-        // prepare the PUT request
-        val request2 = HttpRequest(
-            method =  HttpMethods.PUT,
-            uri = url2,
-            entity = HttpEntity(ContentTypes.`application/json`, bodyField)
-        )
-        // now get the printed field from the modelApi
-        val responseFuture2: Future[HttpResponse] = Http().singleRequest(request2)
-        val bodyStringFuture2: Future[String] = responseFuture2.flatMap { response =>
-            response.entity.toStrict(5.seconds).map(_.data.utf8String)
-        }
-        val bodyString2 = Await.result(bodyStringFuture2, 5.seconds)
-        println(bodyString2) // !!!  */
-        //println(field.toString)
-        //notifyObservers(Event.Help) <--
         bodyStringHelpMessage
     
-    //approved
     def cheat = 
         cheatRest
         notifyObserversRest("Cheat")
     
     def cheatRest: String = {
         val url = s"http://localhost:8082/model/field/cheat"
-        // prepare the Field
-        val bodyField = /* RestUtil.fieldToJson(field) */ RestUtil.fieldDtoToJson(field)
-        // prepare the PUT request
+        
+        val bodyField = RestUtil.fieldDtoToJson(field) // prepare the Field
+
         val request = HttpRequest(
             method =  HttpMethods.PUT,
             uri = url,
             entity = HttpEntity(ContentTypes.`application/json`, bodyField)
         )
-        // now get the printed field from the modelApi
-        val responseFuture: Future[HttpResponse] = Http().singleRequest(request)
+
+        val responseFuture: Future[HttpResponse] = Http().singleRequest(request) // now get the printed field from the modelApi
         val bodyStringFuture: Future[String] = responseFuture.flatMap { response =>
             response.entity.toStrict(5.seconds).map(_.data.utf8String)
         }
         val bodyString = Await.result(bodyStringFuture, 5.seconds)
-        //println(bodyString) maybe later !!!
-        //field.reveal
         bodyString
-        
     }
 
-    // approved
     def checkGameOver(status: String) = {
-        //game.checkExit(status)
         val url = s"http://localhost:8082/model/game/checkExit?board=$status"
         val request = HttpRequest(
             method =  HttpMethods.GET,
@@ -392,17 +309,14 @@ class Controller(/* using var game: IGame, */ /* using var file: IFileIO */) ext
         val bodyString = Await.result(bodyStringFuture, 5.seconds)
         bodyString.toBoolean // parse String to boolean
     }
-        
-    // approved
+
     def newGameGUI =
         game = GameDTO(game.bombs, game.side, game.time, "Playing")
-        //notifyObservers(Event.Input)
-        notifyObserversRest("Input")
+        notifyObserversRest("Input") //notifyObservers(Event.Input)
     
     // approved
     def newGameField(optionString: Option[String]) =
         game = GameDTO(game.bombs, game.side, game.time, "Playing")
-        //val (feld, spiel): (IField, IGame) = game.prepareBoard(optionString)(game)
 
         val oString = optionString.get match {
             case "SuperEasy" => 0
@@ -411,8 +325,7 @@ class Controller(/* using var game: IGame, */ /* using var file: IFileIO */) ext
             case "Hard" => 3
         }
         
-        val url = s"http://localhost:8082/model/game/newGameField?optionString=$oString" // we need a url
-        //println(s"newGameField: url = $url")
+        val url = s"http://localhost:8082/model/game/newGameField?optionString=$oString"
 
         val bodyGame = /* RestUtil.gameToJson(game) */ RestUtil.gameDtoToJson(game) // prepare the game
         val body = bodyGame.getBytes("UTF-8")
@@ -424,30 +337,21 @@ class Controller(/* using var game: IGame, */ /* using var file: IFileIO */) ext
             response.entity.toStrict(5.seconds).map(_.data.utf8String)
         }
         val returnedJsonGameAndField = Await.result(bodyStringFuture, 5.seconds)
-        /* val (newGame, newField): (IGame, IField) = RestUtil.jsonToGameAndField(returnedJsonGameAndField) */
         val (newGame, newField): (GameDTO, FieldDTO) = RestUtil.jsonToGameAndFieldDTO(returnedJsonGameAndField)
         field = newField                
         game = GameDTO(newGame.bombs, newGame.side, newGame.time, newGame.board) 
-
-        //field = feld
-        //game = spiel
-        
-        //notifyObservers(Event.NewGame)
-        notifyObserversRest("NewGame")
-        
-    // approved
+        notifyObserversRest("NewGame") //notifyObservers(Event.NewGame)
+    
     def newGame(side: Int, bombs: Int) =
         game = GameDTO(bombs, side, game.time, "Playing")
-        field = /* createField(game) */ createFieldDTO(game)// TODO: replace with GameEntity
-        //notifyObservers(Event.NewGame)
+        field = createFieldDTO(game)
         notifyObserversRest("NewGame")
     
     // approved - doMove from TUI transfered as param -> game & field in TUI declared
     def makeAndPublish(makeThis: (Boolean, Move, GameDTO) => FieldDTO, b: Boolean, move: Move, game: GameDTO): Unit =
-        // "open" => controller.makeAndPublish(controller.doMove, firstMoveCheck, move, controller.game)
         field = makeThis(b, move, game)  // doMove
         
-        val jasonField = /* RestUtil.fieldToJson(field) */ RestUtil.fieldDtoToJson(field)
+        val jasonField = RestUtil.fieldDtoToJson(field)
         val jsonFileContent = jasonField.getBytes("UTF-8")
         val request = requestPut(s"http://localhost:8082/model/field/showInvisibleCell?y=${move.y}&x=${move.x}", jsonFileContent) // -> request to ModelAPi
         val responseFuture: Future[HttpResponse] = Http().singleRequest(request)
@@ -459,17 +363,13 @@ class Controller(/* using var game: IGame, */ /* using var file: IFileIO */) ext
         val symbol = if(result.length > 3){"E"} else {result}
 
         if (symbol == "0"){field = openRec(move.x,move.y,field)}
-/*         val firstOrNext = if (b) Event.Start else Event.Next
-        notifyObservers(firstOrNext) */
         val firstOrNext = if (b) "Start" else "Next"
         notifyObserversRest(firstOrNext)
     
-
-    // approved
     def makeAndPublish(makeThis: Move => FieldDTO, move: Move): Unit =
         move.value match {
             case "flag" => 
-                val jasonField = /* RestUtil.fieldToJson(field) */ RestUtil.fieldDtoToJson(field)
+                val jasonField = RestUtil.fieldDtoToJson(field)
                 val jsonFileContent = jasonField.getBytes("UTF-8")
 
                 val request = HttpRequest(
@@ -494,11 +394,11 @@ class Controller(/* using var game: IGame, */ /* using var file: IFileIO */) ext
                 val result = Await.result(bodyFieldFuture, 5.seconds)
                 jsonBodyField = result
 
-                val fieldFromController = /* RestUtil.jsonToField(jsonBodyField) */ RestUtil.jsontToFieldDTO(jsonBodyField)
+                val fieldFromController = RestUtil.jsontToFieldDTO(jsonBodyField)
                 field = fieldFromController
 
             case "unflag" => 
-                val jasonField = /* RestUtil.fieldToJson(field) */ RestUtil.fieldDtoToJson(field)
+                val jasonField = RestUtil.fieldDtoToJson(field)
                 val jsonFileContent = jasonField.getBytes("UTF-8")
 
                 val request2 = HttpRequest(
@@ -523,23 +423,16 @@ class Controller(/* using var game: IGame, */ /* using var file: IFileIO */) ext
                 val result = Await.result(bodyFieldFuture, 5.seconds)
                 jsonBodyField = result
 
-                val fieldFromController = /* RestUtil.jsonToField(jsonBodyField) */ RestUtil.jsontToFieldDTO(jsonBodyField)
+                val fieldFromController = RestUtil.jsontToFieldDTO(jsonBodyField)
                 field = fieldFromController
         }
 
         field = makeThis(move)
-        //notifyObservers(Event.Next)
         notifyObserversRest("Next")
-
-    // approved
-/*     def makeAndPublish(makeThis: => IField) =
-        field = makeThis
-        //notifyObservers(Event.Next)
-        notifyObserversRest("Next") */
+    
 
     def makeAndPublish(makeThis: => FieldDTO): FieldDTO =
         field = makeThis
-        //notifyObservers(Event.Next)
         notifyObserversRest("Next")
         field
 
@@ -547,7 +440,7 @@ class Controller(/* using var game: IGame, */ /* using var file: IFileIO */) ext
     
     // approved
     def saveScoreAndPlayerName(playerName: String, saveScore: Int, filePath: String) = {
-        //file.savePlayerScore(playerName, saveScore, filePath)
+
         val queryParameters = Uri.Query(
             "player" -> s"${playerName}",
             "score"  -> s"${saveScore}"
@@ -564,7 +457,6 @@ class Controller(/* using var game: IGame, */ /* using var file: IFileIO */) ext
         }
     }
 
-    // approved
     def loadPlayerScores = {
         
         val url = "http://localhost:8083/persistence/highscore"
@@ -575,33 +467,27 @@ class Controller(/* using var game: IGame, */ /* using var file: IFileIO */) ext
         }
         val jsonStringApiResult: String = Await.result(bodyFuture, 5.seconds)
         
-        // body needs to be convertoed to a Seq[(String, Int)]
-        case class PlayerScore(player: String, score: Int)
+        case class PlayerScore(player: String, score: Int) // body needs to be convertoed to a Seq[(String, Int)]
         implicit val playerScoreFormat: Format[PlayerScore] = Json.format[PlayerScore]
         
         val json: JsValue = Json.parse(jsonStringApiResult) // Parse the JSON string into a sequence of PlayerScore objects
         val playerScoresResult: JsResult[Seq[PlayerScore]] = Json.fromJson[Seq[PlayerScore]](json)
 
-        // Map the sequence of PlayerScore objects to the desired Seq[(String, Int)]
         val playerScores: Seq[(String, Int)] = playerScoresResult match {
         case JsSuccess(scores, _) => scores.map(ps => (ps.player, ps.score))
         case JsError(errors) => Seq.empty // Handle the error appropriately
-        }
+        } // Map the sequence of PlayerScore objects to the desired Seq[(String, Int)]
 
-        //file.loadPlayerScores
         playerScores
     }
     
-    def put(move: Move): FieldDTO = undoRedoManager.doStep(field, DoCommand(move)) // approved
-    def undo: FieldDTO = undoRedoManager.undoStep(field) // approved
-    def redo: FieldDTO = undoRedoManager.redoStep(field) // approved
-
-    // approved
+    def put(move: Move): FieldDTO = undoRedoManager.doStep(field, DoCommand(move))
+    def undo: FieldDTO = undoRedoManager.undoStep(field)
+    def redo: FieldDTO = undoRedoManager.redoStep(field)
     def saveTime(currentTime: Int): Unit = 
         val tempGame: GameDTO = GameDTO(game.bombs, game.side, currentTime, "Playing")
         game = tempGame
     
-    // approved
     def requestPut(input_uri: String, jsonContent: Array[Byte]) = {
         HttpRequest(
             method =  HttpMethods.PUT,
@@ -610,7 +496,7 @@ class Controller(/* using var game: IGame, */ /* using var file: IFileIO */) ext
         )
     }
 
-    // approved - but only to notify the TUI
+    // approved - but only to notify the TUI and GUI
     def notifyObserversRest(event: String) = {
         // TODO: maybe register the logic
 
@@ -644,9 +530,6 @@ class Controller(/* using var game: IGame, */ /* using var file: IFileIO */) ext
         }
 /*         val result2 = Await.result(bodyFieldFuture2, 5.seconds)
         println(result2) */
-
-
-        
     }
 
     
