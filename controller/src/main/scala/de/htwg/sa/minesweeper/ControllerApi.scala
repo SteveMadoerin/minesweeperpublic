@@ -14,6 +14,29 @@ import de.htwg.sa.minesweeper.util.Event
 import akka.stream.Materializer
 import scala.concurrent.ExecutionContextExecutor
 
+import akka.actor.ActorSystem
+import akka.stream.{ActorMaterializer, Materializer}
+import scala.concurrent.ExecutionContext
+import akka.http.scaladsl.server.Route
+import akka.http.scaladsl.server.directives.RouteDirectives
+import akka.http.scaladsl.Http
+import akka.http.scaladsl.model.{ContentTypes, HttpEntity}
+import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.{Route, StandardRoute}
+import scala.concurrent.ExecutionContextExecutor
+import scala.util.Failure
+import scala.util.Success
+import scala.util.matching.Regex
+import scala.util.Try
+import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl.Game
+import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl.Playfield
+import de.htwg.sa.minesweeper.model.gameComponent.config.Default
+import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl.Decider
+import scala.compiletime.ops.boolean
+import play.api.libs.json.Json
+import de.htwg.sa.minesweeper.util.Move
+import play.api.libs.json.JsValue
+
 
 class ControllerApi(using var controller: IController) extends Observer:
     controller.add(this)
@@ -36,6 +59,14 @@ class ControllerApi(using var controller: IController) extends Observer:
         text.foreach(println)
     }
 
+    def jsonToMove(json: JsValue): Move = {
+      val x = (json \ "x").get.toString.toInt
+      val y = (json \ "y").get.toString.toInt
+      val action1 = (json \ "value").get.toString
+      val action2 = action1.replace("\"", "")
+      Move(action2, x, y)
+    }
+
     
     Http().newServerAt("localhost", 8081).bind(
     concat(
@@ -52,6 +83,10 @@ class ControllerApi(using var controller: IController) extends Observer:
               path("field") {
                 complete(RestUtil.fieldToJson(controller.field).toString)
               },
+              path("gameOver") {
+                controller.gameOver
+                complete(RestUtil.fieldToJson(controller.field).toString)
+              },
               path("field"/"toString") {
                 complete(controller.fieldToString)
               },
@@ -64,26 +99,55 @@ class ControllerApi(using var controller: IController) extends Observer:
               },
               path("loadGame") {
                 controller.loadGame
-                complete("controller.loadGame")
+                complete(controller.fieldToString)
               },
-              path("next") {
-                complete("next"/* controller.next() */)
+              path("cheat") {
+                controller.cheat
+                complete(controller.fieldToString)
               },
               pathPrefix("makeAndPublish") {
                 concat(
                   path("doMove") {
-                    complete("controller.makeAndPublish(controller.doMove(b, move, game, field))" ) // "open"
+                    parameter("b".as[Boolean],"bombs".as[Int], "size".as[Int], "time".as[Int], "board".as[Int]) { (b, bombs, size, time, board) =>
+                      entity(as[String]) { moveEntitiy =>
+                          // doMove
+                          val firstMoveCheck = b
+                          val newBoard = board.match
+                          {
+                            case 0 => "Playing"
+                            case 1 => "Won"
+                            case 2 => "Lost"
+                          }
+                          val requestBody = Json.parse(moveEntitiy)
+                          val move = jsonToMove(requestBody)
+                          //controller.makeAndPublish(controller.doMove, firstMoveCheck, move, controller.game)
+                          controller.makeAndPublish(controller.doMove, firstMoveCheck, move, Game(bombs, size, time, newBoard))
+                          //controller.makeAndPublish(controller.put, move)
+                          print("move: " + move.value + " x: " + move.x + " y: " + move.y)
+
+                          complete("success doMove")
+                      }
+                    }
+                    //complete("controller.makeAndPublish(controller.doMove(b, move, game, field))" ) // "open"
                   },
                   path("put") {
-/*                     val c = controller.makeAndPublish(controller.put, move) // flg or unflag
-                    print(c) */
-                    complete("c")
+                    entity(as[String]) { moveEntitiy =>
+                      val requestBody = Json.parse(moveEntitiy)
+
+                      val move = jsonToMove(requestBody)
+                      controller.makeAndPublish(controller.put, move)
+                      print("move: " + move.value + " x: " + move.x + " y: " + move.y)
+
+                      complete("success")
+                    }
                   },
                   path("undo") {
-                      complete("controller.makeAndPublish(controller.undo)")
+                    val returnField = controller.makeAndPublish(controller.undo)
+                    complete(controller.fieldToString)
                   },
                   path("redo") {
-                      complete("controller.makeAndPublish(controller.redo)")
+                    val returnField = controller.makeAndPublish(controller.redo)
+                    complete(controller.fieldToString)
                   }
                 )
               },
@@ -122,12 +186,29 @@ class ControllerApi(using var controller: IController) extends Observer:
                   complete("controller.put(controller.jsonStringToMove(requestBody))")
                 }
               },
-              path("quit") {
-                complete("controller.quit()")
+              path("exit") {
+                controller.exit
+                complete("exit")
               },
-              path("notify") {
-                // 
-                complete("event")
+              path("checkGameOver") {
+                entity(as[String]) { requestStatus =>
+                  val result = controller.checkGameOver(requestStatus)
+
+                  complete(result.toString)
+                }
+              },
+              path("newGame") {
+                parameter("bombs".as[Int], "side".as[Int]) { (bombs, side) =>
+                  controller.newGame(side, bombs)
+                  val feld = controller.field
+                  val game = controller.game
+                  val jsonField = Json.parse(feld.fieldToJson(feld)) // TODO: check fieldToJson
+                  val jsonGame = Json.parse(game.gameToJson) // TODO: check gameToJson
+
+                  val jsonGameFieldArray = Json.arr(jsonGame, jsonField)
+                  complete(HttpEntity(ContentTypes.`application/json`, jsonGameFieldArray.toString))
+
+                }
               },
               path("") {
                 sys.error("No such POST route")

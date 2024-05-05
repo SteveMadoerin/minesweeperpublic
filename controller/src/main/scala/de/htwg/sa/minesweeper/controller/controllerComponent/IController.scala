@@ -16,6 +16,7 @@ trait IController extends Observable{
     def helpMenuRest: String
     def fieldToString: String
     def cheat: Unit
+    def cheatRest: String
     
     def checkGameOver(status: String): Boolean
     def newGameGUI: Unit
@@ -24,7 +25,8 @@ trait IController extends Observable{
 
     def makeAndPublish(makeThis: (Boolean, Move, IGame) => IField, b: Boolean, move: Move, game: IGame): Unit
     def makeAndPublish(makeThis: Move => IField, move: Move): Unit
-    def makeAndPublish(makeThis: => IField): Unit
+    //def makeAndPublish(makeThis: => IField): Unit
+    def makeAndPublish(makeThis: => IField): IField
 
     def loadPlayerScores: Seq[(String, Int)]
     //def loadPlayerScores(filePath: String): Seq[(String, Int)]

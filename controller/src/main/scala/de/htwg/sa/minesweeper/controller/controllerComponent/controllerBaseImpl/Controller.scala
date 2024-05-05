@@ -302,6 +302,7 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
         //notifyObservers(Event.Help)
         notifyObserversRest("Help")
     
+    // approved
     def fieldToString: String = {
         val url2 = s"http://localhost:8082/model/field/toString"
         // prepare the Field
@@ -323,6 +324,8 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
         bodyString2
 
     }
+
+    // approved
     def helpMenuRest: String = 
         val url = s"http://localhost:8082/model/game/helpMessage"
         // prepare the GET request
@@ -364,6 +367,10 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
     
     //approved
     def cheat = 
+        cheatRest
+        notifyObserversRest("Cheat")
+    
+    def cheatRest: String = {
         val url = s"http://localhost:8082/model/field/cheat"
         // prepare the Field
         val bodyField = RestUtil.fieldToJson(field)
@@ -381,9 +388,10 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
         val bodyString = Await.result(bodyStringFuture, 5.seconds)
         //println(bodyString) maybe later !!!
         //field.reveal
-        //notifyObservers(Event.Cheat)
-        notifyObserversRest("Cheat")
-    
+        bodyString
+        
+    }
+
     // approved
     def checkGameOver(status: String) = {
         //game.checkExit(status)
@@ -538,10 +546,18 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
         notifyObserversRest("Next")
 
     // approved
-    def makeAndPublish(makeThis: => IField) =
+/*     def makeAndPublish(makeThis: => IField) =
+        field = makeThis
+        //notifyObservers(Event.Next)
+        notifyObserversRest("Next") */
+
+    def makeAndPublish(makeThis: => IField): IField =
         field = makeThis
         //notifyObservers(Event.Next)
         notifyObserversRest("Next")
+        field
+
+    
     
     // approved
     def saveScoreAndPlayerName(playerName: String, saveScore: Int, filePath: String) = {

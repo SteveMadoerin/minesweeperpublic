@@ -65,27 +65,36 @@ import scala.util.Failure
 import scala.util.Success
 import scala.util.matching.Regex
 import scala.util.Try
+import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl.Game
+import scala.languageFeature.reflectiveCalls
 
-// TODO replace controller with API calls
-class TUI(using var controller: IController):
+class TUI(/* using var controller: IController */):
     
     //controller.add(this) // TODO: implement
     implicit val system: ActorSystem = ActorSystem()
     implicit val materializer: Materializer = Materializer(system)
     implicit val executionContext: ExecutionContextExecutor = system.dispatcher
 
-    // using var controller: IController
+    var firstMoveCheck = true
 
+    case class GameTui(bombs: Int, side: Int, time: Int, board: String)
+    case class FieldTui(matrix: MatrixTui[String], hidden: MatrixTui[String])
+    case class MatrixTui[T] (rows: Vector[Vector[T]])
+
+    var controllerGame: GameTui = requestControllerGame
+    var controllerField: FieldTui = requestControllerField // TODO: implement
 
     def run = 
         infoMessages("Welcome to Minesweeper")
         resize
-        parseInputandPrintLoop(firstMoveCheck = true)
+        parseInputandPrintLoop(firstMoveCheck)
         
     def update(e: Event): Boolean = 
         e match
-            case Event.NewGame | Event.Start | Event.Next | Event.Load => infoMessages(controller.field.toString()); true
-            case Event.GameOver => infoMessages(s"The Game is ${controller.game.board} !", controller.field.toString()); true
+            case Event.NewGame  => infoMessages(requestControllerFieldToString); firstMoveCheck = true; true
+            case Event.Load => infoMessages(requestControllerFieldToString); firstMoveCheck = false; true
+            case Event.Start | Event.Next  => infoMessages(requestControllerFieldToString); true
+            case Event.GameOver => infoMessages(s"The Game is ${controllerGame.board} !", requestControllerFieldToString); true
             case Event.Exit => System.exit(0); false
             case Event.Help => /* requestControllerHelpMenue; */infoMessages(requestControllerFieldToString); true
             case _ => false
@@ -101,12 +110,12 @@ class TUI(using var controller: IController):
         
         input match
             case "q" => System.exit(0); None
-            case "h" => requestControllerHelpMenue; None // TODO implement help menu
-            case "r" => requestControllerCheat; None
-            case "z" => requestControllerMakeAndPublishUndo; None
-            case "y" => requestControllerMakeAndPublishRedo; None
-            case "s" => requestControllerSaveGame; None
-            case "l" => requestControllerLoadGame; None
+            case "h" => requestControllerHelpMenue; None // approved
+            case "r" => requestControllerCheat; None // TODO: implement
+            case "z" => requestControllerMakeAndPublishUndo; None // TODO: implement
+            case "y" => requestControllerMakeAndPublishRedo; None // TODO: implement
+            case "s" => requestControllerSaveGame; None // TODO: implement
+            case "l" => requestControllerLoadGame; None // TODO: implement
             case "e" => None
             case _ => {
                 val charAccumulator = input.toCharArray()
@@ -121,9 +130,11 @@ class TUI(using var controller: IController):
                     case Success(i) => Some(i)
                     case Failure(e) => infoMessages(s">> Invalid Move: ${e.getMessage}"); None
                 }
+                controllerGame = requestControllerGame
 
                 val validCoordinates: Option[Move] = coordinates match {
-                    case Some(i) => {if controller.game.side > i._1 && controller.game.side > i._2 then Some(Move(action, i._1, i._2)) else { infoMessages(">> Invalid Move: Coordinates out of bounds"); None}} // no var game
+                    //case Some(i) => {if controller.game.side > i._1 && controller.game.side > i._2 then Some(Move(action, i._1, i._2)) else { infoMessages(">> Invalid Move: Coordinates out of bounds"); None}}
+                    case Some(i) => {if controllerGame.side > i._1 && controllerGame.side > i._2 then Some(Move(action, i._1, i._2)) else { infoMessages(">> Invalid Move: Coordinates out of bounds"); None}}
                     case None => None
                 }
                 validCoordinates
@@ -140,23 +151,27 @@ class TUI(using var controller: IController):
                 processMove(move, firstMoveCheck)
                 false
         }
-        
-        controller.checkGameOver(controller.game.board) match {
+
+        // replace controller.checkGameOver
+
+        controllerGame = requestControllerGame
+        //Todo implement
+        requestCheckGameOver(controllerGame.board) match {
             case false =>
                 parseInputandPrintLoop(stillFirstMove)
             case true =>
-                controller.gameOver
+                /* controller.gameOver */ requestGameOver // TODO: implement
                 restart
         }
     }
     
 
     def processMove(move: Move, firstMoveCheck: Boolean): Boolean = {
+        controllerGame = requestControllerGame
         move.value match {
-            case "open" => controller.makeAndPublish(controller.doMove, firstMoveCheck, move, controller.game); true
-            case "flag" => controller.makeAndPublish(controller.put, move); true
-            case "unflag" => controller.makeAndPublish(controller.put, move); true
-            case "help" => controller.helpMenu; true
+            case "open" => /* controller.makeAndPublish(controller.doMove, firstMoveCheck, move, controller.game); */requestControllerMakeAndPublishDoMove(firstMoveCheck, move, /* controller.game.asInstanceOf[Game] */ controllerGame); true
+            case "flag" => requestControllerMakeAndPublishPut(move); true
+            case "unflag" => requestControllerMakeAndPublishPut(move); true
             case _ => infoMessages(">> Invalid Input"); false
         }
     }
@@ -165,14 +180,17 @@ class TUI(using var controller: IController):
         infoMessages("Do you want to play again? (yes/no)")
         readLine match
             case "yes" => run
-            case "no" => controller.exit
+            case "no" => requestExit // TODO: implement
             case _ => infoMessages(">> Invalid Input");
     
     def charArrayToInt(s: Array[Char]): Try[(Int, Int)] = Try(((s(1).toString + s(2).toString).toInt, (s(3).toString + s(4).toString).toInt))
     
     def resize: Unit = 
         val (side, bombs) = chooseDifficulty()
-        controller.newGame(side, bombs)
+        
+        requestNewGame(side, bombs)
+        // TODO: receive Game and Field from controller
+        /* controller.newGame(side, bombs) */ // TODO: implement
     
     def chooseDifficulty() = {
         val multilineString = 
@@ -195,10 +213,233 @@ class TUI(using var controller: IController):
         }
     }
 
+    // works
+    def requestNewGame(side: Int, bombs: Int) = {
+        val url = "http://localhost:8081/controller/newGame" + s"?side=$side&bombs=$bombs"
+        // parameters side and bombs
+
+        val request = HttpRequest(
+            method =  HttpMethods.PUT,
+            uri = url
+        )
+
+        val responseFuture: Future[HttpResponse] = Http().singleRequest(request)
+        val bodyStringFuture: Future[String] = responseFuture.flatMap { response =>
+            response.entity.toStrict(5.seconds).map(_.data.utf8String)
+        }
+        val bodyString = Await.result(bodyStringFuture, 5.seconds)
+        val (newGame, newField): (GameTui, FieldTui) = jsonToGameAndField(bodyString)
+        println(newGame.bombs)
+        println(newField.hidden.rows.size)
+        // here we could do something like
+        controllerField = newField
+        controllerGame = newGame
+        //_____________________________________ 
+
+
+        //controller.newGame(side, bombs)
+    }
+
+    // works
+    def requestExit = {
+        val url = "http://localhost:8081/controller/exit"
+
+        val request = HttpRequest(
+            method =  HttpMethods.PUT,
+            uri = url
+        )
+        
+        //controller.exit
+    }
+
+    // works
+    def requestCheckGameOver(status: String) = {
+        val url = "http://localhost:8081/controller/checkGameOver"
+
+        val request = HttpRequest(
+            method =  HttpMethods.PUT,
+            uri = url
+        ).withEntity(status)
+
+        val responseFuture: Future[HttpResponse] = Http().singleRequest(request)
+        val bodyStringFuture: Future[String] = responseFuture.flatMap { response =>
+            response.entity.toStrict(5.seconds).map(_.data.utf8String)
+        }
+        val bodyString = Await.result(bodyStringFuture, 5.seconds)
+        //println(bodyString)
+        bodyString.toBoolean
+        
+        //controller.checkGameOver(status)
+    }
+
     def infoMessages(text: String*) = {
         text.foreach(println)
     }
 
+    // works
+    def requestGameOver = {
+        // get gameOverField from controller
+
+        val url = "http://localhost:8081/controller/gameOver"
+
+        val request = HttpRequest(
+            method =  HttpMethods.GET,
+            uri = url
+        )
+
+        val bodyString = Await.result(Http().singleRequest(request).flatMap(_.entity.toStrict(5.seconds).map(_.data.utf8String)), 5.seconds)
+
+        val field = jsonToFieldTui(bodyString) 
+
+        //-------------------- TODO: implement maybe later controllerfield = field ...
+
+
+        //controller.gameOver
+    }
+
+    // works
+    def requestControllerField = {
+        //controller.field
+        val url = "http://localhost:8081/controller/field"
+        
+        val request = HttpRequest(
+            method =  HttpMethods.GET,
+            uri = url
+        )
+
+        val bodyString = Await.result(Http().singleRequest(request).flatMap(_.entity.toStrict(5.seconds).map(_.data.utf8String)), 5.seconds)
+        val field = jsonToFieldTui(bodyString)
+        //println("field: " + field)
+        field
+    }
+
+    def jsonToFieldTui(jsonString: String): FieldTui = {
+        // T0DO: Replace Field gameComponent with Field Controller
+
+        val json: JsValue = Json.parse(jsonString)
+        val size = (json \ "field" \ "size").get.toString.toInt
+
+        val fieldVectorOption: Option[FieldTui] = Some(FieldTui(MatrixTui(Vector.tabulate(size, size) {(row, col) => "E"}), (MatrixTui(Vector.tabulate(size, size) {(row, col) => "E"}))))
+        val matrixVectorOption: Option[Vector[Vector[String]]] = Some(Vector.tabulate(size, size) {(row, col) => "E"})
+        val hiddenVectorOption: Option[Vector[Vector[String]]] = Some(Vector.tabulate(size, size) {(row, col) => "E"})
+
+        val matrixVector1 = matrixVectorOption match{
+            case Some(matrix) => matrix
+            case None => println("Matrix is not valid"); Vector.tabulate(size, size) {(row, col) => "E"}
+        }
+
+        val updatedMatrixVector: Vector[Vector[String]] = (0 until size * size).foldLeft(matrixVector1) {
+            case (currentMatrix, index) =>
+                val row = (json \ "field" \ "matrix" \\ "row")(index).as[Int]
+                val col = (json \ "field" \ "matrix" \\ "col")(index).as[Int]
+                val cell = (json \ "field" \ "matrix" \\ "cell")(index).as[String]
+                currentMatrix.updated(row, currentMatrix(row).updated(col, cell))
+        }
+
+        val hiddenVector1 = hiddenVectorOption match{
+            case Some(m) => m
+            case None => println("Hidden is not valid"); Vector.tabulate(size, size) {(row, col) => "E"}
+        }
+        
+        val updatedHiddenVector: Vector[Vector[String]] = (0 until size * size).foldLeft(hiddenVector1) {
+            case (currentHidden, index) =>
+                val row = (json \ "field" \ "hidden" \\ "row")(index).as[Int]
+                val col = (json \ "field" \ "hidden" \\ "col")(index).as[Int]
+                val cell = (json \ "field" \ "hidden" \\ "cell")(index).as[String]
+                currentHidden.updated(row, currentHidden(row).updated(col, cell))
+        }
+
+        val finalFieldOption = fieldVectorOption match{
+            case Some(f) => Some(FieldTui(MatrixTui(updatedMatrixVector), MatrixTui(updatedHiddenVector)))
+            case None => println("Field is not valid"); None
+        }
+
+        finalFieldOption.get
+    }
+    
+
+    def requestControllerGame = {
+        //controller.game.asInstanceOf[Game]
+        val url = "http://localhost:8081/controller/game"
+
+        val request = HttpRequest(
+            method =  HttpMethods.GET,
+            uri = url
+        )
+        val bodyString = Await.result(Http().singleRequest(request).flatMap(_.entity.toStrict(5.seconds).map(_.data.utf8String)), 5.seconds)
+        val game = jsonToGameTui(bodyString)
+
+        game
+
+    }
+
+    def jsonToGameTui(jsonString: String): GameTui = {
+        val json: JsValue = Json.parse(jsonString)
+        val status = (json \ "game" \ "status").get.toString
+        val bombs = (json \ "game" \ "bombs").get.toString.toInt
+        val side = (json \ "game" \ "side").get.toString.toInt
+        val time = (json \ "game" \ "time").get.toString.toInt
+        val statusWithoutQuotes = status.replace("\"", "") // \Playing\ -> Playing
+        GameTui(bombs, side, time, statusWithoutQuotes)
+    }
+
+
+    // approved
+    def requestControllerMakeAndPublishDoMove(firstMoveCheck: Boolean, move: Move, game: GameTui) = {
+        //controller.makeAndPublish(controller.doMove, firstMoveCheck, move, game)
+        val newBoard = game.board match {
+            case "Playing" => 0
+            case "Won" => 1
+            case "Lost" => 2    
+        }
+        //val url = "http://localhost:8081/controller/makeAndPublish/doMove?b=" + firstMoveCheck + "bombs=" + game.bombs + "size=" + game.side + "time=" + game.time + "board=" + newBoard
+        //val url = "http://localhost:8081/controller/makeAndPublish/doMove"
+        val url = s"http://localhost:8081/controller/makeAndPublish/doMove?b=$firstMoveCheck&bombs=${game.bombs}&size=${game.side}&time=${game.time}&board=$newBoard"
+
+        val moveRaw = move
+
+        def moveToJson(move: Move): JsValue = {
+            Json.obj("x" -> move.x, "y" -> move.y, "value" -> move.value)
+        }
+
+        val bodyField = moveToJson(moveRaw)
+
+        val request = HttpRequest(
+            method =  HttpMethods.GET,
+            uri = url
+        ).withEntity(HttpEntity(ContentTypes.`application/json`, bodyField.toString()))
+
+        val bodyString = Await.result(Http().singleRequest(request).flatMap(_.entity.toStrict(5.seconds).map(_.data.utf8String)), 5.seconds)
+
+        println(bodyString) // success
+
+    }
+
+    // approved
+    def requestControllerMakeAndPublishPut(move: Move) = {
+        //controller.makeAndPublish(controller.put, move)
+        val url = "http://localhost:8081/controller/makeAndPublish/put"
+
+        val moveRaw = move
+
+        def moveToJson(move: Move): JsValue = {
+            Json.obj("x" -> move.x, "y" -> move.y, "value" -> move.value)
+        }
+
+        val bodyField = moveToJson(moveRaw)
+
+        val request = HttpRequest(
+            method =  HttpMethods.GET,
+            uri = url
+        ).withEntity(HttpEntity(ContentTypes.`application/json`, bodyField.toString()))
+
+        val bodyString = Await.result(Http().singleRequest(request).flatMap(_.entity.toStrict(5.seconds).map(_.data.utf8String)), 5.seconds)
+
+        //println(bodyString) // success
+
+    }
+
+    // approved
     def requestControllerHelpMenue= {
 
         val url = "http://localhost:8081/controller/helpMenu"
@@ -209,31 +450,114 @@ class TUI(using var controller: IController):
 
         val bodyStringHelpMessage = Await.result(Http().singleRequest(request).flatMap(_.entity.toStrict(5.seconds).map(_.data.utf8String)), 5.seconds)
         infoMessages(">> Help Menu in TUI:", bodyStringHelpMessage)
-        update(Event.Help)
+        //update(Event.Help)
         //controller.helpMenu
         //println(// controller.field.toString)
     }
 
+    // working
     def requestControllerCheat: Unit = {
-        controller.cheat
+
+        // // possibly make a mechanism to make a put request an transfert the controller.field and controller.game to ControllerApi late - just keep in mind
+
+        // "http://localhost:8081/controller/cheat"
+        val url = "http://localhost:8081/controller/cheat"
+        // get request
+        val request = HttpRequest(
+            method =  HttpMethods.GET,
+            uri = url
+        )
+
+        val responseFuture: Future[HttpResponse] = Http().singleRequest(request)
+
+        val bodyStringFuture: Future[String] = responseFuture.flatMap { response =>
+            response.entity.toStrict(5.seconds).map(_.data.utf8String)
+        }
+
+        val bodyStringCheat = Await.result(bodyStringFuture, 5.seconds)
+        println(bodyStringCheat)
+        //controller.cheat
     }
 
+    // working
     def requestControllerMakeAndPublishUndo: Unit = {
-        controller.makeAndPublish(controller.undo)
+        //controller.makeAndPublish(controller.undo)
+        val url = "http://localhost:8081/controller/makeAndPublish/undo"
+        val request = HttpRequest(
+            method =  HttpMethods.GET,
+            uri = url
+        )
+
+        val responseFuture: Future[HttpResponse] = Http().singleRequest(request)
+
+        val bodyStringFuture: Future[String] = responseFuture.flatMap { response =>
+            response.entity.toStrict(5.seconds).map(_.data.utf8String)
+        }
+
+        val bodyStringUndo = Await.result(bodyStringFuture, 5.seconds)
+        println(bodyStringUndo)
     }
 
+    // working
     def requestControllerMakeAndPublishRedo: Unit = {
-        controller.makeAndPublish(controller.redo)
+        //controller.makeAndPublish(controller.redo)
+        val url = "http://localhost:8081/controller/makeAndPublish/redo"
+        val request = HttpRequest(
+            method =  HttpMethods.GET,
+            uri = url
+        )
+
+        val responseFuture: Future[HttpResponse] = Http().singleRequest(request)
+
+        val bodyStringFuture: Future[String] = responseFuture.flatMap { response =>
+            response.entity.toStrict(5.seconds).map(_.data.utf8String)
+        }
+
+        val bodyStringUndo = Await.result(bodyStringFuture, 5.seconds)
+        println(bodyStringUndo)
     }
 
+    // working
     def requestControllerSaveGame: Unit = {
-        controller.saveGame
+        //controller.saveGame
+        val url = "http://localhost:8081/controller/saveGame"
+
+        val request = HttpRequest(
+            method =  HttpMethods.GET,
+            uri = url
+        )
+
+        val responseFuture: Future[HttpResponse] = Http().singleRequest(request)
+
+        val bodyStringFuture: Future[String] = responseFuture.flatMap { response =>
+            response.entity.toStrict(5.seconds).map(_.data.utf8String)
+        }
+
+        val bodyStringSave = Await.result(bodyStringFuture, 5.seconds)
+        println(bodyStringSave)
     }
 
+    // working
     def requestControllerLoadGame: Unit = {
-        controller.loadGame
+        //controller.loadGame
+        val url = "http://localhost:8081/controller/loadGame"
+
+        val request = HttpRequest(
+            method =  HttpMethods.GET,
+            uri = url
+        )
+
+        val responseFuture: Future[HttpResponse] = Http().singleRequest(request)
+
+        val bodyStringFuture: Future[String] = responseFuture.flatMap { response =>
+            response.entity.toStrict(5.seconds).map(_.data.utf8String)
+        }
+
+        val bodyStringLoad = Await.result(bodyStringFuture, 5.seconds)
+        println(bodyStringLoad)
     }
 
+    // working
     def requestControllerFieldToString: String = {
         val url = "http://localhost:8081/controller/field/toString"
 
@@ -292,3 +616,58 @@ class TUI(using var controller: IController):
     def unbind = bindFuture
         .flatMap(_.unbind())
         .onComplete(_ => system.terminate())
+
+    
+    def jsonToGameAndField(jsonString: String): (GameTui, FieldTui) = {
+        val json: JsValue = Json.parse(jsonString)
+        val jsonGame: Option[JsValue] = (json \\ "game").headOption
+        val status = (jsonGame.get \ "status").get.toString
+        val bombs = (jsonGame.get \ "bombs").get.toString.toInt
+        val side = (jsonGame.get \ "side").get.toString.toInt
+        val time = (jsonGame.get \ "time").get.toString.toInt
+        val statusWithoutQuotes = status.replace("\"", "")
+        val gameTui = GameTui(bombs, side, time, statusWithoutQuotes)
+
+        val jsonField: Option[JsValue] = (json \\ "field").headOption
+
+        val jsonValue = jsonField.get
+
+        val size = (jsonValue \ "size").get.toString.toInt
+
+        val fieldVectorOption: Option[FieldTui] = Some(FieldTui(MatrixTui(Vector.tabulate(size, size) {(row, col) => "E"}), (MatrixTui(Vector.tabulate(size, size) {(row, col) => "E"}))))
+        val matrixVectorOption: Option[Vector[Vector[String]]] = Some(Vector.tabulate(size, size) {(row, col) => "E"})
+        val hiddenVectorOption: Option[Vector[Vector[String]]] = Some(Vector.tabulate(size, size) {(row, col) => "E"})
+
+        val matrixVector1 = matrixVectorOption match{
+            case Some(matrix) => matrix
+            case None => println("Matrix is not valid"); Vector.tabulate(size, size) {(row, col) => "E"}
+        }
+
+        val updatedMatrixVector: Vector[Vector[String]] = (0 until size * size).foldLeft(matrixVector1) {
+            case (currentMatrix, index) =>
+                val row = (jsonValue \ "matrix" \\ "row")(index).as[Int]
+                val col = (jsonValue \ "matrix" \\ "col")(index).as[Int]
+                val cell = (jsonValue \ "matrix" \\ "cell")(index).as[String]
+                currentMatrix.updated(row, currentMatrix(row).updated(col, cell))
+        }
+
+        val hiddenVector1 = hiddenVectorOption match{
+            case Some(m) => m
+            case None => println("Hidden is not valid"); Vector.tabulate(size, size) {(row, col) => "E"}
+        }
+        
+        val updatedHiddenVector: Vector[Vector[String]] = (0 until size * size).foldLeft(hiddenVector1) {
+            case (currentHidden, index) =>
+                val row = (jsonValue \ "hidden" \\ "row")(index).as[Int]
+                val col = (jsonValue \ "hidden" \\ "col")(index).as[Int]
+                val cell = (jsonValue \ "hidden" \\ "cell")(index).as[String]
+                currentHidden.updated(row, currentHidden(row).updated(col, cell))
+        }
+
+        val finalFieldOption = fieldVectorOption match{
+            case Some(f) => Some(FieldTui(MatrixTui(updatedMatrixVector), MatrixTui(updatedHiddenVector)))
+            case None => println("Field is not valid"); None
+        }
+
+        (gameTui, finalFieldOption.get)
+    }
