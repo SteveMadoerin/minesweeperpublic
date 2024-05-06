@@ -2,7 +2,7 @@ package de.htwg.sa.minesweeper
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.server.Directives.*
+import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.{PathMatcher, PathMatcher1, Route}
 
 import java.net.{HttpURLConnection, URL}
