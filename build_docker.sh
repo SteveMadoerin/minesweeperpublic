@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # List of module directories containing Dockerfiles
-MODULES=("controller" "model" "persistence" "ui") #"gui")
+MODULES=( "model" "persistence" "controller" "ui") #"gui")
 
 # Function to build Dockerfile in a directory
 build_dockerfile() {
