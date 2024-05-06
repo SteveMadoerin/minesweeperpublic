@@ -1,13 +1,14 @@
 package de.htwg.sa.minesweeper.persistence.fileIoComponent.fileIoJsonImpl
 
 import de.htwg.sa.minesweeper.persistence.fileIoComponent.IFileIO
-import de.htwg.sa.minesweeper.model.gameComponent.{IGame, IField}
+import de.htwg.sa.minesweeper.persistence.entity._
+/* import de.htwg.sa.minesweeper.model.gameComponent.{IGame, IField} */
 import scala.io.Source
 import java.io._
 import play.api.libs.json._
 /* import de.htwg.sa.minesweeper.Default.{given}
 import de.htwg.sa.minesweeper.Default */
-import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl._
+/* import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl._ */
 import scala.util.{Try, Success, Failure}
 import de.htwg.sa.minesweeper.persistence.fileIoComponent.config.Default
 

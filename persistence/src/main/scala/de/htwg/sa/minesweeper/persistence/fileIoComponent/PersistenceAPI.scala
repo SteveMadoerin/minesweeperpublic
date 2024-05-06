@@ -16,9 +16,6 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.{Route, StandardRoute}
-import de.htwg.sa.minesweeper.model.gameComponent.IGame
-import de.htwg.sa.minesweeper.model.gameComponent.IField
-
 
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.unmarshalling.FromRequestUnmarshaller
@@ -30,9 +27,10 @@ import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 import akka.http.scaladsl.unmarshalling.{FromEntityUnmarshaller, Unmarshaller}
 import akka.http.scaladsl.model.ContentTypes
-import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl.Game
+/* import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl.Game */
+import de.htwg.sa.minesweeper.persistence.entity._
 import de.htwg.sa.minesweeper.persistence.fileIoComponent.config.Default
-import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl.Field
+/* import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl.Field */
 import scala.io.Source
 import java.nio.file.Files
 import java.nio.file.Paths
@@ -48,14 +46,15 @@ class PersistenceApi(using var file: IFileIO) {
         }
     }
 
+    case class GamePersistence(bombs: Int, side: Int, time: Int, board: String)
+    case class FieldPersistence(matrix: MatrixPersistence[String], hidden: MatrixPersistence[String])
+    case class MatrixPersistence[T] (rows: Vector[Vector[T]])
 
     implicit val system: ActorSystem = ActorSystem()
     implicit val materializer: Materializer = Materializer(system)
     implicit val executionContext: ExecutionContextExecutor = system.dispatcher
 
     val pathToFile = Default.filePathHighScore
-
-    // we net also a put method to save the game
     
     val route: Route = pathPrefix("persistence") {
         get {

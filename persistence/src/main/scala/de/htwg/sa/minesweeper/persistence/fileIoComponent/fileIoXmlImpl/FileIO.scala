@@ -1,10 +1,11 @@
 package de.htwg.sa.minesweeper.persistence.fileIoComponent.fileIoXmlImpl
 
 import de.htwg.sa.minesweeper.persistence.fileIoComponent.IFileIO
-import de.htwg.sa.minesweeper.model.gameComponent.{IGame, IField}
-import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl._
+/* import de.htwg.sa.minesweeper.model.gameComponent.{IGame, IField}
+import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl._ */
 /* import de.htwg.sa.minesweeper.Default.{given}
 import de.htwg.sa.minesweeper.Default */
+import de.htwg.sa.minesweeper.persistence.entity._
 import de.htwg.sa.minesweeper.persistence.fileIoComponent.config.Default
 import scala.xml._
 import scala.compiletime.ops.string
