@@ -1,7 +1,7 @@
 package de.htwg.sa.minesweeper.controller
 
 import de.htwg.sa.minesweeper.controller.controllerComponent.IController
-import de.htwg.sa.minesweeper.ControllerApi
+import de.htwg.sa.minesweeper.controller.ControllerApi
 import de.htwg.sa.minesweeper.controller.controllerComponent.config.Default.{given}
 import de.htwg.sa.minesweeper.controller.controllerComponent.config.Default
 

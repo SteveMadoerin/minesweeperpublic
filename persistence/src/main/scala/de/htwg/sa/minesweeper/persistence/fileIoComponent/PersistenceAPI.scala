@@ -135,6 +135,8 @@ class PersistenceApi(using var file: IFileIO) {
             case _ => JsArray()
         }
     }
+
+    def start: Future[Nothing] = Await.result(Future.never, Duration.Inf)
     
 
 }

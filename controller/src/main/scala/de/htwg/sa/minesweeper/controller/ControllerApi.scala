@@ -1,4 +1,4 @@
-package de.htwg.sa.minesweeper
+package de.htwg.sa.minesweeper.controller
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
