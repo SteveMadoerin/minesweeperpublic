@@ -28,10 +28,11 @@ import scala.util.Failure
 import scala.util.Success
 import scala.util.matching.Regex
 import scala.util.Try
-import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl.Game
+
+/* import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl.Game
 import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl.Playfield
 import de.htwg.sa.minesweeper.model.gameComponent.config.Default
-import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl.Decider
+import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl.Decider */
 import scala.compiletime.ops.boolean
 import play.api.libs.json.Json
 import de.htwg.sa.minesweeper.util.Move
@@ -40,37 +41,37 @@ import de.htwg.sa.minesweeper.entity.GameDTO
 
 
 class ControllerApi(using var controller: IController) extends Observer:
-    controller.add(this)
+  controller.add(this)
     
     
-    implicit val system: ActorSystem = ActorSystem()
-    implicit val materializer: Materializer = Materializer(system)
-    implicit val executionContext: ExecutionContextExecutor = system.dispatcher
+  implicit val system: ActorSystem = ActorSystem()
+  implicit val materializer: Materializer = Materializer(system)
+  implicit val executionContext: ExecutionContextExecutor = system.dispatcher
 
-    @Override def update(e: Event): Boolean = 
-        e match
-            case Event.Start => true
-            case Event.NewGame => true
-            case Event.Next => true
-            case Event.Load => true
-            case Event.GameOver => true
-            case Event.Exit => true
-            case _ => false
+  @Override def update(e: Event): Boolean = 
+      e match
+          case Event.Start => true
+          case Event.NewGame => true
+          case Event.Next => true
+          case Event.Load => true
+          case Event.GameOver => true
+          case Event.Exit => true
+          case _ => false
 
-    def infoMessages(text: String*) = {
-        text.foreach(println)
-    }
+  def infoMessages(text: String*) = {
+      text.foreach(println)
+  }
 
-    def jsonToMove(json: JsValue): Move = {
-      val x = (json \ "x").get.toString.toInt
-      val y = (json \ "y").get.toString.toInt
-      val action1 = (json \ "value").get.toString
-      val action2 = action1.replace("\"", "")
-      Move(action2, x, y)
-    }
+  def jsonToMove(json: JsValue): Move = {
+    val x = (json \ "x").get.toString.toInt
+    val y = (json \ "y").get.toString.toInt
+    val action1 = (json \ "value").get.toString
+    val action2 = action1.replace("\"", "")
+    Move(action2, x, y)
+  }
 
     
-    Http().newServerAt("localhost", 8081).bind(
+  Http().newServerAt("localhost", 8081).bind(
     concat(
       pathPrefix("controller") {
         concat(
@@ -220,6 +221,8 @@ class ControllerApi(using var controller: IController) extends Observer:
       }
     )
   )
+
+  def start: Future[Nothing] = Await.result(Future.never, Duration.Inf)
 
 
 
