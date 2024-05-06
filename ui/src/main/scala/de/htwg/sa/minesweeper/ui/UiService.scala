@@ -5,6 +5,9 @@ import de.htwg.sa.minesweeper.ui._
 
 object UiService:
 
-  @main def main(): Unit = TUI().start // on Port 8081 //Controller.().start
+  @main def main(): Unit = 
+    //TUI().start // on Port 8081 //Controller.().start
+    TUI().run 
+
 
 end UiService
