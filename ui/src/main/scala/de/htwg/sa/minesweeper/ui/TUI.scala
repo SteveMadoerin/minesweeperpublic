@@ -1,8 +1,8 @@
 package de.htwg.sa.minesweeper.ui
 
 
-import de.htwg.sa.minesweeper.controller.controllerComponent.IController
-import de.htwg.sa.minesweeper.util.{Observer, Move, Event}
+/* import de.htwg.sa.minesweeper.controller.controllerComponent.IController
+import de.htwg.sa.minesweeper.util.{Observer, Move, Event} */
 
 import scala.io.StdIn.readLine
 import scala.util.{Try, Success, Failure}
@@ -40,7 +40,7 @@ import scala.util.{Try, Success, Failure}
 import akka.http.scaladsl.unmarshalling.Unmarshal
 import scala.concurrent.Future
 import scala.concurrent.duration._
-import de.htwg.sa.minesweeper.util.RestUtil
+//import de.htwg.sa.minesweeper.util.RestUtil
 import play.api.libs.json.JsArray
 import play.api.libs.json.Format
 import play.api.libs.json.JsResult
@@ -59,13 +59,13 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.{Route, StandardRoute}
-import de.htwg.sa.minesweeper.ui.config.Default.{given}
+//import de.htwg.sa.minesweeper.ui.config.Default.{given}
 import scala.concurrent.ExecutionContextExecutor
 import scala.util.Failure
 import scala.util.Success
 import scala.util.matching.Regex
 import scala.util.Try
-import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl.Game
+//import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl.Game
 import scala.languageFeature.reflectiveCalls
 
 class TUI():
@@ -637,3 +637,18 @@ class TUI():
 
         (gameTui, finalFieldOption.get)
     }
+
+    case class Move(value: String, x: Int, y: Int)
+
+    enum Event:
+        case NewGame
+        case Start
+        case Next
+        case GameOver
+        case Cheat
+        case Help
+        case Input
+        case Load
+        case Save
+        case SaveTime
+        case Exit

@@ -29,6 +29,10 @@ import scala.util.Success
 import scala.util.matching.Regex
 import scala.util.Try
 
+import scala.concurrent.duration.Duration
+
+import scala.concurrent.Future
+
 /* import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl.Game
 import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl.Playfield
 import de.htwg.sa.minesweeper.model.gameComponent.config.Default
@@ -38,6 +42,7 @@ import play.api.libs.json.Json
 import de.htwg.sa.minesweeper.util.Move
 import play.api.libs.json.JsValue
 import de.htwg.sa.minesweeper.entity.GameDTO
+import scala.concurrent.Await
 
 
 class ControllerApi(using var controller: IController) extends Observer:

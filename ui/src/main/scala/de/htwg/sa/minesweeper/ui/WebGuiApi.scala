@@ -1,4 +1,4 @@
-package de.htwg.sa.minesweeper.ui
+/* package de.htwg.sa.minesweeper.ui
 
 
 import de.htwg.sa.minesweeper.controller.controllerComponent.IController
@@ -228,3 +228,4 @@ class WebGuiApi(using var controller: IController) extends Observer{
     }
 
 }
+ */
