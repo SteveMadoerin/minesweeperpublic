@@ -638,6 +638,9 @@ class TUI():
         (gameTui, finalFieldOption.get)
     }
 
+    
+    def start: Future[Nothing] = Await.result(Future.never, Duration.Inf)
+    
     case class Move(value: String, x: Int, y: Int)
 
     enum Event:

@@ -248,6 +248,8 @@ class ModelApi(using var game: IGame, var field: IField){
     def unbind = bindFuture
         .flatMap(_.unbind())
         .onComplete(_ => system.terminate())
+
+    def start: Future[Nothing] = Await.result(Future.never, Duration.Inf)
   
 
 }

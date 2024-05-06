@@ -226,6 +226,5 @@ class WebGuiApi(using var controller: IController) extends Observer{
         html.append("</table>")
         html.toString()
     }
-
 }
  */
