@@ -1,0 +1,25 @@
+services:
+
+  dicecup:
+    container_name: model
+    image: model-image:latest
+    network_mode: host
+
+
+  field:
+    container_name: controller
+    image: controller-image:latest
+    network_mode: host
+
+
+  fileIO:
+    container_name: persistence
+    image: persistence-image:latest
+    network_mode: host
+
+
+  game:
+    container_name: ui
+    image: ui-image:latest
+    network_mode: host
+
