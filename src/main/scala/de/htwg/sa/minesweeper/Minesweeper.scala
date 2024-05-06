@@ -28,7 +28,9 @@ import de.htwg.sa.minesweeper.ui.WebGuiApi
 object Minesweeper {
     
     def main(args: Array[String]): Unit = {
+        System.exit(666)
 
+        /*
         if (args.length >= 1){
             return
         } else {
@@ -42,6 +44,7 @@ object Minesweeper {
             GUI().run // on Port 8087
             TUI().run // on Port 8088
         }
+        */
         
     }
 }
