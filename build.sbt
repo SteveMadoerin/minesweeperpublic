@@ -1,9 +1,6 @@
 import org.scoverage.coveralls.GitHubActions
 
 ThisBuild / scalaVersion := "3.3.1"
-ThisBuild / version := "0.1.0-SNAPSHOT"
-ThisBuild / organization := "de.htwg.sa"
-ThisBuild / organizationName := "minesweeper"
 
 
 lazy val root: Project = (project in file(""))
@@ -17,37 +14,12 @@ lazy val root: Project = (project in file(""))
 
 
 lazy val model = (project in file("model"))
-    .settings(
-        name := "model",
-        version:= "0.1.0-SNAPSHOT",
-        commonSettings
-    )
 
 lazy val persistence = (project in file("persistence"))
-    .dependsOn(model)
-    .aggregate(model)
-    .settings(
-        name := "persistence",
-        version:= "0.1.0-SNAPSHOT",
-        commonSettings
-    )
 
 lazy val controller = (project in file("controller"))
-    .dependsOn(model, persistence)
-    .aggregate(model, persistence)
-    .settings(
-        name := "controller",
-        version:= "0.1.0-SNAPSHOT",
-        commonSettings
-    )
 
 lazy val ui = (project in file("ui"))
-    .dependsOn(model, persistence, controller)
-    .aggregate(model, persistence, controller)
-    .settings(
-        name := "ui",
-        commonSettings,
-    )
 
 
 lazy val commonSettings = Seq(
