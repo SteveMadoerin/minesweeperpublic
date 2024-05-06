@@ -636,4 +636,6 @@ class TUI():
         }
 
         (gameTui, finalFieldOption.get)
+
+        def start: Future[Nothing] = Await.result(Future.never, Duration.Inf)
     }
