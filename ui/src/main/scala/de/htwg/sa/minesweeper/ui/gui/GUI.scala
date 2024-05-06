@@ -1,4 +1,4 @@
-package de.htwg.sa.minesweeper.ui.gui
+/* package de.htwg.sa.minesweeper.ui.gui
 
 import de.htwg.sa.minesweeper.controller.controllerComponent.IController
 import de.htwg.sa.minesweeper.util.{Observer, Event, Move}
@@ -526,4 +526,4 @@ class GUI(using var controller: IController) extends Frame:
     
     case class DigitDisplay(leftDigit: Int, middleDigit: Int, rightDigit: Int)
 
-end GUI
+end GUI */
