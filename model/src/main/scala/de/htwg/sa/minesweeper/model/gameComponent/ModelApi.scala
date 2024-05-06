@@ -1,7 +1,5 @@
 package de.htwg.sa.minesweeper.model.gameComponent
-
-import de.htwg.sa.minesweeper.model.gameComponent.IGame
-import de.htwg.sa.minesweeper.model.gameComponent.IField
+import de.htwg.sa.minesweeper.model.gameComponent.{IGame, IField}
 
 import akka.actor.ActorSystem
 import akka.stream.{ActorMaterializer, Materializer}
@@ -23,6 +21,9 @@ import de.htwg.sa.minesweeper.model.gameComponent.config.Default
 import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl.Decider
 import scala.compiletime.ops.boolean
 import play.api.libs.json.Json
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
+import scala.concurrent.Future
 
 class ModelApi(using var game: IGame, var field: IField){
     

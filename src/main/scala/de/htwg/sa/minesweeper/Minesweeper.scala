@@ -1,10 +1,10 @@
 package de.htwg.sa.minesweeper
 
-import de.htwg.sa.minesweeper.ui.TUI
+/* import de.htwg.sa.minesweeper.ui.TUI
 import de.htwg.sa.minesweeper.ui.gui.GUI
-import de.htwg.sa.minesweeper.ui.config.Default.{given}
-import de.htwg.sa.minesweeper.model.gameComponent.ModelApi
-import de.htwg.sa.minesweeper.persistence.fileIoComponent.PersistenceApi
+import de.htwg.sa.minesweeper.ui.config.Default.{given} */
+/* import de.htwg.sa.minesweeper.model.gameComponent.ModelApi
+import de.htwg.sa.minesweeper.persistence.fileIoComponent.PersistenceApi */
 
 import akka.actor._
 import scala.concurrent.ExecutionContextExecutor
@@ -23,7 +23,7 @@ import akka.stream.ActorMaterializer
 import akka.actor._
 import akka.actor.TypedActor.dispatcher                                                                                                            
 import concurrent.ExecutionContext.Implicits.global   
-import de.htwg.sa.minesweeper.ui.WebGuiApi
+/* import de.htwg.sa.minesweeper.ui.WebGuiApi */
 
 object Minesweeper {
     

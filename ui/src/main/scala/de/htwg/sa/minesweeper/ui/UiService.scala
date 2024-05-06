@@ -1,7 +1,7 @@
 package de.htwg.sa.minesweeper.ui
 
 import de.htwg.sa.minesweeper.ui._
-import de.htwg.sa.minesweeper.ui.config.Default.{given}
+/* import de.htwg.sa.minesweeper.ui.config.Default.{given} */
 
 object UiService:
 
