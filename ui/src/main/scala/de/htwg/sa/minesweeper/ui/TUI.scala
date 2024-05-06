@@ -82,7 +82,7 @@ class TUI():
     case class MatrixTui[T] (rows: Vector[Vector[T]])
 
     var controllerGame: GameTui = requestControllerGame
-    var controllerField: FieldTui = requestControllerField // TODO: implement
+    var controllerField: FieldTui = requestControllerField
 
     def run = 
         infoMessages("Welcome to Minesweeper")
@@ -94,7 +94,7 @@ class TUI():
             case Event.NewGame  => infoMessages(requestControllerFieldToString); firstMoveCheck = true; true
             case Event.Load => infoMessages(requestControllerFieldToString); firstMoveCheck = false; true
             case Event.Start | Event.Next  => infoMessages(requestControllerFieldToString); true
-            case Event.GameOver => infoMessages(s"The Game is ${controllerGame.board} !", requestControllerFieldToString); true
+            case Event.GameOver => infoMessages(s"The Game is ${requestControllerGame.board} !", requestControllerFieldToString); true
             case Event.Exit => System.exit(0); false
             case Event.Help => /* requestControllerHelpMenue; */infoMessages(requestControllerFieldToString); true
             case _ => false
@@ -177,7 +177,7 @@ class TUI():
         infoMessages("Do you want to play again? (yes/no)")
         readLine match
             case "yes" => run
-            case "no" => requestExit // TODO: implement
+            case "no" => requestExit
             case _ => infoMessages(">> Invalid Input");
     
     def charArrayToInt(s: Array[Char]): Try[(Int, Int)] = Try(((s(1).toString + s(2).toString).toInt, (s(3).toString + s(4).toString).toInt))
@@ -356,7 +356,6 @@ class TUI():
         val game = jsonToGameTui(bodyString)
 
         game
-
     }
 
     def jsonToGameTui(jsonString: String): GameTui = {

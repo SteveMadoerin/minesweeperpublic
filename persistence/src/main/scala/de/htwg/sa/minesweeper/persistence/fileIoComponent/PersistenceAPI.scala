@@ -46,9 +46,9 @@ class PersistenceApi(using var file: IFileIO) {
         }
     }
 
-    case class GamePersistence(bombs: Int, side: Int, time: Int, board: String)
+/*     case class GamePersistence(bombs: Int, side: Int, time: Int, board: String)
     case class FieldPersistence(matrix: MatrixPersistence[String], hidden: MatrixPersistence[String])
-    case class MatrixPersistence[T] (rows: Vector[Vector[T]])
+    case class MatrixPersistence[T] (rows: Vector[Vector[T]]) */
 
     implicit val system: ActorSystem = ActorSystem()
     implicit val materializer: Materializer = Materializer(system)
@@ -109,12 +109,6 @@ class PersistenceApi(using var file: IFileIO) {
             }
         }
     }
-
-    /*      val request = Post("/users").withEntity(userEntity)
-         GET     /user/{id}            Application.user
-        POST    /user/                Application.createUser
-        PUT     /user/{id}            Application.updateUser
-        DELETE  /user/{id}            Application.deleteUser */
 
     val bindFuture = Http().bindAndHandle(route, "localhost", 8083)
 

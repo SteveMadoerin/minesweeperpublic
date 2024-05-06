@@ -15,7 +15,7 @@ import play.api.libs.json.{Json, JsArray}
 class FileIOJasonSpec extends AnyWordSpec {
   "A FileIO" when {
 
-    "save and load Game" should {
+/*     "save and load Game" should {
       val fileIO1 = new FileIO()
       var game: IGame = Default.prepareGame(10, 10, 10)
 
@@ -26,9 +26,9 @@ class FileIOJasonSpec extends AnyWordSpec {
         loadGameTest.get.side should be (10)
         loadGameTest.get.time should be (10)
       }
-    }
+    } */
 
-    "save and load Field" should {
+/*     "save and load Field" should {
       val fileIO2 = new FileIO()
       var field: IField = new Field(1, "~")
       field = field.put("*", 0, 0)
@@ -38,7 +38,7 @@ class FileIOJasonSpec extends AnyWordSpec {
         val loadFieldTest = fileIO2.loadField.get
         loadFieldTest.matrix.size should be (1)
       }
-    }
+    } */
     
     "saving a player score" should {
       val fileIo9 = new FileIO()

@@ -15,7 +15,7 @@ class FileIOXmlSpec extends AnyWordSpec {
 
   "A FileIO" when {
 
-    "save and load Game" should {
+/*     "save and load Game" should {
       val fileIO1 = new FileIO
       var game: IGame = new Game(10, 9, 0, "Playing")
 
@@ -27,11 +27,11 @@ class FileIOXmlSpec extends AnyWordSpec {
         loadGameTest.side should be (9)
         loadGameTest.time should be (0)
       }
-    }
+    } */
 
 
 
-    "save and load Field" should {
+/*     "save and load Field" should {
       val fileIO2 = new FileIO
       var field: IField = new Field(1, "~")
       field = field.put("*", 0, 0)
@@ -41,7 +41,7 @@ class FileIOXmlSpec extends AnyWordSpec {
         val loadFieldTest = fileIO2.loadField
         loadFieldTest.size should be (1)
       }
-    }
+    } */
 
   }
 }

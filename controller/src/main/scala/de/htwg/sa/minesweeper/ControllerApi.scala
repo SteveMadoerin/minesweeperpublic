@@ -47,13 +47,14 @@ class ControllerApi(using var controller: IController) extends Observer:
     implicit val materializer: Materializer = Materializer(system)
     implicit val executionContext: ExecutionContextExecutor = system.dispatcher
 
-
-    // update TUI and GUI when an event occurs ->
     @Override def update(e: Event): Boolean = 
         e match
-            case Event.NewGame | Event.Start | Event.Next | Event.Load => infoMessages(controller.field.toString()); true
-            case Event.GameOver => infoMessages(s"The Game is ${controller.game.board} !", controller.field.toString()); true
-            case Event.Exit => System.exit(0); false
+            case Event.Start => true
+            case Event.NewGame => true
+            case Event.Next => true
+            case Event.Load => true
+            case Event.GameOver => true
+            case Event.Exit => true
             case _ => false
 
     def infoMessages(text: String*) = {
@@ -79,10 +80,9 @@ class ControllerApi(using var controller: IController) extends Observer:
                 complete(controller.toString)
               },
               path("controller") {
-                complete(controller.toString()/* controller.toJson.toString */)
+                complete(controller.toString())
               },
               path("field") {
-                /* complete(RestUtil.fieldToJson(controller.field).toString) */
                 complete(RestUtil.fieldDtoToJson(controller.field).toString)
               },
               path("gameOver") {
@@ -130,7 +130,6 @@ class ControllerApi(using var controller: IController) extends Observer:
                           complete("success doMove")
                       }
                     }
-                    //complete("controller.makeAndPublish(controller.doMove(b, move, game, field))" ) // "open"
                   },
                   path("put") {
                     entity(as[String]) { moveEntitiy =>

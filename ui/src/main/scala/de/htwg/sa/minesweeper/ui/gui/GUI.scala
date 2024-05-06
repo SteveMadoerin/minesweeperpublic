@@ -56,7 +56,6 @@ import scala.util.{Try, Success, Failure}
 import akka.http.scaladsl.unmarshalling.Unmarshal
 import scala.concurrent.Future
 import scala.concurrent.duration._
-import de.htwg.sa.minesweeper.util.RestUtil
 import play.api.libs.json.JsArray
 import play.api.libs.json.Format
 import play.api.libs.json.JsResult
@@ -94,7 +93,12 @@ class GUI(using var controller: IController) extends Frame:
     implicit val materializer: Materializer = Materializer(system)
     implicit val executionContext: ExecutionContextExecutor = system.dispatcher
 
-    private var boardBounds = controller.field.matrix.rows.size-1
+    case class GameTui(bombs: Int, side: Int, time: Int, board: String)
+    case class FieldTui(matrix: MatrixTui[String], hidden: MatrixTui[String])
+    case class MatrixTui[T] (rows: Vector[Vector[T]])
+
+    private var boardBounds = /* controller.field.matrix.rows.size-1 */ RestUtil.requestBoardBounds // TODO: implement
+    
     private var firstMoveControl = new AtomicBoolean(true)
     private var timerStarted: Boolean = false
     private var timeLoaded: Boolean = false
