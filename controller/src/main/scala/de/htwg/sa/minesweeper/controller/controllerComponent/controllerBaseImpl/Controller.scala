@@ -517,7 +517,7 @@ class Controller() extends IController with Observable:
         println(result) */
 
         // _________________________ NOTIFY GUI _________________________
-        val uri2 = s"http://localhost:8087/gui/notify" + "?event=" + event
+/*         val uri2 = s"http://localhost:8087/gui/notify" + "?event=" + event
 
         val request2 = HttpRequest(
             method =  HttpMethods.PUT,
@@ -527,7 +527,7 @@ class Controller() extends IController with Observable:
         val responseFuture2: Future[HttpResponse] = Http().singleRequest(request2)
         val bodyFieldFuture2: Future[String] = responseFuture2.flatMap { response =>
             response.entity.toStrict(5.seconds).map(_.data.utf8String)
-        }
+        } */
 /*         val result2 = Await.result(bodyFieldFuture2, 5.seconds)
         println(result2) */
     }

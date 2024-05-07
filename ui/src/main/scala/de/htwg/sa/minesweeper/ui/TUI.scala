@@ -639,8 +639,10 @@ class TUI():
     }
 
     
-    def start: Future[Nothing] = Await.result(Future.never, Duration.Inf)
-    
+    def start: Future[Nothing] = 
+        run
+        Await.result(Future.never, Duration.Inf)
+
     case class Move(value: String, x: Int, y: Int)
 
     enum Event:

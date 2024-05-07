@@ -7,7 +7,9 @@ object UiService:
 
   @main def main(): Unit = 
     //TUI().start // on Port 8081 //Controller.().start
-    TUI().run 
+    //TUI().run 
+    TUI().bindFuture
+    TUI().run
 
 
 end UiService

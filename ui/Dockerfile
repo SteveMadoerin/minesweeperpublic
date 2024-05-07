@@ -4,6 +4,6 @@ WORKDIR /app
 
 ADD . /app
 
-EXPOSE 8080
+EXPOSE 8088
 
 CMD sbt run

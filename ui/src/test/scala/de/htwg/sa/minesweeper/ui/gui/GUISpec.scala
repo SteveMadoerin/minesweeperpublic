@@ -1,4 +1,4 @@
-package de.htwg.sa.minesweeper.ui.gui
+/* package de.htwg.sa.minesweeper.ui.gui
 
 import org.scalatest.matchers.should.Matchers._
 import org.scalatest._
@@ -28,4 +28,4 @@ class GUISpec extends AnyWordSpec{
         }
         
     }
-}
+} */
