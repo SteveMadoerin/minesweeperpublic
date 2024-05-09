@@ -110,11 +110,24 @@ class PersistenceApi(using var file: IFileIO) {
         }
     }
 
-    val bindFuture = Http().bindAndHandle(route, "localhost", 8083)
+    def start(): Unit = {
+        val bindFuture = Http().newServerAt("0.0.0.0", 9083).bind(route)
+
+        bindFuture.onComplete {
+            case Success(binding) =>
+                println("Server online at http://localhost:9083/")
+                complete(binding.toString)
+            case Failure(exception) =>
+                println(s"An error occurred: $exception")
+                complete("fail binding")
+        }
+    }
+
+/*    val bindFuture = Http().bindAndHandle(route, "localhost", 9083)
 
     def unbind = bindFuture
         .flatMap(_.unbind())
-        .onComplete(_ => system.terminate())
+        .onComplete(_ => system.terminate())*/
 
     def loadPlayerScoresToJson(filePath: String): JsValue = {
 

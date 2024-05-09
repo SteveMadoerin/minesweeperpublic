@@ -55,7 +55,7 @@ object RestUtil{
         // take care in the uri -> this is only valid for Command.scala replacement
         val request2 = HttpRequest(
             method =  HttpMethods.PUT,
-            uri = s"http://localhost:8082/model/field/showInvisibleCell?y=${x}&x=${y}" ,
+            uri = s"http://localhost:9082/model/field/showInvisibleCell?y=${x}&x=${y}" ,
             entity = HttpEntity(ContentTypes.`application/json`, jsonFileContent)
         )
 
@@ -82,7 +82,7 @@ object RestUtil{
 
         val request2 = HttpRequest(
             method =  HttpMethods.PUT,
-            uri = s"http://localhost:8082/model/field/put?symbol=$extractedSymbolNew&x=${x}&y=${y}",
+            uri = s"http://localhost:9082/model/field/put?symbol=$extractedSymbolNew&x=${x}&y=${y}",
             entity = HttpEntity(ContentTypes.`application/json`, jsonFileContent)
         )
 
@@ -114,7 +114,7 @@ object RestUtil{
         // then we need to send x and y as a parameter
         val request = HttpRequest(
             method =  HttpMethods.PUT,
-            uri = s"http://localhost:8082/model/field/recursiveOpen?x=${x}&y=${y}",
+            uri = s"http://localhost:9082/model/field/recursiveOpen?x=${x}&y=${y}",
             entity = HttpEntity(ContentTypes.`application/json`, jsonFileContent)
         )
 

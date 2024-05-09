@@ -1,95 +1,34 @@
-package de.htwg.sa.minesweeper.ui.gui
+/*package de.htwg.sa.minesweeper.ui.gui
 
-import de.htwg.sa.minesweeper.controller.controllerComponent.IController
-import de.htwg.sa.minesweeper.util.{Observer, Event, Move}
-
-import de.htwg.sa.minesweeper.ui.config.Default.{given}
-import de.htwg.sa.minesweeper.ui.config.Default
-import scala.swing.event.MouseClicked
-import scala.swing._
-import scala.swing.Button
-import scala.swing.Dialog._
-import scala.io.Source
-import scala.util.Try
-import javax.swing.{ImageIcon, Icon}
-import javax.swing.border.{Border, MatteBorder, BevelBorder}
-import javax.swing.BorderFactory
-import java.awt.image.BufferedImage
-import java.awt.RenderingHints
-import java.awt.event.{ActionListener, ActionEvent, MouseEvent}
-import java.util.concurrent.atomic._
-import java.util.{Timer, TimerTask}
-import java.io.{File, PrintWriter, FileWriter}
-
-import scala.util.{Try, Success, Failure}
-
-import scala.compiletime.ops.string
-import scala.util.matching.Regex
-
-import play.api.libs.json.{JsValue, Json}
-import scala.io.Source
-import akka.http.scaladsl.model.HttpRequest
-import akka.http.scaladsl.model.HttpMethods
-import akka.http.scaladsl.model.HttpEntity
-import akka.http.scaladsl.model.ContentTypes
-import akka.http.scaladsl.Http
-import scala.concurrent.Future
-import akka.http.scaladsl.model.HttpResponse
-import scala.concurrent.duration._
-import scala.concurrent.ExecutionContext
-import scala.concurrent.ExecutionContextExecutor
-import akka.actor.ActorSystem
-import akka.stream.Materializer
-import scala.concurrent.Await
-import play.api.libs.json.JsObject
-import play.api.libs.json.JsString
-import scala.annotation.internal.Body
-import akka.util.ByteString
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.model._
-import akka.stream.ActorMaterializer
-import scala.concurrent.Future
-import scala.util.{Failure, Success}
-
-import scala.util.{Try, Success, Failure}
-import akka.http.scaladsl.unmarshalling.Unmarshal
-import scala.concurrent.Future
-import scala.concurrent.duration._
-import play.api.libs.json.JsArray
-import play.api.libs.json.Format
-import play.api.libs.json.JsResult
-import play.api.libs.json.JsSuccess
-import play.api.libs.json.JsError
-
-import java.nio.file.{Files, Paths}
-import scala.util.{Failure, Success}
-
-import akka.actor.ActorSystem
-import akka.stream.{ActorMaterializer, Materializer}
-import scala.concurrent.ExecutionContext
+import akka.http.scaladsl.server.Directives.*
 import akka.http.scaladsl.server.Route
-import akka.http.scaladsl.server.directives.RouteDirectives
-import akka.http.scaladsl.Http
-import akka.http.scaladsl.model.{ContentTypes, HttpEntity}
-import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.{Route, StandardRoute}
-import de.htwg.sa.minesweeper.ui.config.Default.{given}
+import akka.stream.Materializer
+import de.htwg.sa.minesweeper.controller.controllerComponent.IController
+import de.htwg.sa.minesweeper.entity.{FieldDTO, GameDTO, MatrixDTO}
+import de.htwg.sa.minesweeper.ui.config.Default
+import de.htwg.sa.minesweeper.util.{Event, Move}
+
+import java.awt.RenderingHints
+import java.awt.event.MouseEvent
+import java.awt.image.BufferedImage
+import java.util.concurrent.atomic.*
+import java.util.{Timer, TimerTask}
+import javax.swing.{BorderFactory, ImageIcon}
+import javax.swing.border.Border
 import scala.concurrent.ExecutionContextExecutor
-import scala.util.Failure
-import scala.util.Success
-import scala.util.matching.Regex
-import scala.util.Try
-import de.htwg.sa.minesweeper.entity.MatrixDTO
-import de.htwg.sa.minesweeper.entity.GameDTO
-import de.htwg.sa.minesweeper.entity.FieldDTO
+import scala.swing.*
+import scala.swing.Dialog.*
+import scala.swing.event.MouseClicked
+import scala.util.{Failure, Success}
 
 
 
 class GUI(using var controller: IController) extends Frame:
 
     //controller.add(this)
-    implicit val system: ActorSystem = ActorSystem()
+    implicit val system: ActorSystem = ActorSystem("gui")
     implicit val materializer: Materializer = Materializer(system)
     implicit val executionContext: ExecutionContextExecutor = system.dispatcher
 
@@ -324,12 +263,25 @@ class GUI(using var controller: IController) extends Frame:
         
     }
 
+    def start(): Unit = {
+        val bindFuture = Http(system).newServerAt("0.0.0.0", 9087).bind(route)
 
-    val bindFuture = Http().bindAndHandle(route, "localhost", 8087)
+        bindFuture.onComplete {
+            case Success(binding) =>
+                println("Server online at http://localhost:9088/")
+                complete(binding.toString)
+            case Failure(exception) =>
+                println(s"An error occurred: $exception")
+                complete("fail binding")
+        }
+    }
+
+
+/*    val bindFuture = Http().bindAndHandle(route, "localhost", 9087)
 
     def unbind = bindFuture
         .flatMap(_.unbind())
-        .onComplete(_ => system.terminate())
+        .onComplete(_ => system.terminate())*/
 
     def showHelp: Unit = {
         val text = 
@@ -370,11 +322,18 @@ class GUI(using var controller: IController) extends Frame:
         resizedImg
     }
 
+    // C:\Playground\minesweeperpublic\src\main\resources\time0.jpeg
+    //s"C:/Playground/minesweeperpublic/src/main/resources/time$i.jpeg"
     def showDigits(kind: Int): ImageIcon = {
         val imagePaths = (0 to 9).map(i => i -> s"src/main/resources/time$i.jpeg").toMap
         val imagePath = imagePaths.getOrElse(kind, "src/main/resources/time-.jpeg")
         new ImageIcon(imagePath)
     }
+/*    def showDigits(kind: Int): ImageIcon = {
+        val imagePaths = (0 to 9).map(i => i -> s"C:/Playground/minesweeperpublic/src/main/resources/time$i.jpeg").toMap
+        val imagePath = imagePaths.getOrElse(kind, "C:/Playground/minesweeperpublic/src/main/resources/time-.jpeg")
+        new ImageIcon(imagePath)
+    }*/
 
     def showSmiley(kind: String): ImageIcon =
         val imagePath = s"src/main/resources/face$kind.jpeg"
@@ -526,4 +485,4 @@ class GUI(using var controller: IController) extends Frame:
     
     case class DigitDisplay(leftDigit: Int, middleDigit: Int, rightDigit: Int)
 
-end GUI
+end GUI*/

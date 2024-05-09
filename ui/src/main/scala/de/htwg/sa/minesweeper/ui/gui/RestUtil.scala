@@ -60,7 +60,7 @@ object RestUtil {
     // for TUI and GUI
     def requestControllerField = {
         //controller.field
-        val url = "http://localhost:8081/controller/field"
+        val url = "http://localhost:9081/controller/field"
         
         val request = HttpRequest(
             method =  HttpMethods.GET,

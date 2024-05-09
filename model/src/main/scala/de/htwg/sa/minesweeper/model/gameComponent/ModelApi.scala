@@ -44,7 +44,7 @@ class ModelApi(using var game: IGame, var field: IField){
         get {
             path("game") {
                 // TODO:   
-                val game = new Game(10, 9, 0, "Playing")
+                val game = Game(10, 9, 0, "Playing")
                 complete(HttpEntity(ContentTypes.`application/json`,game.gameToJson))
             } ~
             path("game"/"helpMessage") {
@@ -243,11 +243,24 @@ class ModelApi(using var game: IGame, var field: IField){
         }
     }
 
-    val bindFuture = Http().bindAndHandle(route, "localhost", 8082)
+    //val bindFuture = Http().newServerAt("0.0.0.0", 9082).bind(route)
+    //val bindFuture = Http().bindAndHandle(route, "localhost", 9082)
+    def start(): Unit = {
+        val bindFuture = Http().newServerAt("0.0.0.0", 9082).bind(route)
 
-    def unbind = bindFuture
+        bindFuture.onComplete {
+            case Success(binding) =>
+                println("Server online at http://localhost:9082/")
+                complete(binding.toString)
+            case Failure(exception) =>
+                println(s"An error occurred: $exception")
+                complete("fail binding")
+        }
+    }
+
+/*    def unbind = bindFuture
         .flatMap(_.unbind())
-        .onComplete(_ => system.terminate())
+        .onComplete(_ => system.terminate())*/
   
 
 }

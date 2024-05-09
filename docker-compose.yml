@@ -1,0 +1,36 @@
+services:
+  model:
+    container_name: model
+    image: model-image:latest
+    network_mode: host
+    stdin_open: true
+    tty: true
+  #    ports:
+  #      - 9082:9082
+
+  persistence:
+    container_name: persistence
+    image: persistence-image:latest
+    network_mode: host
+    stdin_open: true
+    tty: true
+  #    ports:
+  #      - 9083:9083
+
+  controller:
+    container_name: controller
+    image: controller-image:latest
+    network_mode: host
+    stdin_open: true
+    tty: true
+  #    ports:
+  #      - 9081:9081
+
+  ui:
+    container_name: ui
+    image: ui-image:latest
+    network_mode: host
+    stdin_open: true
+    tty: true
+  #    ports:
+  #      - 9088:9088

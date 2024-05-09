@@ -1,4 +1,4 @@
-package de.htwg.sa.minesweeper.ui
+/*package de.htwg.sa.minesweeper.ui
 
 
 import de.htwg.sa.minesweeper.controller.controllerComponent.IController
@@ -88,12 +88,24 @@ class WebGuiApi(using var controller: IController) extends Observer{
         
     }
 
+    def start(): Unit = {
+        val bindFuture = Http().newServerAt("0.0.0.0", 9080).bind(route)
 
-    val bindFuture = Http().bindAndHandle(route, "localhost", 8080)
+        bindFuture.onComplete {
+            case Success(binding) =>
+                println("Server online at http://localhost:9082/")
+                complete(binding.toString)
+            case Failure(exception) =>
+                println(s"An error occurred: $exception")
+                complete("fail binding")
+        }
+    }
+
+/*    val bindFuture = Http().bindAndHandle(route, "localhost", 9080)
 
     def unbind = bindFuture
         .flatMap(_.unbind())
-        .onComplete(_ => system.terminate())
+        .onComplete(_ => system.terminate())*/
 
 
     def userIn(rawInput: String): Unit = {
@@ -228,3 +240,4 @@ class WebGuiApi(using var controller: IController) extends Observer{
     }
 
 }
+*/

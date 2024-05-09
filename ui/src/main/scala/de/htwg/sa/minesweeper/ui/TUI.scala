@@ -1,8 +1,9 @@
 package de.htwg.sa.minesweeper.ui
 
 
-import de.htwg.sa.minesweeper.controller.controllerComponent.IController
-import de.htwg.sa.minesweeper.util.{Observer, Move, Event}
+//import de.htwg.sa.minesweeper.controller.controllerComponent.IController
+//import de.htwg.sa.minesweeper.util.{Observer, Move, Event}
+import de.htwg.sa.minesweeper.ui.model.{Move, Event}
 
 import scala.io.StdIn.readLine
 import scala.util.{Try, Success, Failure}
@@ -40,7 +41,7 @@ import scala.util.{Try, Success, Failure}
 import akka.http.scaladsl.unmarshalling.Unmarshal
 import scala.concurrent.Future
 import scala.concurrent.duration._
-import de.htwg.sa.minesweeper.util.RestUtil
+//import de.htwg.sa.minesweeper.util.RestUtil
 import play.api.libs.json.JsArray
 import play.api.libs.json.Format
 import play.api.libs.json.JsResult
@@ -59,13 +60,13 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.{Route, StandardRoute}
-import de.htwg.sa.minesweeper.ui.config.Default.{given}
+//import de.htwg.sa.minesweeper.ui.config.Default.{given}
 import scala.concurrent.ExecutionContextExecutor
 import scala.util.Failure
 import scala.util.Success
 import scala.util.matching.Regex
 import scala.util.Try
-import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl.Game
+//import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl.Game
 import scala.languageFeature.reflectiveCalls
 
 class TUI():
@@ -213,7 +214,7 @@ class TUI():
     // works
     def requestNewGame(side: Int, bombs: Int) = {
 
-        val url = "http://localhost:8081/controller/newGame" + s"?side=$side&bombs=$bombs"
+        val url = "http://localhost:9081/controller/newGame" + s"?side=$side&bombs=$bombs"
         val request = HttpRequest(
             method =  HttpMethods.PUT,
             uri = url
@@ -236,7 +237,7 @@ class TUI():
 
     // works
     def requestExit = {
-        val url = "http://localhost:8081/controller/exit"
+        val url = "http://localhost:9081/controller/exit"
 
         val request = HttpRequest(
             method =  HttpMethods.PUT,
@@ -246,7 +247,7 @@ class TUI():
 
     // works
     def requestCheckGameOver(status: String) = {
-        val url = "http://localhost:8081/controller/checkGameOver"
+        val url = "http://localhost:9081/controller/checkGameOver"
 
         val request = HttpRequest(
             method =  HttpMethods.PUT,
@@ -271,7 +272,7 @@ class TUI():
     def requestGameOver = {
         // get gameOverField from controller
 
-        val url = "http://localhost:8081/controller/gameOver"
+        val url = "http://localhost:9081/controller/gameOver"
 
         val request = HttpRequest(
             method =  HttpMethods.GET,
@@ -289,7 +290,7 @@ class TUI():
     // works
     def requestControllerField = {
         //controller.field
-        val url = "http://localhost:8081/controller/field"
+        val url = "http://localhost:9081/controller/field"
         
         val request = HttpRequest(
             method =  HttpMethods.GET,
@@ -346,7 +347,7 @@ class TUI():
 
     def requestControllerGame = {
         //controller.game.asInstanceOf[Game]
-        val url = "http://localhost:8081/controller/game"
+        val url = "http://localhost:9081/controller/game"
 
         val request = HttpRequest(
             method =  HttpMethods.GET,
@@ -378,7 +379,7 @@ class TUI():
             case "Lost" => 2    
         }
 
-        val url = s"http://localhost:8081/controller/makeAndPublish/doMove?b=$firstMoveCheck&bombs=${game.bombs}&size=${game.side}&time=${game.time}&board=$newBoard"
+        val url = s"http://localhost:9081/controller/makeAndPublish/doMove?b=$firstMoveCheck&bombs=${game.bombs}&size=${game.side}&time=${game.time}&board=$newBoard"
         val moveRaw = move
 
         def moveToJson(move: Move): JsValue = {
@@ -400,7 +401,7 @@ class TUI():
     // approved
     def requestControllerMakeAndPublishPut(move: Move) = {
         //controller.makeAndPublish(controller.put, move)
-        val url = "http://localhost:8081/controller/makeAndPublish/put"
+        val url = "http://localhost:9081/controller/makeAndPublish/put"
         val moveRaw = move
 
         def moveToJson(move: Move): JsValue = {
@@ -421,7 +422,7 @@ class TUI():
     // approved
     def requestControllerHelpMenue= {
 
-        val url = "http://localhost:8081/controller/helpMenu"
+        val url = "http://localhost:9081/controller/helpMenu"
         val request = HttpRequest(
             method =  HttpMethods.GET,
             uri = url
@@ -435,7 +436,7 @@ class TUI():
     def requestControllerCheat: Unit = {
 
         // possibly make a mechanism to make a put request an transfer the controller.field and controller.game to ControllerApi late - just keep in mind
-        val url = "http://localhost:8081/controller/cheat"
+        val url = "http://localhost:9081/controller/cheat"
 
         val request = HttpRequest(
             method =  HttpMethods.GET,
@@ -454,7 +455,7 @@ class TUI():
     // working
     def requestControllerMakeAndPublishUndo: Unit = {
         //controller.makeAndPublish(controller.undo)
-        val url = "http://localhost:8081/controller/makeAndPublish/undo"
+        val url = "http://localhost:9081/controller/makeAndPublish/undo"
         val request = HttpRequest(
             method =  HttpMethods.GET,
             uri = url
@@ -472,7 +473,7 @@ class TUI():
     // working
     def requestControllerMakeAndPublishRedo: Unit = {
         //controller.makeAndPublish(controller.redo)
-        val url = "http://localhost:8081/controller/makeAndPublish/redo"
+        val url = "http://localhost:9081/controller/makeAndPublish/redo"
         val request = HttpRequest(
             method =  HttpMethods.GET,
             uri = url
@@ -490,7 +491,7 @@ class TUI():
     // working
     def requestControllerSaveGame: Unit = {
         //controller.saveGame
-        val url = "http://localhost:8081/controller/saveGame"
+        val url = "http://localhost:9081/controller/saveGame"
 
         val request = HttpRequest(
             method =  HttpMethods.GET,
@@ -509,7 +510,7 @@ class TUI():
     // working
     def requestControllerLoadGame: Unit = {
         //controller.loadGame
-        val url = "http://localhost:8081/controller/loadGame"
+        val url = "http://localhost:9081/controller/loadGame"
 
         val request = HttpRequest(
             method =  HttpMethods.GET,
@@ -527,7 +528,7 @@ class TUI():
 
     // working
     def requestControllerFieldToString: String = {
-        val url = "http://localhost:8081/controller/field/toString"
+        val url = "http://localhost:9081/controller/field/toString"
 
         val request = HttpRequest(
             method =  HttpMethods.GET,
@@ -577,11 +578,27 @@ class TUI():
     }
 
 
-    val bindFuture = Http().bindAndHandle(route, "localhost", 8088)
+    def start(): Unit = {
+        val bindFuture = Http().newServerAt("0.0.0.0", 9088).bind(route)
+
+        bindFuture.onComplete {
+            case Success(binding) =>
+                println("Server online at http://localhost:9088/")
+                complete(binding.toString)
+            case Failure(exception) =>
+                println(s"An error occurred: $exception")
+                complete("fail binding")
+        }
+    }
+    
+    
+
+
+/*    val bindFuture = Http().bindAndHandle(route, "localhost", 9088)
 
     def unbind = bindFuture
         .flatMap(_.unbind())
-        .onComplete(_ => system.terminate())
+        .onComplete(_ => system.terminate())*/
 
     
     def jsonToGameAndField(jsonString: String): (GameTui, FieldTui) = {
@@ -637,3 +654,5 @@ class TUI():
 
         (gameTui, finalFieldOption.get)
     }
+    
+end TUI

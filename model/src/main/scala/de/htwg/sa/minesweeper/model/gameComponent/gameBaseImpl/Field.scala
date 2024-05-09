@@ -1,9 +1,12 @@
 package de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl
 
-import de.htwg.sa.minesweeper.model.gameComponent._
+import de.htwg.sa.minesweeper.model.gameComponent.*
+
 import util.chaining.scalaUtilChainingOps
 import play.api.libs.json.JsValue
 import play.api.libs.json.Json
+
+import scala.annotation.tailrec
 
 case class Field(matrix: Matrix[String], hidden: Matrix[String]) extends IField:
     val size = matrix.size
@@ -38,7 +41,7 @@ case class Field(matrix: Matrix[String], hidden: Matrix[String]) extends IField:
     
     def gameOverField: IField = new Field(this.hidden)
     
-    def reveal = new Field(this.hidden).tap(y => println(y.toString())) // function chaining
+    def reveal = new Field(this.hidden) //.tap(y => println(y.toString())) // function chaining
 
     def put(symbol: String, x: Int, y: Int) = copy(matrix.replaceCell(x, y, symbol))
     def showVisibleCell(x: Int, y: Int): String = matrix.cell(x, y)
@@ -53,8 +56,8 @@ case class Field(matrix: Matrix[String], hidden: Matrix[String]) extends IField:
             (0, -1),          (0, 1),
             (1, -1), (1, 0), (1, 1)
         )
-
-        // recursive function
+        
+        @tailrec
         def exploreDirections(currentField: IField, remainingDirections: List[(Int, Int)]): IField = remainingDirections match {
             case (dx, dy) :: tail =>
             val newX = x + dx
@@ -184,7 +187,7 @@ case class Field(matrix: Matrix[String], hidden: Matrix[String]) extends IField:
         }
 
         val finalFieldOption = fieldOption match{
-            case Some(f) => Some(new Field(updatedMatrix, updatedHidden))
+            case Some(f) => Some(Field(updatedMatrix, updatedHidden))
             case None => println("Field is not valid"); None
         }
 

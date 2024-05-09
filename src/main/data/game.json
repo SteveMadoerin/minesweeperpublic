@@ -1,8 +1,8 @@
 {
   "game" : {
     "status" : "Playing",
-    "bombs" : 10,
-    "side" : 9,
+    "bombs" : 5,
+    "side" : 5,
     "time" : 0
   }
 }
