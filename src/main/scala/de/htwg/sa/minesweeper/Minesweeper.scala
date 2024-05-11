@@ -1,7 +1,7 @@
 package de.htwg.sa.minesweeper
 
 import de.htwg.sa.minesweeper.ui.TUI
-//import de.htwg.sa.minesweeper.ui.gui.GUI
+import de.htwg.sa.minesweeper.ui.gui.GUI
 //import de.htwg.sa.minesweeper.ui.config.Default.{given}
 import de.htwg.sa.minesweeper.Default.{given}
 import de.htwg.sa.minesweeper.model.gameComponent.ModelApi
@@ -39,8 +39,8 @@ object Minesweeper {
             ControllerApi() // on Port 9081
             //WebGuiApi() // on Port 9080
 
-            //GUI().run // on Port 9087
-            //TUI().run // on Port 9088
+            GUI().run // on Port 9087
+            TUI().run // on Port 9088
         }
         
     }

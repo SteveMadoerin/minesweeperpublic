@@ -104,6 +104,48 @@ class ControllerApi(using var controller: IController) extends Observer:
                   controller.loadGame
                   complete(controller.fieldToString)
                 },
+                path("newGameGui") {
+                  controller.newGameGUI
+                  complete("newGameGui")
+                },
+                path("saveTime") {
+                  //
+                  parameter("time".as[Int]) { (time) =>
+                      controller.saveTime(time)
+                      complete("Time saved")
+                  }
+                },
+                path("saveScoreAndPlayerName") {
+                  //
+                  parameter("score".as[Int],"playerName".as[String]) { (score , playerName) =>
+                      val emptypath = ""
+                      controller.saveScoreAndPlayerName(playerName, score, emptypath)
+                      complete("score saved")
+                  }
+                },
+                path("newGameFieldGui") {
+                  //
+                  parameter("input".as[String]) { (input) =>
+                    val inputOption = Some(input)
+                    controller.newGameField(inputOption)
+                      
+                    complete("newGameFieldGui")
+                    
+                    // TODO: check if we need to send game and field back to GUI
+                    
+                    /*val feld = controller.field
+                    val game = controller.game
+                    val jsonField = Json.parse(RestUtil.fieldDtoToJson(feld))
+                    val jsonGame = Json.parse(RestUtil.gameDtoToJson(game))
+
+                    val jsonGameFieldArray = Json.arr(jsonGame, jsonField)
+                    complete(HttpEntity(ContentTypes.`application/json`, jsonGameFieldArray.toString))
+                    */
+                    
+
+                  }
+
+                },
                 path("cheat") {
                   val cheat = controller.cheatRest
                   controller.cheat

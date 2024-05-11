@@ -1,14 +1,15 @@
-/*package de.htwg.sa.minesweeper.ui.gui
+package de.htwg.sa.minesweeper.ui.gui
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Directives.*
 import akka.http.scaladsl.server.Route
 import akka.stream.Materializer
-import de.htwg.sa.minesweeper.controller.controllerComponent.IController
-import de.htwg.sa.minesweeper.entity.{FieldDTO, GameDTO, MatrixDTO}
+import de.htwg.sa.minesweeper.ui.model.{DigitDisplay, FieldTui, GameTui, MatrixTui}
+//import de.htwg.sa.minesweeper.controller.controllerComponent.IController
+//import de.htwg.sa.minesweeper.entity.{FieldDTO, GameDTO, MatrixDTO}
 import de.htwg.sa.minesweeper.ui.config.Default
-import de.htwg.sa.minesweeper.util.{Event, Move}
+import de.htwg.sa.minesweeper.ui.model.{Event, Move}
 
 import java.awt.RenderingHints
 import java.awt.event.MouseEvent
@@ -25,25 +26,25 @@ import scala.util.{Failure, Success}
 
 
 
-class GUI(using var controller: IController) extends Frame:
+class GUI(/*using var controller: IController*/) extends Frame:
 
     //controller.add(this)
     implicit val system: ActorSystem = ActorSystem("gui")
     implicit val materializer: Materializer = Materializer(system)
     implicit val executionContext: ExecutionContextExecutor = system.dispatcher
 
-    case class GameTui(bombs: Int, side: Int, time: Int, board: String)
-    case class FieldTui(matrix: MatrixTui[String], hidden: MatrixTui[String])
-    case class MatrixTui[T] (rows: Vector[Vector[T]])
-
     private var boardBounds = /* controller.field.matrix.rows.size-1 */ RestUtil.requestBoardBounds // TODO: implement
+    //var controllerGame: GameTui = RestUtil.requestControllerGame
+    var controllerField: FieldTui = RestUtil.requestControllerField
+    var controllerGame: GameTui = RestUtil.requestControllerGame
     
     private var firstMoveControl = new AtomicBoolean(true)
     private var timerStarted: Boolean = false
     private var timeLoaded: Boolean = false
+    //private var digitBar = new DigitDisplay(0, 0, 0)
     private var digitBar = new DigitDisplay(0, 0, 0)
     var clock = new AtomicInteger(0)
-    val timer = new Timer()
+    val timer = Timer()
     var task: Option[TimerTask] = None
 
     def startTimer(): Unit = {
@@ -79,7 +80,7 @@ class GUI(using var controller: IController) extends Frame:
             contents ++= flagCountDisplay.productIterator.map(digit => new DigitLabel(digit.asInstanceOf[ImageIcon]))
         }, BorderPanel.Position.West)
 
-        add(new SmileLabel(s"${controller.game.board}"), BorderPanel.Position.Center)
+        add(new SmileLabel(s"${controllerGame.board}"), BorderPanel.Position.Center)
         
         val timerDigits = Seq(digitBar.leftDigit, digitBar.middleDigit, digitBar.rightDigit).map(showDigits)
         add(new BoxPanel(Orientation.NoOrientation){
@@ -101,18 +102,18 @@ class GUI(using var controller: IController) extends Frame:
         title = "Minesweeper"
         menuBar = new MenuBar{
             contents += new Menu("Game"){
-                contents += new MenuItem(Action("Quit") { controller.exit })
-                contents += new MenuItem(Action("New") { controller.newGameGUI})
-                contents += new MenuItem(Action("Load") { controller.loadGame })
-                contents += new MenuItem(Action("Save") { controller.saveGame })
+                contents += new MenuItem(Action("Quit") { leExit })
+                contents += new MenuItem(Action("New") { RestUtil.requestNewGameGui; controllerField = RestUtil.requestControllerField; controllerGame = RestUtil.requestControllerGame; update(Event.NewGame)})
+                contents += new MenuItem(Action("Load") { /*controller.loadGame*/ RestUtil.requestControllerLoadGame})
+                contents += new MenuItem(Action("Save") { /*controller.saveGame*/ RestUtil.requestControllerSaveGame})
             }
             contents += new Menu("Edit"){
-                contents += new MenuItem(Action("Undo") { controller.makeAndPublish(controller.undo) })
-                contents += new MenuItem(Action("Redo") { controller.makeAndPublish(controller.redo) })
+                contents += new MenuItem(Action("Undo") { /*controller.makeAndPublish(controller.undo)*/ RestUtil.requestControllerMakeAndPublishUndo })
+                contents += new MenuItem(Action("Redo") { /*controller.makeAndPublish(controller.redo*/ RestUtil.requestControllerMakeAndPublishRedo })
             }
             contents += new Menu("Help"){
                 contents += new MenuItem(Action("Help") { showHelp/* controller.helpMenu */ }) // TODO:
-                contents += new MenuItem(Action("Cheat") { controller.cheat })
+                contents += new MenuItem(Action("Cheat") { /*controller.cheat*/ RestUtil.requestControllerCheat }) // TODO: prove
             }
         }
         
@@ -135,12 +136,18 @@ class GUI(using var controller: IController) extends Frame:
 
     }
 
+    def leExit = {
+        RestUtil.requestExit
+    }
+
     def update(e: Event): Boolean = {
         e match {
 
             case Event.NewGame =>
                 firstMoveControl.set(true)
-                boardBounds = controller.field.matrix.rows.size -1
+                controllerField = RestUtil.requestControllerField
+                controllerGame = RestUtil.requestControllerGame
+                boardBounds = controllerField.matrix.rows.size -1
                 if(digitBar.rightDigit>0){
                     stopTimer()
                     resetTimer()
@@ -163,7 +170,8 @@ class GUI(using var controller: IController) extends Frame:
             case Event.Next =>
                 
                 if(!timerStarted){
-                    restartTimer(new AtomicInteger(controller.game.time))
+                    restartTimer(new AtomicInteger(controllerGame.time))
+                    //restartTimer(new AtomicInteger(controller.game.time))
                 } else{
                     contents = updateContents
                     repaint()
@@ -177,7 +185,8 @@ class GUI(using var controller: IController) extends Frame:
                 stopTimer()
 
                 val saveScore: Int = calculateScore
-                val text = s"Game is ${controller.game.board} and your Score is ${calculateScore}"
+                controllerGame = RestUtil.requestControllerGame
+                val text = s"Game is ${controllerGame.board} and your Score is ${calculateScore}"
                 
                 resetTimer()
                 showMessage(None.orNull, text, "GameOver", Message.Info)
@@ -189,7 +198,8 @@ class GUI(using var controller: IController) extends Frame:
             case Event.Cheat =>
 
                 /* val text = s"${controller.field.gameOverField}" */
-                val text = s"${prettyFormat(FieldDTO(controller.field.hidden, controller.field.hidden))}"
+                val cheatingField = RestUtil.requestControllerField
+                val text = s"${prettyFormat(FieldTui(cheatingField.hidden, cheatingField.hidden))}"
                 showMessage(None.orNull, text, "Cheat Menu", Message.Plain)
                 false
             
@@ -200,32 +210,36 @@ class GUI(using var controller: IController) extends Frame:
             case Event.Input =>
 
                 val x = showGraphicalInput
-                controller.newGameField(x)
+                //controller.newGameField(x)
+                RestUtil.requestControllerNewGameFieldGui(x)
+
+
                 true
             
             case Event.Load =>
 
-                setLoadedTimer(new AtomicInteger(controller.game.time))
+                setLoadedTimer(new AtomicInteger(controllerGame.time))
                 timeLoaded = true
-                boardBounds = controller.field.matrix.rows.size -1
+                boardBounds = controllerField.matrix.rows.size -1
                 contents = updateContents
                 repaint()
                 true
             
             case Event.Save =>
                 
-                restartTimer(new AtomicInteger(controller.game.time))
+                restartTimer(new AtomicInteger(controllerGame.time))
                 true
             
             case Event.SaveTime =>
 
                 pauseTimer()
-                controller.saveTime(clock.get())
+                //controller.saveTime(clock.get())
+                RestUtil.requestControllerSaveTime(clock.get())
                 contents = updateContents
                 repaint()
                 true
             
-            case Event.Exit => false
+            case Event.Exit => System.exit(0); true
         }
     }
 
@@ -240,24 +254,24 @@ class GUI(using var controller: IController) extends Frame:
         } ~
         put {
             path("gui"/"notify") {
-                    parameter("event".as[String]) { (event) =>
-                        //
-                        event match
-                            case "NewGame" => update(Event.NewGame)
-                            case "Start" => update(Event.Start)
-                            case "Next" => update(Event.Next)
-                            case "GameOver" => update(Event.GameOver)
-                            case "Cheat" => update(Event.Cheat)
-                            case "Help" => update(Event.Help)
-                            case "Input" => update(Event.Input)
-                            case "Load" => update(Event.Load)
-                            case "Save" => update(Event.Save)
-                            case "SaveTime" => update(Event.SaveTime)
-                            case "Exit" => update(Event.Exit)
-                            case _ => false
-                            
-                        complete("success notify" + event)
-                    }
+                parameter("event".as[String]) { (event) =>
+                    //
+                    event match
+                        case "NewGame" => update(Event.NewGame)
+                        case "Start" => update(Event.Start)
+                        case "Next" => update(Event.Next)
+                        case "GameOver" => update(Event.GameOver)
+                        case "Cheat" => update(Event.Cheat)
+                        case "Help" => update(Event.Help)
+                        case "Input" => update(Event.Input)
+                        case "Load" => update(Event.Load)
+                        case "Save" => update(Event.Save)
+                        case "SaveTime" => update(Event.SaveTime)
+                        case "Exit" => update(Event.Exit)
+                        case _ => false
+
+                    complete("success notify" + event)
+                }
             }
         }
         
@@ -268,20 +282,13 @@ class GUI(using var controller: IController) extends Frame:
 
         bindFuture.onComplete {
             case Success(binding) =>
-                println("Server online at http://localhost:9088/")
+                println("Server online at http://localhost:9087/")
                 complete(binding.toString)
             case Failure(exception) =>
                 println(s"An error occurred: $exception")
                 complete("fail binding")
         }
     }
-
-
-/*    val bindFuture = Http().bindAndHandle(route, "localhost", 9087)
-
-    def unbind = bindFuture
-        .flatMap(_.unbind())
-        .onComplete(_ => system.terminate())*/
 
     def showHelp: Unit = {
         val text = 
@@ -334,7 +341,6 @@ class GUI(using var controller: IController) extends Frame:
         val imagePath = imagePaths.getOrElse(kind, "C:/Playground/minesweeperpublic/src/main/resources/time-.jpeg")
         new ImageIcon(imagePath)
     }*/
-
     def showSmiley(kind: String): ImageIcon =
         val imagePath = s"src/main/resources/face$kind.jpeg"
         val icon: ImageIcon = new ImageIcon(imagePath)
@@ -346,14 +352,17 @@ class GUI(using var controller: IController) extends Frame:
     
     def saveScoreNew(saveScore: Int): Unit = {
         val playerName =  showInput(None.orNull, "Enter your Name to save your score!", "Save Score", Message.Info, Swing.EmptyIcon, Nil, "Sly").getOrElse("Default") // was null before
-        val filePath = Default.filePathHighScore
-        controller.saveScoreAndPlayerName(playerName, saveScore, Default.filePathHighScore)
+        val filePath = Default.filePathHighScore // not in use atm
+        //controller.saveScoreAndPlayerName(playerName, saveScore, Default.filePathHighScore)
+        RestUtil.requestControllerSaveScoreAndPlayerName(saveScore, playerName)
     }
 
     def loadScoreNew = {
 
         val loadAndDisplayScores = () => {
-            val scores = controller.loadPlayerScores // path is set in Persistence
+            //val scores = controller.loadPlayerScores // path is set in Persistence
+            val scores = RestUtil.requestControllerLoadPlayerScores
+
             val top10 = scores.sortBy(-_._2).take(10)
             val message = top10.zipWithIndex.map { case ((name, score), index) =>
                 s"${index + 1}. $name: $score"
@@ -364,11 +373,23 @@ class GUI(using var controller: IController) extends Frame:
         loadAndDisplayScores()
     }
         
-    class CellPanel(x: Int, y: Int, bounds: Int, first: Boolean) extends GridPanel(x,y) {
+    class CellPanel(var x: Int, var y: Int, bounds: Int, first: Boolean) extends GridPanel(x,y) {
+        //controller.field.matrix.rows.size -1
+        //TODO: replace
+        if (x == 0 && y == 0) {
+            x = 1
+            y = 1
+        } else if (x == 0 && y > 0) {
+            x = 1
+        } else if (x > 0 && y == 0) {
+            y = 1
+        }
+
+        controllerField = RestUtil.requestControllerField
         (for(
             x <- 0 to bounds;
             y <- 0 to bounds
-            ) yield(x,y, controller.field.matrix.rows(x)(y))).foreach(t => contents += new CellButton(t._1, t._2, t._3, first))
+            ) yield(x,y, controllerField.matrix.rows(x)(y))).foreach(t => contents += new CellButton(t._1, t._2, t._3, first))
     }
     
     def setTime = synchronized {
@@ -394,8 +415,8 @@ class GUI(using var controller: IController) extends Frame:
     }
 
     def calculateScore: Int =
-        val score = ((controller.field.matrix.rows.size * controller.field.matrix.rows.size)) * 10 - (digitBar.leftDigit*100+digitBar.middleDigit*10+digitBar.rightDigit)
-        if controller.game.board == "Won" then score else 0
+        val score = ((controllerField.matrix.rows.size * controllerField.matrix.rows.size)) * 10 - (digitBar.leftDigit*100+digitBar.middleDigit*10+digitBar.rightDigit)
+        if controllerGame.board == "Won" then score else 0
     
     def resetTimer() = {
         clock.set(0)
@@ -404,17 +425,17 @@ class GUI(using var controller: IController) extends Frame:
     }
 
     /* def calcFlagCount: Int = controller.game.calcMineAndFlag(controller.field.matrix) */
-    def calcFlagCount: Int = calcMineAndFlag(controller.field.matrix, controller.game)
+    def calcFlagCount: Int = calcMineAndFlag(controllerField.matrix, controllerGame)
 
-    def prettyFormat(fieldDto: FieldDTO): String = {
-        fieldDto.matrix.rows.map(_.mkString(" ")).mkString("\n")
+    def prettyFormat(fieldTui: FieldTui): String = {
+        fieldTui.matrix.rows.map(_.mkString(" ")).mkString("\n")
     }
 
-    def calcMineAndFlag(visibleMatrix: MatrixDTO[String], gamely: GameDTO) = {
+    def calcMineAndFlag(visibleMatrix: MatrixTui[String], gamely: GameTui) = {
         (gamely.bombs - calcX("F")(visibleMatrix))
     }
 
-    def calcX(symbols: String)(visibleMatrix: MatrixDTO[String]): Int = {
+    def calcX(symbols: String)(visibleMatrix: MatrixTui[String]): Int = {
         val sizze = visibleMatrix.rows.size -1
         val multiIndex = 0 to sizze
         multiIndex
@@ -448,13 +469,19 @@ class GUI(using var controller: IController) extends Frame:
         maximumSize_=(new Dimension(40,40))
         listenTo(mouse.clicks)
         reactions += {
-            case e: MouseClicked if (controller.game.board == "Won" || controller.game.board == "Lost") =>
+            case e: MouseClicked if (updateGame.board == "Won" || updateGame.board == "Lost") =>
+                controllerField = FieldTui(controllerField.hidden, controllerField.hidden)
             
-            case e: MouseClicked if e.peer.getButton == MouseEvent.BUTTON3 => 
-                if (/* controller.field.showVisibleCell(x,y) */controller.field.matrix.rows(x)(y) == "~"){
-                    controller.makeAndPublish(controller.put, Move("flag", y, x))
-                } else if (controller.field.matrix.rows(x)(y) == "F"){
-                    controller.makeAndPublish(controller.put, Move("unflag", y, x))
+            case e: MouseClicked if e.peer.getButton == MouseEvent.BUTTON3 =>
+                // Check if controllerField is up to date
+                controllerField = RestUtil.requestControllerField
+                if (controllerField.matrix.rows(x)(y) == "~"){
+                    //controller.makeAndPublish(controller.put, Move("flag", y, x))
+                    //controller.makeAndPublish(controller.put, Move("flag", y, x))
+                    RestUtil.requestControllerMakeAndPublishPut(Move("flag", y, x))
+                } else if (controllerField.matrix.rows(x)(y) == "F"){
+                    //controller.makeAndPublish(controller.put, Move("unflag", y, x))
+                    RestUtil.requestControllerMakeAndPublishPut(Move("unflag", y, x))
                 } else {
                     println(">> You can't flag an open field")
                 }
@@ -462,27 +489,38 @@ class GUI(using var controller: IController) extends Frame:
             
             case e: MouseClicked if e.peer.getButton == MouseEvent.BUTTON1 => 
                 synchronized{
+                    controllerField = RestUtil.requestControllerField
+                    controllerGame = RestUtil.requestControllerGame
                     if (first) {startTimer()}
-                    controller.makeAndPublish(controller.doMove, first, Move("open", y, x), controller.game)
+                    //controller.makeAndPublish(controller.doMove, first, Move("open", y, x), controller.game)
+                    RestUtil.requestControllerMakeAndPublishDoMove(first, Move("open", y, x), controllerGame) // TODO: check updateGame
                     if (first) {
-                        controller.checkGameOver(controller.game.board)  // check this
+                        //controller.checkGameOver(controllerGame.board)  // check this
+                        RestUtil.requestCheckGameOver(controllerGame.board)  // TODO: check if updateGame works better
                     } else {
-                        if(controller.checkGameOver(controller.game.board)){controller.gameOver}
+                        controllerGame = RestUtil.requestControllerGame
+                        if(RestUtil.requestCheckGameOver(controllerGame.board)) {
+                            RestUtil.requestGameOver
+                        }
+                        //if(controller.checkGameOver(controllerGame.board)){controller.gameOver}
                     }
                 }
         }
+        def updateGame: GameTui = {
+            RestUtil.requestControllerGame
+        }
     }
     
-    class SmileLabel(kind: String) extends Label():
+    class SmileLabel(kind: String) extends Label(){
         icon = kind match {
             case "Playing" => showSmiley("smile")
             case "Lost" => showSmiley("dead")
             case "Won" => showSmiley("win") 
         }
+    }
 
     class DigitLabel(newIcon: ImageIcon) extends Label():
         icon = newIcon
-    
-    case class DigitDisplay(leftDigit: Int, middleDigit: Int, rightDigit: Int)
 
-end GUI*/
+
+end GUI

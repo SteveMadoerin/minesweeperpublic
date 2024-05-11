@@ -1,43 +1,40 @@
 package de.htwg.sa.minesweeper.ui.gui
 
-import de.htwg.sa.minesweeper.ui._
+import de.htwg.sa.minesweeper.ui.*
+import play.api.libs.json.{Format, JsError, JsObject, JsResult, JsString, JsSuccess, JsValue, Json}
 
-import play.api.libs.json.JsValue
-import play.api.libs.json.Json
-import play.api.libs.json.{JsValue, Json}
-import scala.io.Source
-
-import play.api.libs.json.JsValue
-import play.api.libs.json.Json
 import scala.io.Source
 import akka.http.scaladsl.model.HttpRequest
 import akka.http.scaladsl.model.HttpMethods
 import akka.http.scaladsl.model.HttpEntity
 import akka.http.scaladsl.model.ContentTypes
 import akka.http.scaladsl.Http
+
 import scala.concurrent.Future
 import akka.http.scaladsl.model.HttpResponse
-import scala.concurrent.duration._
+
+import scala.concurrent.duration.*
 import scala.concurrent.ExecutionContext
 import scala.concurrent.ExecutionContextExecutor
 import akka.actor.ActorSystem
 import akka.stream.Materializer
+
 import scala.concurrent.Await
-import play.api.libs.json.JsObject
-import play.api.libs.json.JsString
 import scala.annotation.internal.Body
 import akka.util.ByteString
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.model._
+import akka.http.scaladsl.model.*
 import akka.stream.ActorMaterializer
+
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
-
-import scala.util.{Try, Success, Failure}
+import scala.util.{Failure, Success, Try}
 import akka.http.scaladsl.unmarshalling.Unmarshal
+import de.htwg.sa.minesweeper.ui.model.{FieldTui, GameTui, MatrixTui, Move}
+
 import scala.concurrent.Future
-import scala.concurrent.duration._
+import scala.concurrent.duration.*
 
 object RestUtil {
 
@@ -45,9 +42,9 @@ object RestUtil {
     implicit val materializer: Materializer = Materializer(system)
     implicit val executionContext: ExecutionContextExecutor = system.dispatcher
 
-    case class GameTui(bombs: Int, side: Int, time: Int, board: String)
+/*    case class GameTui(bombs: Int, side: Int, time: Int, board: String)
     case class FieldTui(matrix: MatrixTui[String], hidden: MatrixTui[String])
-    case class MatrixTui[T] (rows: Vector[Vector[T]])
+    case class MatrixTui[T] (rows: Vector[Vector[T]])*/
 
     // for GUI only
     def requestBoardBounds: Int = {
@@ -72,7 +69,289 @@ object RestUtil {
         field
     }
 
-        def jsonToFieldTui(jsonString: String): FieldTui = {
+    def requestControllerGame = {
+        //controller.game.asInstanceOf[Game]
+        val url = "http://localhost:9081/controller/game"
+
+        val request = HttpRequest(
+            method = HttpMethods.GET,
+            uri = url
+        )
+        val bodyString = Await.result(Http().singleRequest(request).flatMap(_.entity.toStrict(5.seconds).map(_.data.utf8String)), 5.seconds)
+        val game = jsonToGameTui(bodyString)
+
+        game
+    }
+
+    def requestExit = {
+        val url = "http://localhost:9081/controller/exit"
+
+        val request = HttpRequest(
+            method = HttpMethods.PUT,
+            uri = url
+        )
+    }
+
+    // for GUI
+    def requestNewGameGui = {
+        val url = "http://localhost:9081/controller/newGameGui"
+
+        val request = HttpRequest(
+            method = HttpMethods.GET,
+            uri = url
+        )
+    }
+
+    def requestControllerLoadGame: Unit = {
+        //controller.loadGame
+        val url = "http://localhost:9081/controller/loadGame"
+
+        val request = HttpRequest(
+            method = HttpMethods.GET,
+            uri = url
+        )
+
+        val responseFuture: Future[HttpResponse] = Http().singleRequest(request)
+        val bodyStringFuture: Future[String] = responseFuture.flatMap { response =>
+            response.entity.toStrict(5.seconds).map(_.data.utf8String)
+        }
+
+        val bodyStringLoad = Await.result(bodyStringFuture, 5.seconds)
+        println(bodyStringLoad)
+    }
+
+    def requestControllerSaveGame: Unit = {
+        //controller.saveGame
+        val url = "http://localhost:9081/controller/saveGame"
+
+        val request = HttpRequest(
+            method = HttpMethods.GET,
+            uri = url
+        )
+
+        val responseFuture: Future[HttpResponse] = Http().singleRequest(request)
+        val bodyStringFuture: Future[String] = responseFuture.flatMap { response =>
+            response.entity.toStrict(5.seconds).map(_.data.utf8String)
+        }
+
+        val bodyStringSave = Await.result(bodyStringFuture, 5.seconds)
+        println(bodyStringSave)
+    }
+
+    def requestControllerMakeAndPublishUndo: Unit = {
+        //controller.makeAndPublish(controller.undo)
+        val url = "http://localhost:9081/controller/makeAndPublish/undo"
+        val request = HttpRequest(
+            method = HttpMethods.GET,
+            uri = url
+        )
+
+        val responseFuture: Future[HttpResponse] = Http().singleRequest(request)
+        val bodyStringFuture: Future[String] = responseFuture.flatMap { response =>
+            response.entity.toStrict(5.seconds).map(_.data.utf8String)
+        }
+
+        val bodyStringUndo = Await.result(bodyStringFuture, 5.seconds)
+        println(bodyStringUndo)
+    }
+
+    def requestControllerMakeAndPublishRedo: Unit = {
+        //controller.makeAndPublish(controller.redo)
+        val url = "http://localhost:9081/controller/makeAndPublish/redo"
+        val request = HttpRequest(
+            method = HttpMethods.GET,
+            uri = url
+        )
+
+        val responseFuture: Future[HttpResponse] = Http().singleRequest(request)
+        val bodyStringFuture: Future[String] = responseFuture.flatMap { response =>
+            response.entity.toStrict(5.seconds).map(_.data.utf8String)
+        }
+
+        val bodyStringUndo = Await.result(bodyStringFuture, 5.seconds)
+        println(bodyStringUndo)
+    }
+
+    def requestControllerCheat: Unit = {
+
+        // possibly make a mechanism to make a put request an transfer the controller.field and controller.game to ControllerApi late - just keep in mind
+        val url = "http://localhost:9081/controller/cheat"
+
+        val request = HttpRequest(
+            method = HttpMethods.GET,
+            uri = url
+        )
+
+        val responseFuture: Future[HttpResponse] = Http().singleRequest(request)
+        val bodyStringFuture: Future[String] = responseFuture.flatMap { response =>
+            response.entity.toStrict(5.seconds).map(_.data.utf8String)
+        }
+
+        val bodyStringCheat = Await.result(bodyStringFuture, 5.seconds)
+        println(bodyStringCheat)
+    }
+    
+    //new TODO: check if working
+    def requestControllerNewGameFieldGui(x: Option[String]): Unit = {
+        val url = "http://localhost:9081/controller/newGameFieldGui" + x.get
+        
+        val request = HttpRequest(
+            method = HttpMethods.GET,
+            uri = url
+        )
+        
+    }
+    
+    // TODO: check if working
+    def requestControllerSaveTime(currentTime: Int): Unit = {
+        val url = "http://localhost:9081/controller/saveTime/" + currentTime.toString
+        
+        val request = HttpRequest(
+            method = HttpMethods.GET,
+            uri = url
+        )
+    }
+    
+    // TODO: check if working
+    def requestControllerSaveScoreAndPlayerName(score: Int, playerName: String): Unit = {
+        val url = "http://localhost:9081/controller/saveScoreAndPlayerName/" + score.toString + "/" + playerName
+        
+        val request = HttpRequest(
+            method = HttpMethods.GET,
+            uri = url
+        )
+    }
+    
+    // TODO: check if working and if body is correct - else just make direct call to persistence API
+    def requestControllerLoadPlayerScores: Seq[(String, Int)] = {
+        val url = "http://localhost:9081/controller/loadPlayerScores"
+        
+        val request = HttpRequest(
+            method = HttpMethods.GET,
+            uri = url
+        )
+        
+        val responseFuture: Future[HttpResponse] = Http().singleRequest(request)
+        val bodyStringFuture: Future[String] = responseFuture.flatMap { response =>
+            response.entity.toStrict(5.seconds).map(_.data.utf8String)
+        }
+        
+        val jsonStringApiResult = Await.result(bodyStringFuture, 5.seconds)
+        // we need to get this: Seq[(String, Int)]
+        case class PlayerScore(player: String, score: Int) // body needs to be convertoed to a Seq[(String, Int)]
+        implicit val playerScoreFormat: Format[PlayerScore] = Json.format[PlayerScore]
+
+        val json: JsValue = Json.parse(jsonStringApiResult) // Parse the JSON string into a sequence of PlayerScore objects
+        val playerScoresResult: JsResult[Seq[PlayerScore]] = Json.fromJson[Seq[PlayerScore]](json)
+
+        val playerScores: Seq[(String, Int)] = playerScoresResult match {
+            case JsSuccess(scores, _) => scores.map(ps => (ps.player, ps.score))
+            case JsError(errors) => Seq.empty // Handle the error appropriately
+        } // Map the sequence of PlayerScore objects to the desired Seq[(String, Int)]
+
+        playerScores
+        
+    }
+
+    // TODO: check if working - CHECK IF X AND Y ARE NOT SWAPPED
+    def requestControllerMakeAndPublishPut(move: Move) = {
+        //controller.makeAndPublish(controller.put, move)
+        val url = "http://localhost:9081/controller/makeAndPublish/put"
+        val moveRaw = move
+
+        def moveToJson(move: Move): JsValue = {
+            Json.obj("x" -> move.x, "y" -> move.y, "value" -> move.value)
+        }
+
+        val bodyField = moveToJson(moveRaw)
+
+        val request = HttpRequest(
+            method = HttpMethods.GET,
+            uri = url
+        ).withEntity(HttpEntity(ContentTypes.`application/json`, bodyField.toString()))
+
+        val bodyString = Await.result(Http().singleRequest(request).flatMap(_.entity.toStrict(5.seconds).map(_.data.utf8String)), 5.seconds)
+
+    }
+
+    // TODO: check if working
+    def requestControllerMakeAndPublishDoMove(firstMoveCheck: Boolean, move: Move, game: GameTui) = {
+        //controller.makeAndPublish(controller.doMove, firstMoveCheck, move, game)
+        val newBoard = game.board match {
+            case "Playing" => 0
+            case "Won" => 1
+            case "Lost" => 2
+        }
+
+        val url = s"http://localhost:9081/controller/makeAndPublish/doMove?b=$firstMoveCheck&bombs=${game.bombs}&size=${game.side}&time=${game.time}&board=$newBoard"
+        val moveRaw = move
+
+        def moveToJson(move: Move): JsValue = {
+            Json.obj("x" -> move.x, "y" -> move.y, "value" -> move.value)
+        }
+
+        val bodyField = moveToJson(moveRaw)
+
+        val request = HttpRequest(
+            method = HttpMethods.GET,
+            uri = url
+        ).withEntity(HttpEntity(ContentTypes.`application/json`, bodyField.toString()))
+
+        val bodyString = Await.result(Http().singleRequest(request).flatMap(_.entity.toStrict(5.seconds).map(_.data.utf8String)), 5.seconds)
+        println(bodyString) // success
+
+    }
+
+    // TODO: check if working
+    def requestCheckGameOver(status: String) = {
+        val url = "http://localhost:9081/controller/checkGameOver"
+
+        val request = HttpRequest(
+            method = HttpMethods.PUT,
+            uri = url
+        ).withEntity(status)
+
+        val responseFuture: Future[HttpResponse] = Http().singleRequest(request)
+        val bodyStringFuture: Future[String] = responseFuture.flatMap { response =>
+            response.entity.toStrict(5.seconds).map(_.data.utf8String)
+        }
+        val bodyString = Await.result(bodyStringFuture, 5.seconds)
+        bodyString.toBoolean
+
+        //controller.checkGameOver(status)
+    }
+
+    // TODO: check if working
+    def requestGameOver = {
+        // get gameOverField from controller
+
+        val url = "http://localhost:9081/controller/gameOver"
+
+        val request = HttpRequest(
+            method = HttpMethods.GET,
+            uri = url
+        )
+
+/*        val bodyString = Await.result(Http().singleRequest(request).flatMap(_.entity.toStrict(5.seconds).map(_.data.utf8String)), 5.seconds)
+
+        val field = jsonToFieldTui(bodyString)*/
+
+        //-------------------- TODO: implement maybe later controllerfield = field ...
+        //controller.gameOver
+    }
+    
+
+    def jsonToGameTui(jsonString: String): GameTui = {
+        val json: JsValue = Json.parse(jsonString)
+        val status = (json \ "game" \ "status").get.toString
+        val bombs = (json \ "game" \ "bombs").get.toString.toInt
+        val side = (json \ "game" \ "side").get.toString.toInt
+        val time = (json \ "game" \ "time").get.toString.toInt
+        val statusWithoutQuotes = status.replace("\"", "") // \Playing\ -> Playing
+        GameTui(bombs, side, time, statusWithoutQuotes)
+    }
+
+    def jsonToFieldTui(jsonString: String): FieldTui = {
         val json: JsValue = Json.parse(jsonString)
         val size = (json \ "field" \ "size").get.toString.toInt
 

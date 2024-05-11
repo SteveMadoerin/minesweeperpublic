@@ -3,44 +3,47 @@ package de.htwg.sa.minesweeper.ui
 
 //import de.htwg.sa.minesweeper.controller.controllerComponent.IController
 //import de.htwg.sa.minesweeper.util.{Observer, Move, Event}
-import de.htwg.sa.minesweeper.ui.model.{Move, Event}
+import de.htwg.sa.minesweeper.ui.model.{Event, FieldTui, GameTui, MatrixTui, Move}
 
 import scala.io.StdIn.readLine
-import scala.util.{Try, Success, Failure}
-
+import scala.util.{Failure, Success, Try}
 import scala.compiletime.ops.string
 import scala.util.matching.Regex
-
 import play.api.libs.json.{JsValue, Json}
+
 import scala.io.Source
 import akka.http.scaladsl.model.HttpRequest
 import akka.http.scaladsl.model.HttpMethods
 import akka.http.scaladsl.model.HttpEntity
 import akka.http.scaladsl.model.ContentTypes
 import akka.http.scaladsl.Http
+
 import scala.concurrent.Future
 import akka.http.scaladsl.model.HttpResponse
-import scala.concurrent.duration._
+
+import scala.concurrent.duration.*
 import scala.concurrent.ExecutionContext
 import scala.concurrent.ExecutionContextExecutor
 import akka.actor.ActorSystem
 import akka.stream.Materializer
+
 import scala.concurrent.Await
 import play.api.libs.json.JsObject
 import play.api.libs.json.JsString
+
 import scala.annotation.internal.Body
 import akka.util.ByteString
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.model._
+import akka.http.scaladsl.model.*
 import akka.stream.ActorMaterializer
-import scala.concurrent.Future
-import scala.util.{Failure, Success}
 
-import scala.util.{Try, Success, Failure}
-import akka.http.scaladsl.unmarshalling.Unmarshal
 import scala.concurrent.Future
-import scala.concurrent.duration._
+import scala.util.{Failure, Success, Try}
+import akka.http.scaladsl.unmarshalling.Unmarshal
+
+import scala.concurrent.Future
+import scala.concurrent.duration.*
 //import de.htwg.sa.minesweeper.util.RestUtil
 import play.api.libs.json.JsArray
 import play.api.libs.json.Format
@@ -78,9 +81,9 @@ class TUI():
 
     var firstMoveCheck = true
 
-    case class GameTui(bombs: Int, side: Int, time: Int, board: String)
+/*    case class GameTui(bombs: Int, side: Int, time: Int, board: String)
     case class FieldTui(matrix: MatrixTui[String], hidden: MatrixTui[String])
-    case class MatrixTui[T] (rows: Vector[Vector[T]])
+    case class MatrixTui[T] (rows: Vector[Vector[T]])*/
 
     var controllerGame: GameTui = requestControllerGame
     var controllerField: FieldTui = requestControllerField
@@ -279,9 +282,9 @@ class TUI():
             uri = url
         )
 
-        val bodyString = Await.result(Http().singleRequest(request).flatMap(_.entity.toStrict(5.seconds).map(_.data.utf8String)), 5.seconds)
+        //val bodyString = Await.result(Http().singleRequest(request).flatMap(_.entity.toStrict(5.seconds).map(_.data.utf8String)), 5.seconds)
 
-        val field = jsonToFieldTui(bodyString) 
+        //val field = jsonToFieldTui(bodyString) 
 
         //-------------------- TODO: implement maybe later controllerfield = field ...
         //controller.gameOver

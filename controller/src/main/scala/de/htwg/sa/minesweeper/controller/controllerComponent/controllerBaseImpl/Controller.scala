@@ -457,7 +457,7 @@ class Controller() extends IController with Observable:
         }
     }
 
-    def loadPlayerScores = {
+    def loadPlayerScores: Seq[(String, Int)] = {
         
         val url = "http://localhost:9083/persistence/highscore"
         val request = HttpRequest(method = HttpMethods.GET, uri = url)
@@ -502,19 +502,19 @@ class Controller() extends IController with Observable:
 
         // _________________________ NOTIFY TUI _________________________
 
-        val uri = s"http://localhost:9088/tui/notify" + "?event=" + event
+        val uri1 = s"http://localhost:9088/tui/notify" + "?event=" + event
 
         val request = HttpRequest(
             method =  HttpMethods.PUT,
-            uri = uri
+            uri = uri1
         )
         
         val responseFuture: Future[HttpResponse] = Http().singleRequest(request)
         val bodyFieldFuture: Future[String] = responseFuture.flatMap { response =>
             response.entity.toStrict(5.seconds).map(_.data.utf8String)
         }
-/*         val result = Await.result(bodyFieldFuture, 5.seconds)
-        println(result) */
+        val result = Await.result(bodyFieldFuture, 5.seconds)
+        println(result + " - TUI")
 
         // _________________________ NOTIFY GUI _________________________
         val uri2 = s"http://localhost:9087/gui/notify" + "?event=" + event
@@ -528,8 +528,8 @@ class Controller() extends IController with Observable:
         val bodyFieldFuture2: Future[String] = responseFuture2.flatMap { response =>
             response.entity.toStrict(5.seconds).map(_.data.utf8String)
         }
-/*         val result2 = Await.result(bodyFieldFuture2, 5.seconds)
-        println(result2) */
+        val result2 = Await.result(bodyFieldFuture2, 5.seconds)
+        println(result2 + " - GUI")
     }
 
     
