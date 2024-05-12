@@ -7,6 +7,6 @@ trait IDAO:
   def saveField(field: String): Unit
   def savePlayerScore(playerName: String, score: Int): Unit
 
-  //def loadGame(): Game
-  //def loadField(): String
+  def loadGame(): Game
+  def loadField(): String
   //def loadPlayerScore(): Unit

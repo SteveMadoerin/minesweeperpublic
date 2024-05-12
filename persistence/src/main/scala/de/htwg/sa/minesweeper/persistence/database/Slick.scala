@@ -79,28 +79,34 @@ class Slick extends IDAO {
     database.run(games)
     println("Database save")
   }
-  /*
+
   def loadGame() : Game = {
-    val query = gameTable.take(1).result.head
-    val result = database.run(query)
-    val game = result.map { row =>
-      val bombs = row._2
-      val size = row._3
-      val time = row._4
-      val board = row._5
-      var game = Game(bombs, size, time, board)
+    val query = for {
+      game <- gameTable.sortBy(_.id.desc).take(1)
+    } yield {
+      (game.bombs, game.size, game.time, game.board)
+    }
+    //TODO funktionert nicht richtig
+    val result = database.run(query.result)
+    val game = result.map {  case (bombs, size, time, board) =>
+      game = Game(bombs, size, time, board)
     }
     game
   }
 
   def loadField() : String = {
-    val query = fieldTable.take(1).result.head
-    val result = database.run(query)
-    val field = result.map { row =>
-      val field = row._2
+    //val query = fieldTable.take(1).result.head
+    val query = for {
+      field <- fieldTable.sortBy(_.id.desc).take(1)
+    } yield {
+      (field.field)
+    }
+    //todo funktioert nicht richtig
+    val result = Await.result(database.run(query),1.second)
+    //val result = database.run(query.result)
+    val field = result.map { case (field) =>
+      field
     }
     field
   }
-  */
-
 }
