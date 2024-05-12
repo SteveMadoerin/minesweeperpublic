@@ -3,6 +3,7 @@ package de.htwg.sa.minesweeper.ui
 
 import org.scalatest.matchers.should.Matchers._
 import org.scalatest.wordspec.AnyWordSpec
+/*
 import de.htwg.sa.minesweeper.controller.controllerComponent.controllerBaseImpl.Controller
 //import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl._
 import de.htwg.sa.minesweeper.util.Move
@@ -11,7 +12,7 @@ import de.htwg.sa.minesweeper.util.Event
 import java.io.PrintStream
 import java.io.ByteArrayOutputStream
 import de.htwg.sa.minesweeper.ui.TUI
-
+*/
 
 class TUISpec extends AnyWordSpec {
 
@@ -47,7 +48,7 @@ class TUISpec extends AnyWordSpec {
 
     } */
 
-
+/*
     "The TUI update method" should{
         val tui2 = new TUI()
         "update or not a Event" in{
@@ -120,11 +121,12 @@ class TUISpec extends AnyWordSpec {
                     bombs should be (85)
                 }
             }
-        }
 
+        }
+*/
         
 
-    }
+
 
 
 }

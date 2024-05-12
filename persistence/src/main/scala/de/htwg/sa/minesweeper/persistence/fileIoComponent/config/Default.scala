@@ -1,6 +1,7 @@
 package de.htwg.sa.minesweeper.persistence.fileIoComponent.config
 
 import de.htwg.sa.minesweeper.persistence.entity._
+import de.htwg.sa.minesweeper.persistence.database._
 /* import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl._
 import de.htwg.sa.minesweeper.model.gameComponent._ */
 import de.htwg.sa.minesweeper.persistence.fileIoComponent.IFileIO

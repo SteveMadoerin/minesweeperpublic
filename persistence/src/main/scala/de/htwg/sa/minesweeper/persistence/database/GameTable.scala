@@ -3,10 +3,13 @@ package de.htwg.sa.minesweeper.persistence.database
 import slick.jdbc.PostgresProfile.api.*
 import slick.lifted.{ForeignKey, ForeignKeyQuery}
 
-class GameTable extends Table[(Option[Int], String)]("Game") {
-  def id = column[Int]("id", O.PrimaryKey, O.AutoInc)
-  def game = column[String]("game_data")
+class GameTable(tag: Tag) extends Table[(Option[Int], Int, Int, Int, String)](tag, "Game") {
+  def id = column[Option[Int]]("id", O.PrimaryKey, O.AutoInc)
+  def bombs = column[Int]("bombs")
+  def size = column[Int]("size")
+  def time = column[Int]("time")
+  def board = column[String]("board")
 
-  def * = (id, game)
+  def * = (id, bombs, size, time, board)
 
 }

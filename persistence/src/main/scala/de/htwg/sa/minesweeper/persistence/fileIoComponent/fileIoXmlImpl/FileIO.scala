@@ -44,7 +44,7 @@ class FileIO extends IFileIO {
     override def saveGame(game: IGame): Unit = {scala.xml.XML.save("C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\game.xml", gameToXml(game))}
     
     
-    override def loadField: Option[IField] = {
+    override def loadField(field: String): Option[IField] = {
         val maybeFile: Try[Elem] = Try(scala.xml.XML.loadFile("C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\field.xml"))
         val file = maybeFile match {
             case Success(file) => file

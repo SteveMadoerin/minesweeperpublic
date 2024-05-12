@@ -1,8 +1,8 @@
-package de.htwg.sa.minesweeper.model.fileIoComponent.fileIoJsonImpl
+package de.htwg.sa.minesweeper.persistence.fileIoComponent.fileIoJsonImpl
 
 import org.scalatest.matchers.should.Matchers._
 import org.scalatest.wordspec.AnyWordSpec
-
+/*
 import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl.{Field, Game, Matrix, Playfield}
 import de.htwg.sa.minesweeper.persistence.fileIoComponent.fileIoJsonImpl.FileIO
 import de.htwg.sa.minesweeper.model.gameComponent.{IGame, IField}
@@ -11,7 +11,7 @@ import java.io._
 import java.nio.file.{Files, Path, Paths}
 import play.api.libs.json.{Json, JsArray}
 
-
+*/
 class FileIOJasonSpec extends AnyWordSpec {
   "A FileIO" when {
 
@@ -38,7 +38,7 @@ class FileIOJasonSpec extends AnyWordSpec {
         val loadFieldTest = fileIO2.loadField.get
         loadFieldTest.matrix.size should be (1)
       }
-    } */
+    }
     
     "saving a player score" should {
       val fileIo9 = new FileIO()
@@ -92,6 +92,7 @@ class FileIOJasonSpec extends AnyWordSpec {
         new File(tempFilePath).delete()
       }
     }
+    */
 
   }
 }

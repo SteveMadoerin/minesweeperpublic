@@ -105,9 +105,10 @@ class FileIO extends IFileIO{
         )
     }
 
-    override def loadField: Option[IField] = {
+    override def loadField(field: String): Option[IField] = {
 
-        val source: String = Source.fromFile("C:\\Playground\\minesweeperpublic\\src\\main\\data\\field.json").getLines.mkString
+        //val source: String = Source.fromFile("C:\\Playground\\minesweeperpublic\\src\\main\\data\\field.json").getLines.mkString
+        val source = field
         val json: JsValue = Json.parse(source)
         val size = (json \ "field" \ "size").get.toString.toInt
 

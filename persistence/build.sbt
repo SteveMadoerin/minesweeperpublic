@@ -14,7 +14,8 @@ lazy val commonSettings = Seq(
   libraryDependencies += "com.typesafe.akka" %% "akka-actor-typed" % "2.8.5",
   libraryDependencies += "com.typesafe.akka" %% "akka-http" % "10.5.3",
   libraryDependencies += "com.typesafe.akka" %% "akka-stream" % "2.8.5",
-  libraryDependencies += "com.typesafe.slick" %% "slick" % "3.0.0",
+  libraryDependencies += "com.typesafe.slick" %% "slick-hikaricp" % "3.5.1",
+  libraryDependencies +="com.typesafe.slick" %% "slick" % "3.5.1",
   libraryDependencies += "org.slf4j" % "slf4j-nop" % "1.6.4",
   libraryDependencies += "org.postgresql" % "postgresql" % "42.5.4"
 )

@@ -6,27 +6,27 @@ import scala.util.Failure
 import scala.util.Success
 import scala.util.matching.Regex
 import scala.util.Try
-
 import akka.actor.ActorSystem
 import akka.stream.{ActorMaterializer, Materializer}
+
 import scala.concurrent.ExecutionContext
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.directives.RouteDirectives
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity}
-import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.Directives.*
 import akka.http.scaladsl.server.{Route, StandardRoute}
-
-import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.Directives.*
 import akka.http.scaladsl.unmarshalling.FromRequestUnmarshaller
 import akka.http.scaladsl.model.HttpEntity
 import akka.util.ByteString
-import play.api.libs.json._
+import play.api.libs.json.*
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 import akka.http.scaladsl.unmarshalling.{FromEntityUnmarshaller, Unmarshaller}
 import akka.http.scaladsl.model.ContentTypes
+import de.htwg.sa.minesweeper.persistence.database.Slick
 /* import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl.Game */
 import de.htwg.sa.minesweeper.persistence.entity._
 import de.htwg.sa.minesweeper.persistence.fileIoComponent.config.Default
@@ -49,7 +49,7 @@ class PersistenceApi(using var file: IFileIO) {
 /*     case class GamePersistence(bombs: Int, side: Int, time: Int, board: String)
     case class FieldPersistence(matrix: MatrixPersistence[String], hidden: MatrixPersistence[String])
     case class MatrixPersistence[T] (rows: Vector[Vector[T]]) */
-
+    var db = new Slick()
     implicit val system: ActorSystem = ActorSystem()
     implicit val materializer: Materializer = Materializer(system)
     implicit val executionContext: ExecutionContextExecutor = system.dispatcher
@@ -59,10 +59,15 @@ class PersistenceApi(using var file: IFileIO) {
     val route: Route = pathPrefix("persistence") {
         get {
             path("game") {
-            complete(HttpEntity(ContentTypes.`application/json`, file.loadGame.get.gameToJson.toString()))
+            //var game = db.loadGame()
+            //complete(HttpEntity(ContentTypes.`application/json`, /*game.gameToJson.toString())*/fieldToJson.)
+            complete(StatusCodes.OK, HttpEntity(ContentTypes.`application/json`, "game")    )
             } ~
             path("field") {
-            complete(HttpEntity(ContentTypes.`application/json`, file.loadField.get.fieldToJson))
+            //val field = db.loadField()
+            //val transfield = file.loadField(field)
+            complete(HttpEntity(ContentTypes.`application/json`, "field"/*transfield.get.fieldToJson.toString())*/))
+                //complete(HttpEntity(ContentTypes.`application/json`,/* transfield.get.fieldToJson)*/ fieldToJson.toString()))
             } ~
             path("highscore") {
             complete(HttpEntity(ContentTypes.`application/json`, loadPlayerScoresToJson("C:\\Playground\\minesweeperpublic\\src\\main\\data\\highscore.json").toString()))
@@ -74,6 +79,7 @@ class PersistenceApi(using var file: IFileIO) {
             
                     val testGame: IGame = Game(bombs, size, time, board)
                     file.saveGame(testGame)
+                    db.saveGame(bombs, size, time, board)
                     complete(HttpEntity(ContentTypes.`application/json`, Game(bombs, size, time, board).gameToJson.toString()))
                 }
             } ~
@@ -81,7 +87,7 @@ class PersistenceApi(using var file: IFileIO) {
                 entity(as[String]) { field =>
                     val jsonField = field
                     val pathToFile = Paths.get("C:\\Playground\\minesweeperpublic\\src\\main\\data\\field.json")
-
+                    db.saveField(field)
                     val saveFuture: Future[Unit] = Future {
                         Files.write(pathToFile, jsonField.getBytes("UTF-8"))
                     }
@@ -99,6 +105,7 @@ class PersistenceApi(using var file: IFileIO) {
                         "player" -> player,
                         "score" -> score
                     )
+                    db.savePlayerScore(player, score)
 
                     val pathToFile = "C:\\Playground\\minesweeperpublic\\src\\main\\data\\highscore.json"
 
