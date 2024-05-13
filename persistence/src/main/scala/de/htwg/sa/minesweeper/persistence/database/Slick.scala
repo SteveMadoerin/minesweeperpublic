@@ -3,7 +3,7 @@ package de.htwg.sa.minesweeper.persistence.database
 import akka.japi.JAPI
 import de.htwg.sa.minesweeper.persistence.entity.Game
 import play.api.libs.json.Json
-import slick.jdbc.PostgresProfile.api.*
+import slick.jdbc.PostgresProfile.api._
 import slick.jdbc.JdbcBackend.Database
 import slick.lifted.TableQuery
 import slick.dbio.DBIO
@@ -19,7 +19,7 @@ class Slick extends IDAO {
 
   private val databaseDB: String = sys.env.getOrElse("POSTGRES_DATABASE", "postgres")
   private val databaseUser: String = sys.env.getOrElse("POSTGRES_USER", "postgres")
-  private val databasePassword: String = sys.env.getOrElse("POSTGRES_PASSWORD", "postgres")
+  private val databasePassword: String = sys.env.getOrElse("POSTGRES_PASSWORD", "Kiiing001")
   private val databasePort: String = sys.env.getOrElse("POSTGRES_PORT", "5432")
   private val databaseHost: String = sys.env.getOrElse("POSTGRES_HOST", "localhost")
   private val databaseUrl = s"jdbc:postgresql://$databaseHost:$databasePort/$databaseDB?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&autoReconnect=true"
@@ -80,33 +80,34 @@ class Slick extends IDAO {
     println("Database save")
   }
 
-  def loadGame() : Game = {
+  def loadField(): String = {
     val query = for {
-      game <- gameTable.sortBy(_.id.desc).take(1)
-    } yield {
-      (game.bombs, game.size, game.time, game.board)
-    }
-    //TODO funktionert nicht richtig
-    val result = database.run(query.result)
-    val game = result.map {  case (bombs, size, time, board) =>
-      game = Game(bombs, size, time, board)
-    }
-    game
+        field <- fieldTable.sortBy(_.id.desc).take(1)
+      } yield {
+        field.field
+      }
+
+    val resultFuture = database.run(query.result)
+    val resultField: Seq[String] = Await.result(resultFuture, 1.second)
+    resultField.head
   }
 
-  def loadField() : String = {
-    //val query = fieldTable.take(1).result.head
+  def loadGame(): Game = {
     val query = for {
-      field <- fieldTable.sortBy(_.id.desc).take(1)
-    } yield {
-      (field.field)
+        spiel <- gameTable.sortBy(_.id.desc).take(1)
+      } yield {
+        (spiel.bombs, spiel.size, spiel.time, spiel.board)
+      }
+
+    val resultFuture = database.run(query.result)
+    val resultGame: Seq[(Int, Int, Int, String)] = Await.result(resultFuture, 1.second)
+    val gameSeq: Seq[Game] = resultGame.map { case (bombs, size, time, board) =>
+      Game(bombs, size, time, board)
     }
-    //todo funktioert nicht richtig
-    val result = Await.result(database.run(query),1.second)
-    //val result = database.run(query.result)
-    val field = result.map { case (field) =>
-      field
-    }
-    field
+
+    gameSeq.head
+
   }
+  
+  
 }
