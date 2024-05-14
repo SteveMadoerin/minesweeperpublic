@@ -9,7 +9,7 @@ import slick.lifted.TableQuery
 import slick.dbio.DBIO
 
 import java.sql.SQLNonTransientException
-import scala.concurrent.Await
+import scala.concurrent.{Await, Future}
 import scala.util.{Failure, Success}
 import concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.DurationInt
@@ -32,9 +32,9 @@ class Slick extends IDAO {
   )
 
 
-  private val gameTable = TableQuery(GameTable(_))
-  private val fieldTable = TableQuery(FieldTable(_))
-  private val playerTable = TableQuery(PlayerScoreTable(_))
+  private val gameTable = TableQuery[GameTable]//TableQuery(GameTable(_))
+  private val fieldTable = TableQuery[FieldTable]//TableQuery(FieldTable(_))
+  private val playerTable = TableQuery[PlayerScoreTable]//TableQuery(PlayerScoreTable(_))
 
   private val setup: DBIOAction[Unit, NoStream, Effect.Schema] = DBIO.seq(
     gameTable.schema.createIfNotExists,
@@ -107,6 +107,58 @@ class Slick extends IDAO {
 
     gameSeq.head
 
+  }
+
+  /* CREATE*/
+  def saveGame(obj: Game): Game = {
+    val games = (gameTable returning gameTable.map(_.id)) += (
+        None,
+        obj.bombs,
+        obj.side,
+        obj.time,
+        obj.board
+    )
+    val resultFuture = database.run(games)
+    println("Database save")
+    obj
+  }
+
+  /* READ*/
+  def loadGameById(id: Int): Game = {
+    val query = for {
+        spiel <- gameTable if spiel.id === id
+    } yield {
+      (spiel.bombs, spiel.size, spiel.time, spiel.board)
+    }
+    
+    val resultFuture = database.run(query.result)
+    val resultGame: Seq[(Int, Int, Int, String)] = Await.result(resultFuture, 5.second)
+    val gameSeq: Seq[Game] = resultGame.map { case (bombs, size, time, board) =>
+      Game(bombs, size, time, board)
+    }
+    
+    gameSeq.head
+  }
+  
+  // UPDATE
+  def updateGame(id: Int, obj: Game): Game = {
+    val query = gameTable
+      .filter(_.id === id)
+      .map(game => (game.bombs, game.size, game.time, game.board))
+      .update((obj.bombs, obj.side, obj.time, obj.board))
+    val resultFuture = database.run(query)
+    println("Database update")
+    obj
+  }
+  
+  // DELETE
+  def deleteGame(id: Int): Boolean = {
+    val query = gameTable
+      .filter(_.id === id)
+      .delete
+    val resultFuture = database.run(query)
+    println("Database delete")
+    true
   }
   
   

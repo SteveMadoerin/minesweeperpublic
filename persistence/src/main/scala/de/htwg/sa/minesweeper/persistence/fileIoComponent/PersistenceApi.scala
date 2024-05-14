@@ -56,19 +56,19 @@ class PersistenceApi(using var file: IFileIO) {
     val route: Route = pathPrefix("persistence") {
         get {
             path("game") {
-                var game = db.loadGame()
-            //var game = db.loadGame()
-            //complete(HttpEntity(ContentTypes.`application/json`, /*game.gameToJson.toString())*/fieldToJson.)
+                val game = db.loadGame()
+                //var game = db.loadGame()
+                //complete(HttpEntity(ContentTypes.`application/json`, /*game.gameToJson.toString())*/fieldToJson.)
             complete(StatusCodes.OK, HttpEntity(ContentTypes.`application/json`, game.gameToJson.toString())    )
             } ~
             path("field") {
-            val field = db.loadField()
-            //val transfield = file.loadField(field)
-            complete(HttpEntity(ContentTypes.`application/json`, field/*transfield.get.fieldToJson.toString())*/))
+                val field = db.loadField()
+                 //val transfield = file.loadField(field)
+                complete(HttpEntity(ContentTypes.`application/json`, field/*transfield.get.fieldToJson.toString())*/))
                 //complete(HttpEntity(ContentTypes.`application/json`,/* transfield.get.fieldToJson)*/ fieldToJson.toString()))
             } ~
             path("highscore") {
-            complete(HttpEntity(ContentTypes.`application/json`, loadPlayerScoresToJson("C:\\Playground\\minesweeperpublic\\src\\main\\data\\highscore.json").toString()))
+                complete(HttpEntity(ContentTypes.`application/json`, loadPlayerScoresToJson("C:\\Playground\\minesweeperpublic\\src\\main\\data\\highscore.json").toString()))
             }
         } ~
         put {
