@@ -421,4 +421,7 @@
 }, {
   "player" : "Default",
   "score" : 0
+}, {
+  "player" : "Sly",
+  "score" : 999
 } ]

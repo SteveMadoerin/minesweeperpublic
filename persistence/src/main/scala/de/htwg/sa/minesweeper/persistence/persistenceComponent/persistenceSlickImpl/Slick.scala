@@ -98,7 +98,7 @@ class Slick extends IPersistence {
 
 
   def loadField: Option[IField] = {
-    FieldDao(database).findById(0) match{
+    FieldDao(database).findById(1) match{
       case field => Some(Util.f.jsonToField(field))
       case _ => None
     }
@@ -118,7 +118,7 @@ class Slick extends IPersistence {
 //  }
 
   def loadGame: Option[IGame] = {
-    GameDao(database).findById(0) match
+    GameDao(database).findById(1) match
       case g => Some(g)
       case _ => None
   }

@@ -59,7 +59,7 @@ class PersistenceApi(using var file: IPersistence) {
                 Slick().closeConnection
                 //val field = db.loadField()
                  //val transfield = file.loadField(field)
-                complete(HttpEntity(ContentTypes.`application/json`, field.fieldToJson/*transfield.get.fieldToJson.toString())*/))
+                complete(HttpEntity(ContentTypes.`application/json`, field.fieldToJson.toString/*transfield.get.fieldToJson.toString())*/))
                 //complete(HttpEntity(ContentTypes.`application/json`,/* transfield.get.fieldToJson)*/ fieldToJson.toString()))
             } ~
             path("highscore") {
@@ -88,7 +88,7 @@ class PersistenceApi(using var file: IPersistence) {
                     //db.saveField(field)
                     Slick().saveField(Util.f.jsonToField(field))
                     Slick().closeConnection
-                    
+
                     val saveFuture: Future[Unit] = Future {
                         Files.write(pathToFile, jsonField.getBytes("UTF-8"))
                     }
