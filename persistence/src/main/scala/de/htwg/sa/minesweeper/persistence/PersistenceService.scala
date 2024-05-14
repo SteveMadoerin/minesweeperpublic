@@ -1,10 +1,10 @@
 package de.htwg.sa.minesweeper.persistence
 
-import de.htwg.sa.minesweeper.persistence.fileIoComponent.PersistenceApi
-import de.htwg.sa.minesweeper.persistence.database
-import de.htwg.sa.minesweeper.persistence.database.{GameDao, GameTable, Slick}
+import de.htwg.sa.minesweeper.persistence.persistenceComponent
+import de.htwg.sa.minesweeper.persistence.persistenceComponent.{GameTable, PersistenceApi, Slick}
 import de.htwg.sa.minesweeper.persistence.entity.Game
-import de.htwg.sa.minesweeper.persistence.fileIoComponent.config.Default.given
+import de.htwg.sa.minesweeper.persistence.persistenceComponent.config.Default.given
+import de.htwg.sa.minesweeper.persistence.persistenceComponent.persistenceSlickImpl.Dao.GameDao
 import slick.dbio.DBIO
 import slick.jdbc.JdbcBackend.Database
 import slick.lifted.TableQuery

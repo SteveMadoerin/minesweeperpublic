@@ -1,19 +1,15 @@
-package de.htwg.sa.minesweeper.persistence.fileIoComponent.fileIoJsonImpl
+package de.htwg.sa.minesweeper.persistence.persistenceComponent.persistenceJsonImpl
 
-import de.htwg.sa.minesweeper.persistence.fileIoComponent.IFileIO
 import de.htwg.sa.minesweeper.persistence.entity._
-/* import de.htwg.sa.minesweeper.model.gameComponent.{IGame, IField} */
+import de.htwg.sa.minesweeper.persistence.persistenceComponent.IPersistence
 import scala.io.Source
 import java.io._
 import play.api.libs.json._
-/* import de.htwg.sa.minesweeper.Default.{given}
-import de.htwg.sa.minesweeper.Default */
-/* import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl._ */
+import de.htwg.sa.minesweeper.persistence.persistenceComponent.config.Default
 import scala.util.{Try, Success, Failure}
-import de.htwg.sa.minesweeper.persistence.fileIoComponent.config.Default
 
 
-class FileIO extends IFileIO{
+class Persistence extends IPersistence{
 
     override def saveGame(game: IGame): Unit = {
         val pw = Try (new PrintWriter(new File("C:\\Playground\\minesweeperpublic\\src\\main\\data\\game.json")))
@@ -105,7 +101,7 @@ class FileIO extends IFileIO{
         )
     }
 
-    override def loadField(field: String): Option[IField] = {
+    def loadField(field: String): Option[IField] = {
 
         //val source: String = Source.fromFile("C:\\Playground\\minesweeperpublic\\src\\main\\data\\field.json").getLines.mkString
         val source = field
@@ -203,5 +199,7 @@ class FileIO extends IFileIO{
             }
 
         }
-    } 
+    }
+
+    override def loadField: Option[IField] = ???
 }

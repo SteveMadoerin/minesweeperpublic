@@ -1,12 +1,12 @@
-package de.htwg.sa.minesweeper.persistence.fileIoComponent.fileIoXmlImpl
+package de.htwg.sa.minesweeper.persistence.persistenceComponent.persistenceXmlImpl
 
-import de.htwg.sa.minesweeper.persistence.fileIoComponent.IFileIO
+import de.htwg.sa.minesweeper.persistence.persistenceComponent.IPersistence
 /* import de.htwg.sa.minesweeper.model.gameComponent.{IGame, IField}
 import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl._ */
 /* import de.htwg.sa.minesweeper.Default.{given}
 import de.htwg.sa.minesweeper.Default */
 import de.htwg.sa.minesweeper.persistence.entity._
-import de.htwg.sa.minesweeper.persistence.fileIoComponent.config.Default
+import de.htwg.sa.minesweeper.persistence.persistenceComponent.config.Default
 import scala.xml._
 import scala.compiletime.ops.string
 import scala.util.{Try, Success, Failure}
@@ -14,7 +14,7 @@ import java.io._
 
 
 
-class FileIO extends IFileIO {
+class Persistence extends IPersistence {
 
 
     override def loadGame: Option[IGame] = {
@@ -44,7 +44,7 @@ class FileIO extends IFileIO {
     override def saveGame(game: IGame): Unit = {scala.xml.XML.save("C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\game.xml", gameToXml(game))}
     
     
-    override def loadField(field: String): Option[IField] = {
+    def loadField(field: String): Option[IField] = {
         val maybeFile: Try[Elem] = Try(scala.xml.XML.loadFile("C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\field.xml"))
         val file = maybeFile match {
             case Success(file) => file
@@ -169,5 +169,6 @@ class FileIO extends IFileIO {
             writer.close()
         }
     }
-    
+
+    override def loadField: Option[IField] = ???
 }

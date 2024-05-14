@@ -1,11 +1,11 @@
-package de.htwg.sa.minesweeper.persistence.database
+package de.htwg.sa.minesweeper.persistence.persistenceComponent
 
 
 import scala.language.postfixOps
 
 import scala.concurrent.{Await, Future}
 
-trait IDaoNew [T, U] {
+trait IDao [T, U] {
 
     def save(obj: T): T
 

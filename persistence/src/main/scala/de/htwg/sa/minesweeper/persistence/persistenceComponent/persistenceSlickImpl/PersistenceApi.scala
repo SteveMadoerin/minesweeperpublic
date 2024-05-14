@@ -1,43 +1,34 @@
-package de.htwg.sa.minesweeper.persistence.fileIoComponent
+package de.htwg.sa.minesweeper.persistence.persistenceComponent
 
-
-import scala.concurrent.ExecutionContextExecutor
-import scala.util.Failure
-import scala.util.Success
-import scala.util.matching.Regex
-import scala.util.Try
 import akka.actor.ActorSystem
-import akka.stream.{ActorMaterializer, Materializer}
-
-import scala.concurrent.ExecutionContext
-import akka.http.scaladsl.server.Route
-import akka.http.scaladsl.server.directives.RouteDirectives
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity}
 import akka.http.scaladsl.server.Directives.*
+import akka.http.scaladsl.server.directives.RouteDirectives
 import akka.http.scaladsl.server.{Route, StandardRoute}
-import akka.http.scaladsl.server.Directives.*
-import akka.http.scaladsl.unmarshalling.FromRequestUnmarshaller
-import akka.http.scaladsl.model.HttpEntity
+import akka.http.scaladsl.unmarshalling.{FromEntityUnmarshaller, FromRequestUnmarshaller, Unmarshaller}
+import akka.stream.{ActorMaterializer, Materializer}
 import akka.util.ByteString
+import de.htwg.sa.minesweeper.persistence.persistenceComponent.persistenceSlickImpl.Util
+import de.htwg.sa.minesweeper.persistence.persistenceComponent.{IPersistence, Slick}
 import play.api.libs.json.*
 
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
-import akka.http.scaladsl.unmarshalling.{FromEntityUnmarshaller, Unmarshaller}
-import akka.http.scaladsl.model.ContentTypes
-import de.htwg.sa.minesweeper.persistence.database.Slick
+import scala.concurrent.{ExecutionContext, ExecutionContextExecutor, Future}
+import scala.util.{Failure, Success, Try}
+import scala.util.matching.Regex
 /* import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl.Game */
-import de.htwg.sa.minesweeper.persistence.entity._
-import de.htwg.sa.minesweeper.persistence.fileIoComponent.config.Default
-/* import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl.Field */
-import scala.io.Source
-import java.nio.file.Files
-import java.nio.file.Paths
-import akka.http.scaladsl.model.StatusCodes
-import java.io.File
+import de.htwg.sa.minesweeper.persistence.entity.*
+import de.htwg.sa.minesweeper.persistence.persistenceComponent.config.Default
 
-class PersistenceApi(using var file: IFileIO) {
+/* import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl.Field */
+import akka.http.scaladsl.model.StatusCodes
+
+import java.io.File
+import java.nio.file.{Files, Paths}
+import scala.io.Source
+
+class PersistenceApi(using var file: IPersistence) {
 
     // Define the implicit unmarshaller for `play.api.libs.json.JsValue`
     implicit val jsValueUnmarshaller: FromEntityUnmarshaller[JsValue] = {
@@ -56,18 +47,25 @@ class PersistenceApi(using var file: IFileIO) {
     val route: Route = pathPrefix("persistence") {
         get {
             path("game") {
-                val game = db.loadGame()
+                val game = Slick().loadGame
+                Slick().closeConnection
+                //val game = db.loadGame()
                 //var game = db.loadGame()
                 //complete(HttpEntity(ContentTypes.`application/json`, /*game.gameToJson.toString())*/fieldToJson.)
-            complete(StatusCodes.OK, HttpEntity(ContentTypes.`application/json`, game.gameToJson.toString())    )
+            complete(StatusCodes.OK, HttpEntity(ContentTypes.`application/json`, game.get.gameToJson.toString())    )
             } ~
             path("field") {
-                val field = db.loadField()
+                val field = Slick().loadField.getOrElse(Util.f)
+                Slick().closeConnection
+                //val field = db.loadField()
                  //val transfield = file.loadField(field)
-                complete(HttpEntity(ContentTypes.`application/json`, field/*transfield.get.fieldToJson.toString())*/))
+                complete(HttpEntity(ContentTypes.`application/json`, field.fieldToJson/*transfield.get.fieldToJson.toString())*/))
                 //complete(HttpEntity(ContentTypes.`application/json`,/* transfield.get.fieldToJson)*/ fieldToJson.toString()))
             } ~
             path("highscore") {
+
+                Slick().loadPlayerScores(pathToFile)
+                Slick().closeConnection
                 complete(HttpEntity(ContentTypes.`application/json`, loadPlayerScoresToJson("C:\\Playground\\minesweeperpublic\\src\\main\\data\\highscore.json").toString()))
             }
         } ~
@@ -75,17 +73,22 @@ class PersistenceApi(using var file: IFileIO) {
             path("putGame") {
                 parameter("bombs".as[Int], "size".as[Int], "time".as[Int], "board".as[String]) { (bombs, size, time, board) =>
             
-                    val testGame: IGame = Game(bombs, size, time, board)
-                    file.saveGame(testGame)
-                    db.saveGame(bombs, size, time, board)
-                    complete(HttpEntity(ContentTypes.`application/json`, Game(bombs, size, time, board).gameToJson.toString()))
+                    val tempGame = Game(bombs, size, time, board)
+                    file.saveGame(tempGame)
+                    Slick().saveGame(tempGame)
+                    Slick().closeConnection
+                    //db.saveGame(bombs, size, time, board)
+                    complete(HttpEntity(ContentTypes.`application/json`, tempGame.gameToJson.toString()))
                 }
             } ~
             path("putField") {
                 entity(as[String]) { field =>
                     val jsonField = field
                     val pathToFile = Paths.get("C:\\Playground\\minesweeperpublic\\src\\main\\data\\field.json")
-                    db.saveField(field)
+                    //db.saveField(field)
+                    Slick().saveField(Util.f.jsonToField(field))
+                    Slick().closeConnection
+                    
                     val saveFuture: Future[Unit] = Future {
                         Files.write(pathToFile, jsonField.getBytes("UTF-8"))
                     }
@@ -103,7 +106,9 @@ class PersistenceApi(using var file: IFileIO) {
                         "player" -> player,
                         "score" -> score
                     )
-                    db.savePlayerScore(player, score)
+                    Slick().savePlayerScore(player, score, "")
+                    Slick().closeConnection
+                    //db.savePlayerScore(player, score)
 
                     val pathToFile = "C:\\Playground\\minesweeperpublic\\src\\main\\data\\highscore.json"
 

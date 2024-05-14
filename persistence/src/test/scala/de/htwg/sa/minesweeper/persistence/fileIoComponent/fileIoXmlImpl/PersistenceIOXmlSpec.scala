@@ -10,7 +10,7 @@ import de.htwg.sa.minesweeper.model.gameComponent.IField
 //import de.htwg.sa.minesweeper.Default
 import de.htwg.sa.minesweeper.model.gameComponent.config.Default
 */
-class FileIOXmlSpec extends AnyWordSpec {
+class PersistenceIOXmlSpec extends AnyWordSpec {
 
 
   "A FileIO" when {

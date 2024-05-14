@@ -16,7 +16,7 @@ import de.htwg.sa.minesweeper.Default.given_IFileIO
 import de.htwg.sa.minesweeper.Default.given_IGame
 import de.htwg.sa.minesweeper.controller.controllerComponent.IController
 import de.htwg.sa.minesweeper.model.gameComponent.IGame
-import de.htwg.sa.minesweeper.persistence.fileIoComponent.IFileIO
+import de.htwg.sa.minesweeper.persistence.persistenceComponent.IFileIO
 import de.htwg.sa.minesweeper.Default
 import de.htwg.sa.minesweeper.controller.controllerComponent.controllerBaseImpl.Controller
 import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl.{Playfield, Game, Field}

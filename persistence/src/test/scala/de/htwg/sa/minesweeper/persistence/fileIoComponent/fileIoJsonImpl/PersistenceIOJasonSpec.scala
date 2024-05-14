@@ -12,7 +12,7 @@ import java.nio.file.{Files, Path, Paths}
 import play.api.libs.json.{Json, JsArray}
 
 */
-class FileIOJasonSpec extends AnyWordSpec {
+class PersistenceIOJasonSpec extends AnyWordSpec {
   "A FileIO" when {
 
 /*     "save and load Game" should {

@@ -1,4 +1,4 @@
-package de.htwg.sa.minesweeper.persistence.database
+package de.htwg.sa.minesweeper.persistence.persistenceComponent
 
 import slick.jdbc.PostgresProfile.api._
 import slick.lifted.{ForeignKey, ForeignKeyQuery}

@@ -1,15 +1,16 @@
-package de.htwg.sa.minesweeper.persistence.database
+package de.htwg.sa.minesweeper.persistence.persistenceComponent.persistenceSlickImpl.Dao
 
 import de.htwg.sa.minesweeper.persistence.entity.Game
+import de.htwg.sa.minesweeper.persistence.persistenceComponent.{IDao, PlayerScoreTable}
 import slick.dbio.{DBIO, DBIOAction, Effect, NoStream}
 import slick.jdbc.JdbcBackend.Database
+import slick.jdbc.PostgresProfile.api.*
 import slick.lifted.TableQuery
-import slick.jdbc.PostgresProfile.api._
 
-import concurrent.duration.DurationInt
 import scala.concurrent.Await
+import scala.concurrent.duration.DurationInt
 
-class PlayerScoreDao(db: Database)  extends IDaoNew[(String, Int), Int] {
+class PlayerScoreDao(db: Database)  extends IDao[(String, Int), Int] {
 
     private val playerScoreTable = TableQuery(PlayerScoreTable(_))
 
