@@ -1,9 +1,6 @@
 package de.htwg.sa.minesweeper.persistence.database
 
-import de.htwg.sa.minesweeper.persistence.entity.Game
-import slick.jdbc.JdbcBackend.Database
-import slick.lifted.TableQuery
-import concurrent.duration.DurationInt
+
 import scala.language.postfixOps
 
 import scala.concurrent.{Await, Future}
