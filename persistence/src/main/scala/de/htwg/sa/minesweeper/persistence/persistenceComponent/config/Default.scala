@@ -2,8 +2,6 @@ package de.htwg.sa.minesweeper.persistence.persistenceComponent.config
 
 import de.htwg.sa.minesweeper.persistence.entity._
 import de.htwg.sa.minesweeper.persistence.persistenceComponent._
-/* import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl._
-import de.htwg.sa.minesweeper.model.gameComponent._ */
 import de.htwg.sa.minesweeper.persistence.persistenceComponent.IPersistence
 import de.htwg.sa.minesweeper.persistence.persistenceComponent.persistenceJsonImpl.Persistence as JsonFileIO
 import de.htwg.sa.minesweeper.persistence.persistenceComponent.persistenceXmlImpl.Persistence as XmlFileIO

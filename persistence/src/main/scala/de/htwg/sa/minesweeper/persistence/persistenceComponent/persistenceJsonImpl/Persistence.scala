@@ -36,7 +36,7 @@ class Persistence extends IPersistence{
     }
 
     override def loadGame: Option[IGame] = 
-        import java.io._
+        
         val maybeSource = Try(Source.fromFile("C:\\Playground\\minesweeperpublic\\src\\main\\data\\game.json").getLines.mkString)
         val source = maybeSource match {
             case Success(source) => source
@@ -53,8 +53,8 @@ class Persistence extends IPersistence{
         val bombs = (json \ "game" \ "bombs").get.toString.toInt
         val side = (json \ "game" \ "side").get.toString.toInt
         val time = (json \ "game" \ "time").get.toString.toInt
-        // TWO TRACK CODE   
-        Some(new Game(bombs, side, time, "Playing")) // after loading should always be playing
+        
+        Some(Game(bombs, side, time, "Playing")) // after loading should always be playing
     
     def saveField(field: IField) = {
         import java.io._
@@ -102,9 +102,8 @@ class Persistence extends IPersistence{
     }
 
     def loadField(field: String): Option[IField] = {
-
-        //val source: String = Source.fromFile("C:\\Playground\\minesweeperpublic\\src\\main\\data\\field.json").getLines.mkString
-        val source = field
+        
+        val source = field // Source.fromFile("C:\\Playground\\minesweeperpublic\\src\\main\\data\\field.json").getLines.mkString
         val json: JsValue = Json.parse(source)
         val size = (json \ "field" \ "size").get.toString.toInt
 

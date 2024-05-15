@@ -1,16 +1,12 @@
 package de.htwg.sa.minesweeper.persistence.persistenceComponent.persistenceXmlImpl
 
 import de.htwg.sa.minesweeper.persistence.persistenceComponent.IPersistence
-/* import de.htwg.sa.minesweeper.model.gameComponent.{IGame, IField}
-import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl._ */
-/* import de.htwg.sa.minesweeper.Default.{given}
-import de.htwg.sa.minesweeper.Default */
-import de.htwg.sa.minesweeper.persistence.entity._
+import de.htwg.sa.minesweeper.persistence.entity.*
 import de.htwg.sa.minesweeper.persistence.persistenceComponent.config.Default
-import scala.xml._
-import scala.compiletime.ops.string
-import scala.util.{Try, Success, Failure}
-import java.io._
+
+import java.io.*
+import scala.util.{Failure, Success, Try}
+import scala.xml.*
 
 
 
@@ -29,8 +25,8 @@ class Persistence extends IPersistence {
         val bombs = (file \\ "bombs").text.toInt
         val side = (file \\ "side").text.toInt
         val time = (file \\ "time").text.toInt
-        // HERE IS THE TWO TRACK CODE
-        Some(new Game(0, 0, 0, "Playing")) // after loading should always be playing
+
+        Some(Game(0, 0, 0, "Playing")) // after loading should always be playing
     }
 
     def gameToXml(game: IGame) = {
@@ -106,7 +102,7 @@ class Persistence extends IPersistence {
     def saveField(field: IField): Unit = saveString(field)
 
     def saveString(field: IField): Unit = {
-        import java.io._
+        import java.io.*
 
         val pw = Try(new PrintWriter(new File("C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\field.xml")))
         pw match {

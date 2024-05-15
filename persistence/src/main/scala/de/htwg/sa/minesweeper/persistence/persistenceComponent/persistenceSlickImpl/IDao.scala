@@ -1,9 +1,6 @@
 package de.htwg.sa.minesweeper.persistence.persistenceComponent
 
-
 import scala.language.postfixOps
-
-import scala.concurrent.{Await, Future}
 
 trait IDao [T, U] {
 
