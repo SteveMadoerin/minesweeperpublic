@@ -1,6 +1,7 @@
 package de.htwg.sa.minesweeper.persistence.persistenceComponent.persistenceSlickImpl.Dao
 
-import de.htwg.sa.minesweeper.persistence.persistenceComponent.{IDao, PlayerScoreTable}
+
+import de.htwg.sa.minesweeper.persistence.persistenceComponent.persistenceSlickImpl.{IDao, PlayerScoreTable}
 import slick.jdbc.JdbcBackend.Database
 import slick.jdbc.PostgresProfile.api.*
 import slick.lifted.TableQuery

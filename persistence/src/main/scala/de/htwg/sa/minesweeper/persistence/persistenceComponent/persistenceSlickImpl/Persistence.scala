@@ -1,6 +1,7 @@
-package de.htwg.sa.minesweeper.persistence.persistenceComponent
+package de.htwg.sa.minesweeper.persistence.persistenceComponent.persistenceSlickImpl
 
 import de.htwg.sa.minesweeper.persistence.entity.{Game, IField, IGame}
+import de.htwg.sa.minesweeper.persistence.persistenceComponent.IPersistence
 import de.htwg.sa.minesweeper.persistence.persistenceComponent.persistenceSlickImpl.Dao.{FieldDao, GameDao, PlayerScoreDao}
 import de.htwg.sa.minesweeper.persistence.persistenceComponent.persistenceSlickImpl.Util
 import slick.dbio.DBIO
@@ -11,8 +12,8 @@ import slick.lifted.TableQuery
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Failure, Success}
 
-
-class Slick extends IPersistence {
+/* Slick implementation of IPersistence */
+class Persistence extends IPersistence {
 
   private val databaseDB: String = sys.env.getOrElse("POSTGRES_DATABASE", "postgres")
   private val databaseUser: String = sys.env.getOrElse("POSTGRES_USER", "postgres")

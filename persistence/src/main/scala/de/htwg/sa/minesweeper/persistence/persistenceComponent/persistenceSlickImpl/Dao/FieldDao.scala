@@ -1,8 +1,8 @@
 package de.htwg.sa.minesweeper.persistence.persistenceComponent.persistenceSlickImpl.Dao
 
-import de.htwg.sa.minesweeper.persistence.persistenceComponent.{FieldTable, IDao}
+import de.htwg.sa.minesweeper.persistence.persistenceComponent.persistenceSlickImpl.{FieldTable, IDao}
 import slick.jdbc.JdbcBackend.Database
-import slick.jdbc.PostgresProfile.api._
+import slick.jdbc.PostgresProfile.api.*
 import slick.lifted.TableQuery
 
 import scala.concurrent.Await

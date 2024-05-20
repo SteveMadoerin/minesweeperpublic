@@ -1,9 +1,9 @@
 package de.htwg.sa.minesweeper.persistence.persistenceComponent.persistenceSlickImpl.Dao
 
 import de.htwg.sa.minesweeper.persistence.entity.Game
-import de.htwg.sa.minesweeper.persistence.persistenceComponent.{GameTable, IDao}
+import de.htwg.sa.minesweeper.persistence.persistenceComponent.persistenceSlickImpl.{GameTable, IDao}
 import slick.jdbc.JdbcBackend.Database
-import slick.jdbc.PostgresProfile.api._
+import slick.jdbc.PostgresProfile.api.*
 import slick.lifted.TableQuery
 
 import scala.concurrent.Await

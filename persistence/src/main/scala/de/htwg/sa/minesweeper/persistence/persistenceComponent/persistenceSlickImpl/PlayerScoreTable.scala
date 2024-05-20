@@ -1,4 +1,4 @@
-package de.htwg.sa.minesweeper.persistence.persistenceComponent
+package de.htwg.sa.minesweeper.persistence.persistenceComponent.persistenceSlickImpl
 
 import slick.jdbc.PostgresProfile.api.*
 
