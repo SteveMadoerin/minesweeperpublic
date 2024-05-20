@@ -1,4 +1,26 @@
+version: "3.1"
+
 services:
+  mongo:
+    image: mongo
+    restart: always
+    container_name: mongo
+    ports:
+      - 27017:27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: mongodb
+      MONGO_INITDB_ROOT_PASSWORD: dev.to/mongodb
+    volumes:
+      - ./db_data/:/data/db/
+
+#  worker:
+#    container_name: worker
+#    image: worker-image:latest
+#    network_mode: host
+#    stdin_open: true
+#    tty: true
+#  #    ports:
+#  #      - 9080:9080
 
   model:
     container_name: model
