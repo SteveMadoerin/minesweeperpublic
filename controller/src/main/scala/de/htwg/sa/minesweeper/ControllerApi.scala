@@ -2,46 +2,21 @@ package de.htwg.sa.minesweeper
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.server.Directives.*
-import akka.http.scaladsl.server.{PathMatcher, PathMatcher1, Route}
-
-import java.net.{HttpURLConnection, URL}
-import scala.concurrent.ExecutionContext
-import de.htwg.sa.minesweeper.util.Observer
-import de.htwg.sa.minesweeper.controller.controllerComponent.IController
-import de.htwg.sa.minesweeper.util.RestUtil
-import de.htwg.sa.minesweeper.util.Event
-import akka.stream.Materializer
-import scala.concurrent.ExecutionContextExecutor
-
-import akka.actor.ActorSystem
-import akka.stream.{ActorMaterializer, Materializer}
-import scala.concurrent.ExecutionContext
-import akka.http.scaladsl.server.Route
-import akka.http.scaladsl.server.directives.RouteDirectives
-import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity}
-import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.{Route, StandardRoute}
+import akka.http.scaladsl.server.Directives.*
+import akka.http.scaladsl.server.Route
+import akka.stream.Materializer
+import de.htwg.sa.minesweeper.controller.controllerComponent.IController
+import de.htwg.sa.minesweeper.util.{Event, Observer, RestUtil}
 import scala.concurrent.ExecutionContextExecutor
-import scala.util.Failure
-import scala.util.Success
-import scala.util.matching.Regex
-import scala.util.Try
-//import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl.Game
-//import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl.Playfield
-//import de.htwg.sa.minesweeper.model.gameComponent.config.Default
-//import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl.Decider
-import scala.compiletime.ops.boolean
-import play.api.libs.json.Json
-import de.htwg.sa.minesweeper.util.Move
-import play.api.libs.json.JsValue
+import scala.util.{Failure, Success}
 import de.htwg.sa.minesweeper.entity.GameDTO
+import de.htwg.sa.minesweeper.util.Move
+import play.api.libs.json.{JsValue, Json}
 
 
 class ControllerApi(using var controller: IController) extends Observer:
     controller.add(this)
-    
     
     implicit val system: ActorSystem = ActorSystem()
     implicit val materializer: Materializer = Materializer(system)

@@ -10,8 +10,8 @@ import akka.stream.Materializer
 import de.htwg.sa.minesweeper.persistence.entity.*
 import de.htwg.sa.minesweeper.persistence.persistenceComponent.IPersistence
 import de.htwg.sa.minesweeper.persistence.persistenceComponent.config.Default
-import de.htwg.sa.minesweeper.persistence.persistenceComponent.persistenceSlickImpl.Util
-import play.api.libs.json.*
+import de.htwg.sa.minesweeper.persistence.persistenceComponent.config.Default.{given}
+import play.api.libs.json._
 
 import java.io.File
 import java.nio.file.{Files, Paths}
@@ -19,7 +19,7 @@ import scala.concurrent.{ExecutionContextExecutor, Future}
 import scala.io.Source
 import scala.util.{Failure, Success, Try}
 
-class PersistenceApi(using var file: IPersistence) {
+class PersistenceApi(using var p: IPersistence) {
     
     implicit val jsValueUnmarshaller: FromEntityUnmarshaller[JsValue] = {
         Unmarshaller.byteStringUnmarshaller.forContentTypes(ContentTypes.`application/json`).mapWithCharset { (data, charset) =>
@@ -36,32 +36,39 @@ class PersistenceApi(using var file: IPersistence) {
     
     val route: Route = pathPrefix("persistence") {
         get {
+            path("ping") {
+                complete(StatusCodes.OK, HttpEntity(ContentTypes.`application/json`, "accessGranted"))
+            } ~
             path("game") {
-                val game = Persistence().loadGame
-                Persistence().closeConnection
-            complete(StatusCodes.OK, HttpEntity(ContentTypes.`application/json`, game.get.gameToJson.toString())    )
+                val spiel = p.loadGame
+                //Persistence().closeConnection
+                complete(StatusCodes.OK, HttpEntity(ContentTypes.`application/json`, spiel.get.gameToJson.toString())    )
             } ~
             path("field") {
-                val field = Persistence().loadField.getOrElse(Util.f)
-                Persistence().closeConnection
+                val field = p.loadField.getOrElse(Util.f)
+                //Persistence().closeConnection
                 complete(HttpEntity(ContentTypes.`application/json`, field.fieldToJson.toString))
             } ~
             path("highscore") {
 
-                Persistence().loadPlayerScores(pathToFile)
-                Persistence().closeConnection
-                complete(HttpEntity(ContentTypes.`application/json`, loadPlayerScoresToJson("C:\\Playground\\minesweeperpublic\\src\\main\\data\\highscore.json").toString()))
+                val scoreTable = p.loadPlayerScores(pathToFile)
+                val highscore = loadPlayerScoresToJson(scoreTable)
+                //Persistence().closeConnection
+                //complete(HttpEntity(ContentTypes.`application/json`, loadPlayerScoresToJson("C:\\Playground\\minesweeperpublic\\src\\main\\data\\highscore.json").toString()))
+                //complete(HttpEntity(ContentTypes.`application/json`, loadPlayerScoresToJson("C:\\Playground\\minesweeperpublic\\src\\main\\data\\highscore.json").toString()))
+
+                complete(HttpEntity(ContentTypes.`application/json`, highscore.toString()))
             }
         } ~
         put {
             path("putGame") {
-                parameter("bombs".as[Int], "size".as[Int], "time".as[Int], "board".as[String]) { (bombs, size, time, board) =>
-            
-                    val tempGame = Game(bombs, size, time, board)
-                    file.saveGame(tempGame)
-                    Persistence().saveGame(tempGame)
-                    Persistence().closeConnection
-                    complete(HttpEntity(ContentTypes.`application/json`, tempGame.gameToJson.toString()))
+                parameter("bombs".as[Int], "size".as[Int], "time".as[Int], "board".as[String]) {
+                    case (bombs, size, time, board) =>
+                        val tempGame = Game(bombs, size, time, board)
+                        p.saveGame(tempGame)
+                        //Persistence().saveGame(tempGame)
+                        //Persistence().closeConnection
+                        complete(HttpEntity(ContentTypes.`application/json`, tempGame.gameToJson))
                 }
             } ~
             path("putField") {
@@ -69,12 +76,10 @@ class PersistenceApi(using var file: IPersistence) {
                     val jsonField = field
                     val pathToFile = Paths.get("C:\\Playground\\minesweeperpublic\\src\\main\\data\\field.json")
                     
-                    Persistence().saveField(Util.f.jsonToField(field))
-                    Persistence().closeConnection
+                    p.saveField(Util.f.jsonToField(field))
+                    //Persistence().closeConnection
 
-                    val saveFuture: Future[Unit] = Future {
-                        Files.write(pathToFile, jsonField.getBytes("UTF-8"))
-                    }
+                    val saveFuture: Future[Unit] = Future { Files.write(pathToFile, jsonField.getBytes("UTF-8"))}
 
                     onComplete(saveFuture) {
                         case Success(_) => complete(StatusCodes.OK, HttpEntity(ContentTypes.`application/json`, jsonField))
@@ -89,14 +94,15 @@ class PersistenceApi(using var file: IPersistence) {
                         "player" -> player,
                         "score" -> score
                     )
-                    Persistence().savePlayerScore(player, score, "")
-                    Persistence().closeConnection
+                    //Persistence().savePlayerScore(player, score, "")
+                    //Persistence().closeConnection
                     
                     val pathToFile = "C:\\Playground\\minesweeperpublic\\src\\main\\data\\highscore.json"
+                    p.savePlayerScore(player, score, pathToFile)
 
-                    file.savePlayerScore(player, score, pathToFile)
-                    complete(HttpEntity(ContentTypes.`application/json`, newScoreObj.toString())) 
-
+                    //file.savePlayerScore(player, score, pathToFile)
+                    complete(HttpEntity(ContentTypes.`application/json`, newScoreObj.toString()))
+                    //complete(HttpEntity(ContentTypes.`application/json`, s"Player: $player Score: $score"))
                 }
             }
         }
@@ -140,6 +146,18 @@ class PersistenceApi(using var file: IPersistence) {
             case _ => JsArray()
         }
     }
+
+    def loadPlayerScoresToJson( scoreTable: Seq[(String, Int)]): JsValue = {
+
+        val validScores = scoreTable.flatMap {
+            case (player, score) if player.nonEmpty && score > 0 =>
+                Some(Json.obj("player" -> player, "score" -> score))
+            case _ => None
+        }
+        JsArray(validScores)
+    }
+
+
     
 
 }

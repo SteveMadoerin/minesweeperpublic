@@ -173,7 +173,7 @@ class Controller() extends IController with Observable:
 
     def saveGame =
 
-        notifyObserversRest("SaveTime") 
+        notifyObserversRest("SaveTime")
 
         val queryParameters = Uri.Query(
             "bombs" -> s"${game.bombs}",
@@ -192,6 +192,8 @@ class Controller() extends IController with Observable:
             case Failure(ex)  => println(s"Request failed: $ex")
         }
 
+        // TODO: Await for the response
+
         // _____________________________________________________________________________________________________
 
         val jasonField = RestUtil.fieldDtoToJson(field)
@@ -209,7 +211,7 @@ class Controller() extends IController with Observable:
             case Failure(ex)  => println(s"Failed to put JSON file: ${ex.getMessage}")
         }
 
-        game = GameDTO(game.bombs, game.side, game.time, "Playing")
+        game = GameDTO(game.bombs, game.side, game.time, "Playing") // TODO: game.time is not updated
         notifyObserversRest("Save") //notifyObservers(Event.Save)
     
     def exit = notifyObserversRest("Exit")

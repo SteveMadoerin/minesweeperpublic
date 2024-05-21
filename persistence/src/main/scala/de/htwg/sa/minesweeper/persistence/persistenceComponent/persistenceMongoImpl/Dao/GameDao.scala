@@ -10,19 +10,22 @@ import org.mongodb.scala.result.*
 
 import scala.concurrent.Await
 import scala.concurrent.duration.DurationInt
+import scala.util.{Failure, Success, Try}
 
 class GameDao(db: MongoDatabase) extends IDao[Game, Int] {
 
     val gameCollection: MongoCollection[Document] = db.getCollection("game")
 
+    def loadNextGameId: Int = {
+        val results = Await.result(gameCollection.find().toFuture(), 5.seconds)
+        val idNew = Try(results.maxBy(_.getInteger("id")).getInteger("id") + 1)
+        idNew match
+            case Success(id) => id
+            case Failure(_) => 1
+    }
+
     override def save(obj: Game): Game = {
-
-        def loadNextGameId: Int = {
-            val results = Await.result(gameCollection.find().toFuture(), 5.seconds)
-            val idNew = results.maxBy(_.getInteger("id")).getInteger("id") + 1
-            if (results.isEmpty) then 1 else idNew
-        }
-
+        
         def gameToDocument(game: Game, gameId: Int): Document = {
             Document(
                 "id" -> gameId,

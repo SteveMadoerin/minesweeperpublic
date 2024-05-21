@@ -3,10 +3,9 @@ package de.htwg.sa.minesweeper.persistence.persistenceComponent.persistenceSlick
 import de.htwg.sa.minesweeper.persistence.entity.{Game, IField, IGame}
 import de.htwg.sa.minesweeper.persistence.persistenceComponent.IPersistence
 import de.htwg.sa.minesweeper.persistence.persistenceComponent.persistenceSlickImpl.Dao.{FieldDao, GameDao, PlayerScoreDao}
-import de.htwg.sa.minesweeper.persistence.persistenceComponent.persistenceSlickImpl.Util
 import slick.dbio.DBIO
 import slick.jdbc.JdbcBackend.Database
-import slick.jdbc.PostgresProfile.api.*
+import slick.jdbc.PostgresProfile.api._
 import slick.lifted.TableQuery
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -14,6 +13,8 @@ import scala.util.{Failure, Success}
 
 /* Slick implementation of IPersistence */
 class Persistence extends IPersistence {
+
+  private val logger = org.slf4j.LoggerFactory.getLogger(classOf[Persistence])
 
   private val databaseDB: String = sys.env.getOrElse("POSTGRES_DATABASE", "postgres")
   private val databaseUser: String = sys.env.getOrElse("POSTGRES_USER", "postgres")
@@ -38,24 +39,17 @@ class Persistence extends IPersistence {
     fieldTable.schema.createIfNotExists,
     playerTable.schema.createIfNotExists
   )
-  println("create tables")
 
   database.run(setup).onComplete {
-    case Success(value) => println("tables created")
-    case Failure(exception) => println(exception.getMessage)
+    case Success(value) => logger.info("Tables created")
+    case Failure(exception) => logger.error(exception.getMessage)
   }
   
-  def savePlayerScore(playerName: String, score: Int, filePath: String): Unit = {
-    PlayerScoreDao(database).save((playerName, score))
-  }
+  def savePlayerScore(playerName: String, score: Int, filePath: String): Unit = PlayerScoreDao(database).save((playerName, score))
   
-  def saveField(field: IField): Unit = {
-    FieldDao(database).save(Util.f.fieldToJson(field))
-  }
+  def saveField(field: IField): Unit = FieldDao(database).save(Util.f.fieldToJson(field))
   
-  def saveGame(game: IGame): Unit = {
-    GameDao(database).save(game.asInstanceOf[Game])
-  }
+  def saveGame(game: IGame): Unit = GameDao(database).save(game.asInstanceOf[Game])
   
   def loadField: Option[IField] = {
     FieldDao(database).findById(1) match{
@@ -70,12 +64,20 @@ class Persistence extends IPersistence {
       case _ => None
   }
   
-  override def loadPlayerScores(filePath: String): Seq[(String, Int)] = {
-    PlayerScoreDao(database).findAll()
-  }
+  override def loadPlayerScores(filePath: String): Seq[(String, Int)] = PlayerScoreDao(database).findAll()
   
-  def closeConnection = {
-    database.close
+  def closeConnection = database.close
+
+  def dropTables(): Unit = {
+    val shutdownSetup: DBIOAction[Unit, NoStream, Effect.Schema] = DBIO.seq(
+      gameTable.schema.dropIfExists,
+      fieldTable.schema.dropIfExists,
+      playerTable.schema.dropIfExists
+    )
+    database.run(shutdownSetup).onComplete {
+      case Success(value) => logger.info("Tables dropped")
+      case Failure(exception) => logger.error(exception.getMessage)
+    }
   }
   
 }

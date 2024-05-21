@@ -12,18 +12,21 @@ import org.mongodb.scala.bson.BsonTransformer.TransformImmutableDocument
 
 import scala.concurrent.Await
 import scala.concurrent.duration.DurationInt
+import scala.util.{Failure, Success, Try}
 
 class FieldDao(db: MongoDatabase) extends IDao[Field, Int] {
 
     private val fieldCollection: MongoCollection[Document] = db.getCollection("field")
 
-    override def save(obj: Field): Field = {
+    def loadNextFieldId: Int = {
+        val results = Await.result(fieldCollection.find().toFuture(), 5.seconds)
+        val idNew = Try(results.maxBy(_.getInteger("id")).getInteger("id") + 1)
+        idNew match
+            case Success(id) => id
+            case Failure(_) => 1
+    }
 
-        def loadNextFieldId: Int = {
-            val results = Await.result(fieldCollection.find().toFuture(), 5.seconds)
-            val idNew = results.maxBy(_.getInteger("id")).getInteger("id") + 1
-            if (results.isEmpty) then 1 else idNew
-        }
+    override def save(obj: Field): Field = {
         
         def fieldToDocument(field: Field, fieldId: Int): Document = {
             val json = field.fieldToJson(field)

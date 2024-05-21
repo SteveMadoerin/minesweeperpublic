@@ -200,5 +200,49 @@ class Persistence extends IPersistence{
         }
     }
 
-    override def loadField: Option[IField] = ???
+    override def loadField: Option[IField] = {
+        val source = Source.fromFile("C:\\Playground\\minesweeperpublic\\src\\main\\data\\field.json").getLines.mkString
+        val json: JsValue = Json.parse(source)
+        val size = (json \ "field" \ "size").get.toString.toInt
+
+        val fieldOption: Option[IField] = Some(Default.scalableField(size, "E"))
+        val matrixOption: Option[Matrix[String]] = Some(Default.scalableMatrix(size, "E"))
+        val hiddenOption: Option[Matrix[String]] = Some(Default.scalableMatrix(size, "E"))
+
+
+        val matrix1 = matrixOption match {
+            case Some(matrix) => matrix
+            case None => println("Matrix is not valid"); Default.scalableMatrix(size, "E")
+        }
+
+        val updatedMatrix: Matrix[String] = (0 until size * size).foldLeft(matrix1) {
+            case (currentMatrix, index) =>
+                val row = (json \ "field" \ "matrix" \\ "row")(index).as[Int]
+                val col = (json \ "field" \ "matrix" \\ "col")(index).as[Int]
+                val cell = (json \ "field" \ "matrix" \\ "cell")(index).as[String]
+                currentMatrix.replaceCell(row, col, cell)
+        }
+
+        val hidden1 = hiddenOption match {
+            case Some(m) => m
+            case None => println("Hidden is not valid"); Default.scalableMatrix(size, "E")
+        }
+
+        val updatedHidden: Matrix[String] = (0 until size * size).foldLeft(hidden1) {
+            case (currentHidden, index) =>
+                val row = (json \ "field" \ "hidden" \\ "row")(index).as[Int]
+                val col = (json \ "field" \ "hidden" \\ "col")(index).as[Int]
+                val cell = (json \ "field" \ "hidden" \\ "cell")(index).as[String]
+                currentHidden.replaceCell(row, col, cell)
+        }
+
+        val finalFieldOption = fieldOption match {
+            case Some(f) => Some(Default.mergeMatrixToField(updatedMatrix, updatedHidden))
+            case None => println("Field is not valid"); None
+        }
+
+        finalFieldOption
+    }
+
+
 }

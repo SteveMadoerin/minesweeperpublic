@@ -34,8 +34,6 @@ class PlayerScoreDao(db: MongoDatabase) extends IDao[(String, Int), Int]  {
             override def onComplete(): Unit = println("Insertion completed.")
         })
 
-        Await.result(insertObservable.toFuture(), 5.seconds) // Ensure that the operation completes
-        println("Database save Player Score")
         obj
     }
 
