@@ -16,7 +16,9 @@ trait IController extends Observable{
     def cheatRest: String
     
     def checkGameOver(status: String): Boolean
+    def checkGameOverGui: Boolean
     def newGameGUI: Unit
+    def newGameForGui(side: Int, bombs: Int): Unit
     def newGameField(optionString: Option[String]): Unit
     def newGame(side: Int, bombs: Int): Unit
 

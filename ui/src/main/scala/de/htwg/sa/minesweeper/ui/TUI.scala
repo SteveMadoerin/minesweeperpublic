@@ -348,7 +348,7 @@ class TUI():
     }
     
 
-    def requestControllerGame = {
+    def requestControllerGame: GameTui = {
         //controller.game.asInstanceOf[Game]
         val url = "http://localhost:9081/controller/game"
 

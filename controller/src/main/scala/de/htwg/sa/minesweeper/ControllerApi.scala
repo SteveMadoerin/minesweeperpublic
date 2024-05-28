@@ -8,9 +8,10 @@ import akka.http.scaladsl.server.Route
 import akka.stream.Materializer
 import de.htwg.sa.minesweeper.controller.controllerComponent.IController
 import de.htwg.sa.minesweeper.util.{Event, Observer, RestUtil}
+
 import scala.concurrent.ExecutionContextExecutor
 import scala.util.{Failure, Success}
-import de.htwg.sa.minesweeper.entity.GameDTO
+import de.htwg.sa.minesweeper.entity.{FieldDTO, GameDTO}
 import de.htwg.sa.minesweeper.util.Move
 import play.api.libs.json.{JsValue, Json}
 
@@ -63,6 +64,9 @@ class ControllerApi(using var controller: IController) extends Observer:
                 },
                 path("gameOver") {
                   controller.gameOver
+/*                    val tempfield = FieldDTO(MatrixDTO(), MatrixDTO())
+                        
+                    )*/
                   complete(RestUtil.fieldDtoToJson(controller.field).toString)
                 },
                 path("field"/"toString") {
@@ -215,6 +219,25 @@ class ControllerApi(using var controller: IController) extends Observer:
                     val result = controller.checkGameOver(requestStatus)
 
                     complete(result.toString)
+                  }
+                },
+                path("checkGameOverGui") {
+
+                  val result = controller.checkGameOverGui
+                  complete(result.toString)
+
+                },
+                path("newGameForGui") {
+                  parameter("bombs".as[Int], "side".as[Int]) { (bombs, side) =>
+                      controller.newGameForGui(side, bombs)
+                      val feld = controller.field
+                      val game = controller.game
+                      val jsonField = Json.parse(RestUtil.fieldDtoToJson(feld))
+                      val jsonGame = Json.parse(RestUtil.gameDtoToJson(game))
+
+                      val jsonGameFieldArray = Json.arr(jsonGame, jsonField)
+                      complete(HttpEntity(ContentTypes.`application/json`, jsonGameFieldArray.toString))
+
                   }
                 },
                 path("newGame") {

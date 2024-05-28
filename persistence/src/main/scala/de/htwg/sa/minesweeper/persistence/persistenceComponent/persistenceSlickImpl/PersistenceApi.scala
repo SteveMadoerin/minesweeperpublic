@@ -32,7 +32,7 @@ class PersistenceApi(using var p: IPersistence) {
     implicit val materializer: Materializer = Materializer(system)
     implicit val executionContext: ExecutionContextExecutor = system.dispatcher
 
-    val pathToFile = Default.filePathHighScore
+    private val pathToFile = Default.filePathHighScore
     
     val route: Route = pathPrefix("persistence") {
         get {
@@ -53,11 +53,8 @@ class PersistenceApi(using var p: IPersistence) {
 
                 val scoreTable = p.loadPlayerScores(pathToFile)
                 val highscore = loadPlayerScoresToJson(scoreTable)
-                //Persistence().closeConnection
-                //complete(HttpEntity(ContentTypes.`application/json`, loadPlayerScoresToJson("C:\\Playground\\minesweeperpublic\\src\\main\\data\\highscore.json").toString()))
-                //complete(HttpEntity(ContentTypes.`application/json`, loadPlayerScoresToJson("C:\\Playground\\minesweeperpublic\\src\\main\\data\\highscore.json").toString()))
 
-                complete(HttpEntity(ContentTypes.`application/json`, highscore.toString()))
+                complete(HttpEntity(ContentTypes.`application/json`, highscore.toString))
             }
         } ~
         put {
@@ -66,8 +63,6 @@ class PersistenceApi(using var p: IPersistence) {
                     case (bombs, size, time, board) =>
                         val tempGame = Game(bombs, size, time, board)
                         p.saveGame(tempGame)
-                        //Persistence().saveGame(tempGame)
-                        //Persistence().closeConnection
                         complete(HttpEntity(ContentTypes.`application/json`, tempGame.gameToJson))
                 }
             } ~
@@ -75,16 +70,25 @@ class PersistenceApi(using var p: IPersistence) {
                 entity(as[String]) { field =>
                     val jsonField = field
                     val pathToFile = Paths.get("C:\\Playground\\minesweeperpublic\\src\\main\\data\\field.json")
-                    
-                    p.saveField(Util.f.jsonToField(field))
-                    //Persistence().closeConnection
 
-                    val saveFuture: Future[Unit] = Future { Files.write(pathToFile, jsonField.getBytes("UTF-8"))}
+                    /*                    val saveFuture: Future[Unit] = Future {
+                        Files.write(pathToFile, jsonField.getBytes("UTF-8"))
+                    }
 
                     onComplete(saveFuture) {
                         case Success(_) => complete(StatusCodes.OK, HttpEntity(ContentTypes.`application/json`, jsonField))
                         case Failure(ex) => complete(StatusCodes.InternalServerError, s"An error occurred: ${ex.getMessage}")
-                    }
+                    }*/
+                    
+                    
+                    val maybeSucces = Try(p.saveField(Util.f.jsonToField(field)))
+
+                    maybeSucces match
+                        case Success(_) => complete(HttpEntity(ContentTypes.`application/json`, jsonField))
+                        case Failure(_) => complete(StatusCodes.InternalServerError, "An error occurred")
+                    
+                    complete(HttpEntity(ContentTypes.`application/json`, jsonField))
+                    
                 }
             } ~
             path("putHighscore") {
@@ -94,15 +98,12 @@ class PersistenceApi(using var p: IPersistence) {
                         "player" -> player,
                         "score" -> score
                     )
-                    //Persistence().savePlayerScore(player, score, "")
-                    //Persistence().closeConnection
-                    
-                    val pathToFile = "C:\\Playground\\minesweeperpublic\\src\\main\\data\\highscore.json"
+                    val path = pathToFile
+                    //val pathToFile = "C:\\Playground\\minesweeperpublic\\src\\main\\data\\highscore.json"
                     p.savePlayerScore(player, score, pathToFile)
 
-                    //file.savePlayerScore(player, score, pathToFile)
                     complete(HttpEntity(ContentTypes.`application/json`, newScoreObj.toString()))
-                    //complete(HttpEntity(ContentTypes.`application/json`, s"Player: $player Score: $score"))
+
                 }
             }
         }
@@ -150,7 +151,7 @@ class PersistenceApi(using var p: IPersistence) {
     def loadPlayerScoresToJson( scoreTable: Seq[(String, Int)]): JsValue = {
 
         val validScores = scoreTable.flatMap {
-            case (player, score) if player.nonEmpty && score > 0 =>
+            case (player, score) if player.nonEmpty && score >= 0 =>
                 Some(Json.obj("player" -> player, "score" -> score))
             case _ => None
         }

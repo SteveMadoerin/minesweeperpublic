@@ -12,12 +12,15 @@ import scala.io.StdIn.readLine
 
 
 object Default{
-    
+
+    var filePathHighScore = "C:\\Playground\\minesweeperpublic\\src\\main\\data\\highscore.json"
+
     def scalableMatrix(size: Int, filling: String): Matrix[String] = new Matrix(size, filling)
     def scalableField(size: Int, filling: String): IField = new Field(size, filling)
     def mergeMatrixToField(sichtbar: Matrix[String], unsichtbar: Matrix[String] ): IField = new Field(sichtbar, unsichtbar)
 
-    given IPersistence = new MongoFileIO
+    //given IPersistence = new MongoFileIO
+    given IPersistence = choose
     //given IPersistence = choose
     private def choose: IPersistence =
         println("Choose Persistence: 1. JsonFileIO, 2. XmlFileIO, 3. SlickFileIO, 4. MongoFileIO: ")
@@ -28,7 +31,7 @@ object Default{
         case 4 => new MongoFileIO()
     }
 
-    var filePathHighScore = "C:\\Playground\\minesweeperpublic\\src\\main\\data\\highscore.json"
+    //var filePathHighScore = "C:\\Playground\\minesweeperpublic\\src\\main\\data\\highscore.json"
     //given IPersistence = new JsonFileIO() //choose Implementation here
     //given IFileIO = new XmlFileIO() //choose Implementation here
     //val filePathHighScore = "C:\\Playground\\minesweeperpublic\\src\\main\\data\\highscore.xml"

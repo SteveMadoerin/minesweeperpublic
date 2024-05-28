@@ -2,6 +2,8 @@ package de.htwg.sa.minesweeper.controller.controllerComponent.controllerBaseImpl
 
 import de.htwg.sa.minesweeper.controller.controllerComponent.config.Default
 import de.htwg.sa.minesweeper.controller.controllerComponent.IController
+
+import scala.language.postfixOps
 /* import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl._
 import de.htwg.sa.minesweeper.model.gameComponent._ */
 /* import de.htwg.sa.minesweeper.persistence.fileIoComponent.IFileIO */
@@ -217,7 +219,7 @@ class Controller() extends IController with Observable:
     def exit = notifyObserversRest("Exit")
 
     // approved
-    def gameOver =
+    def gameOver: Unit =
         val url = s"http://localhost:9082/model/field/gameOverField"
         val jsonField =  RestUtil.fieldDtoToJson(field) // provide the controller field to the ModelAPI
         val jsonFileContent = jsonField.getBytes("UTF-8")
@@ -232,9 +234,19 @@ class Controller() extends IController with Observable:
             response.entity.toStrict(5.seconds).map(_.data.utf8String)
         }
         val bodyString = Await.result(bodyStringFuture, 5.seconds)
-        field = RestUtil.jsontToFieldDTO(bodyString)
+        val ANSI_BLUE = "\u001B[34m"
+        val ANSI_RESET = "\u001B[0m"
+        print(ANSI_BLUE + bodyString + ANSI_RESET)
 
-        notifyObserversRest("GameOver")
+
+        //field = RestUtil.jsontToFieldDTO(bodyString)
+        val tempField = RestUtil.jsontToFieldDTO(bodyString)
+        print (tempField.toString)
+        field = FieldDTO(tempField.hidden, tempField.hidden)
+
+
+
+        notifyObserversRest("GameOver") //TODO: rewrite this call
     
     def openRec(x: Int, y: Int, field: FieldDTO): FieldDTO = undoRedoManager.doStep(field, DoCommand(Move("recursion", x, y))) // approved
 
@@ -312,6 +324,22 @@ class Controller() extends IController with Observable:
         bodyString.toBoolean // parse String to boolean
     }
 
+    def checkGameOverGui: Boolean = {
+        val status = game.board
+
+        val url = s"http://localhost:9082/model/game/checkExit?board=$status"
+        val request = HttpRequest(
+            method = HttpMethods.GET,
+            uri = url
+        )
+        val responseFuture: Future[HttpResponse] = Http().singleRequest(request)
+        val bodyStringFuture: Future[String] = responseFuture.flatMap { response =>
+            response.entity.toStrict(5.seconds).map(_.data.utf8String)
+        }
+        val bodyString = Await.result(bodyStringFuture, 5.seconds)
+        bodyString.toBoolean // parse String to boolean
+    }
+
     def newGameGUI =
         game = GameDTO(game.bombs, game.side, game.time, "Playing")
         notifyObserversRest("Input") //notifyObservers(Event.Input)
@@ -348,6 +376,28 @@ class Controller() extends IController with Observable:
         game = GameDTO(bombs, side, game.time, "Playing")
         field = createFieldDTO(game)
         notifyObserversRest("NewGame")
+        
+    def newGameForGui(side: Int, bombs: Int): Unit = 
+        game = GameDTO(bombs, side, game.time, "Playing")
+        field = createFieldDTO(game)
+        //notifyObserversRest("NewGame")
+        notifyObserverGui("NewGame")
+        
+    def notifyObserverGui(event: String) = {
+        val uri2 = s"http://localhost:9087/gui/notify" + "?event=" + event
+
+        val request2 = HttpRequest(
+            method = HttpMethods.PUT,
+            uri = uri2
+        )
+
+        val responseFuture2: Future[HttpResponse] = Http().singleRequest(request2)
+        val bodyFieldFuture2: Future[String] = responseFuture2.flatMap { response =>
+            response.entity.toStrict(5.seconds).map(_.data.utf8String)
+        }
+        val result2 = Await.result(bodyFieldFuture2, 5.seconds)
+        println(result2 + " Only - GUI")
+    }
     
     // approved - doMove from TUI transfered as param -> game & field in TUI declared
     def makeAndPublish(makeThis: (Boolean, Move, GameDTO) => FieldDTO, b: Boolean, move: Move, game: GameDTO): Unit =
@@ -430,7 +480,7 @@ class Controller() extends IController with Observable:
         }
 
         field = makeThis(move)
-        notifyObserversRest("Next")
+        notifyObserversRest("Next") // TODO REMOVE
     
 
     def makeAndPublish(makeThis: => FieldDTO): FieldDTO =

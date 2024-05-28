@@ -425,8 +425,8 @@ object RestUtil{
                     ),
                     "hidden" -> Json.toJson(
                         for {
-                            row <- 0 until fieldInput.matrix.rows.size
-                            col <- 0 until fieldInput.matrix.rows.size
+                            row <- 0 until fieldInput.hidden.rows.size
+                            col <- 0 until fieldInput.hidden.rows.size
                         } yield {
                             Json.obj(
                                 "row" -> row,

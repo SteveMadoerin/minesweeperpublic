@@ -15,7 +15,7 @@ class Persistence extends IPersistence {
 
     override def loadGame: Option[IGame] = {
         // TRY OPTION for file
-        val maybeFile: Try[Elem] = Try(scala.xml.XML.loadFile("C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\game.xml"))
+        val maybeFile: Try[Elem] = Try(scala.xml.XML.loadFile("C:\\Playground\\minesweeperpublic\\src\\main\\data\\game.xml"))
         val file = maybeFile match {
             case Success(file) => file
             case Failure(exception) => throw exception
@@ -26,7 +26,7 @@ class Persistence extends IPersistence {
         val side = (file \\ "side").text.toInt
         val time = (file \\ "time").text.toInt
 
-        Some(Game(0, 0, 0, "Playing")) // after loading should always be playing
+        Some(Game(bombs, side, time, "Playing")) // after loading should always be playing
     }
 
     def gameToXml(game: IGame) = {
@@ -37,11 +37,11 @@ class Persistence extends IPersistence {
         </game>
     }
 
-    override def saveGame(game: IGame): Unit = {scala.xml.XML.save("C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\game.xml", gameToXml(game))}
+    override def saveGame(game: IGame): Unit = {scala.xml.XML.save("C:\\Playground\\minesweeperpublic\\src\\main\\data\\game.xml", gameToXml(game))}
     
     
     def loadField(field: String): Option[IField] = {
-        val maybeFile: Try[Elem] = Try(scala.xml.XML.loadFile("C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\field.xml"))
+        val maybeFile: Try[Elem] = Try(scala.xml.XML.loadFile("C:\\Playground\\minesweeperpublic\\src\\main\\data\\field.xml"))
         val file = maybeFile match {
             case Success(file) => file
             case Failure(exception) => throw exception
@@ -104,7 +104,7 @@ class Persistence extends IPersistence {
     def saveString(field: IField): Unit = {
         import java.io.*
 
-        val pw = Try(new PrintWriter(new File("C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\field.xml")))
+        val pw = Try(new PrintWriter(new File("C:\\Playground\\minesweeperpublic\\src\\main\\data\\field.xml")))
         pw match {
             case Success(pw) =>
                 val prettyPrinter = new PrettyPrinter(120, 4)
@@ -166,5 +166,37 @@ class Persistence extends IPersistence {
         }
     }
 
-    override def loadField: Option[IField] = ???
+    override def loadField: Option[IField] = {
+        val maybeFile: Try[Elem] = Try(scala.xml.XML.loadFile("C:\\Playground\\minesweeperpublic\\src\\main\\data\\field.xml"))
+        val file = maybeFile match {
+            case Success(file) => file
+            case Failure(exception) => throw exception
+        }
+
+        val size = (file \\ "field" \@ "size").toInt
+
+        val matrixOption = Some(Default.scalableMatrix(size, "~"))
+        val hiddenOption = Some(Default.scalableMatrix(size, "~"))
+        val fieldOption = Some(Default.scalableField(size, "~"))
+
+        val cellNodesVisible: NodeSeq = (file \\ "field" \\ "matrix" \\ "cell")
+        val matrix = cellNodesVisible.foldLeft(matrixOption.get) { (m, cell) =>
+            val row: Int = (cell \ "@row").text.toInt
+            val col: Int = (cell \ "@col").text.toInt
+            val symbol = (cell.text.trim)
+            m.replaceCell(row, col, symbol)
+        }
+
+        val cellNodesHidden: NodeSeq = (file \\ "field" \\ "hidden" \\ "cell")
+        val hidden = cellNodesHidden.foldLeft(hiddenOption.get) { (h, cell) =>
+            val row: Int = (cell \ "@row").text.toInt
+            val col: Int = (cell \ "@col").text.toInt
+            val symbol = (cell.text.trim)
+            h.replaceCell(row, col, symbol)
+        }
+
+        fieldOption.map { f =>
+            Default.mergeMatrixToField(matrix, hidden)
+        }
+    }
 }

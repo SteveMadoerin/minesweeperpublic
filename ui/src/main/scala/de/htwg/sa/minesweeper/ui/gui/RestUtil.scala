@@ -46,6 +46,87 @@ object RestUtil {
     case class FieldTui(matrix: MatrixTui[String], hidden: MatrixTui[String])
     case class MatrixTui[T] (rows: Vector[Vector[T]])*/
 
+
+
+
+    def requestNewGame(side: Int, bombs: Int): (FieldTui, GameTui) = {
+
+        val url = "http://localhost:9081/controller/newGameForGui" + s"?side=$side&bombs=$bombs"
+        val request = HttpRequest(
+            method = HttpMethods.PUT,
+            uri = url
+        )
+
+        val responseFuture: Future[HttpResponse] = Http().singleRequest(request)
+        val bodyStringFuture: Future[String] = responseFuture.flatMap { response =>
+            response.entity.toStrict(5.seconds).map(_.data.utf8String)
+        }
+        val bodyString = Await.result(bodyStringFuture, 5.seconds)
+        val (newGame, newField): (GameTui, FieldTui) = jsonToGameAndField(bodyString)
+        println(newGame.bombs)
+        println(newField.hidden.rows.size)
+        
+
+        (newField, newGame)
+        
+        //_____________________________________ 
+        //controller.newGame(side, bombs)
+    }
+
+    def jsonToGameAndField(jsonString: String): (GameTui, FieldTui) = {
+        val json: JsValue = Json.parse(jsonString)
+        val jsonGame: Option[JsValue] = (json \\ "game").headOption
+        val status = (jsonGame.get \ "status").get.toString
+        val bombs = (jsonGame.get \ "bombs").get.toString.toInt
+        val side = (jsonGame.get \ "side").get.toString.toInt
+        val time = (jsonGame.get \ "time").get.toString.toInt
+        val statusWithoutQuotes = status.replace("\"", "")
+        val gameTui = GameTui(bombs, side, time, statusWithoutQuotes)
+
+        val jsonField: Option[JsValue] = (json \\ "field").headOption
+
+        val jsonValue = jsonField.get
+
+        val size = (jsonValue \ "size").get.toString.toInt
+
+        val fieldVectorOption: Option[FieldTui] = Some(FieldTui(MatrixTui(Vector.tabulate(size, size) { (row, col) => "E" }), (MatrixTui(Vector.tabulate(size, size) { (row, col) => "E" }))))
+        val matrixVectorOption: Option[Vector[Vector[String]]] = Some(Vector.tabulate(size, size) { (row, col) => "E" })
+        val hiddenVectorOption: Option[Vector[Vector[String]]] = Some(Vector.tabulate(size, size) { (row, col) => "E" })
+
+        val matrixVector1 = matrixVectorOption match {
+            case Some(matrix) => matrix
+            case None => println("Matrix is not valid"); Vector.tabulate(size, size) { (row, col) => "E" }
+        }
+
+        val updatedMatrixVector: Vector[Vector[String]] = (0 until size * size).foldLeft(matrixVector1) {
+            case (currentMatrix, index) =>
+                val row = (jsonValue \ "matrix" \\ "row")(index).as[Int]
+                val col = (jsonValue \ "matrix" \\ "col")(index).as[Int]
+                val cell = (jsonValue \ "matrix" \\ "cell")(index).as[String]
+                currentMatrix.updated(row, currentMatrix(row).updated(col, cell))
+        }
+
+        val hiddenVector1 = hiddenVectorOption match {
+            case Some(m) => m
+            case None => println("Hidden is not valid"); Vector.tabulate(size, size) { (row, col) => "E" }
+        }
+
+        val updatedHiddenVector: Vector[Vector[String]] = (0 until size * size).foldLeft(hiddenVector1) {
+            case (currentHidden, index) =>
+                val row = (jsonValue \ "hidden" \\ "row")(index).as[Int]
+                val col = (jsonValue \ "hidden" \\ "col")(index).as[Int]
+                val cell = (jsonValue \ "hidden" \\ "cell")(index).as[String]
+                currentHidden.updated(row, currentHidden(row).updated(col, cell))
+        }
+
+        val finalFieldOption = fieldVectorOption match {
+            case Some(f) => Some(FieldTui(MatrixTui(updatedMatrixVector), MatrixTui(updatedHiddenVector)))
+            case None => println("Field is not valid"); None
+        }
+
+        (gameTui, finalFieldOption.get)
+    }
+
     // for GUI only
     def requestBoardBounds: Int = {
         //controller.field.matrix.rows.size-1
@@ -214,17 +295,26 @@ object RestUtil {
     
     // TODO: check if working
     def requestControllerSaveScoreAndPlayerName(score: Int, playerName: String): Unit = {
-        val url = "http://localhost:9081/controller/saveScoreAndPlayerName/" + score.toString + "/" + playerName
+        val url = "http://localhost:9081/controller/saveScoreAndPlayerName?score=" + score + "&playerName=" + playerName
+        // http://localhost:9081/controller/saveScoreAndPlayerName?score=555&playerName=Dennis
+        //val url2 = "http://localhost:9081/controller/saveScoreAndPlayerName"
         
         val request = HttpRequest(
             method = HttpMethods.GET,
             uri = url
         )
+        // make a request
+        val responseFuture: Future[HttpResponse] = Http().singleRequest(request)
+        val bodyStringFuture: Future[String] = responseFuture.flatMap { response =>
+            response.entity.toStrict(5.seconds).map(_.data.utf8String)
+        }
+
+        val bodyStringSave = Await.result(bodyStringFuture, 5.seconds)
+        println(bodyStringSave)
     }
-    
-    // TODO: check if working and if body is correct - else just make direct call to persistence API
-    def requestControllerLoadPlayerScores: Seq[(String, Int)] = {
-        val url = "http://localhost:9081/controller/loadPlayerScores"
+
+    def requestLoadPlayerScores: Seq[(String, Int)] = {
+        val url = "http://localhost:9083/persistence/highscore"
         
         val request = HttpRequest(
             method = HttpMethods.GET,
@@ -310,6 +400,24 @@ object RestUtil {
             method = HttpMethods.PUT,
             uri = url
         ).withEntity(status)
+
+        val responseFuture: Future[HttpResponse] = Http().singleRequest(request)
+        val bodyStringFuture: Future[String] = responseFuture.flatMap { response =>
+            response.entity.toStrict(5.seconds).map(_.data.utf8String)
+        }
+        val bodyString = Await.result(bodyStringFuture, 5.seconds)
+        bodyString.toBoolean
+
+        //controller.checkGameOver(status)
+    }
+
+    def requestCheckGameOverGui = {
+        val url = "http://localhost:9081/controller/checkGameOverGui"
+
+        val request = HttpRequest(
+            method = HttpMethods.PUT,
+            uri = url
+        )
 
         val responseFuture: Future[HttpResponse] = Http().singleRequest(request)
         val bodyStringFuture: Future[String] = responseFuture.flatMap { response =>
