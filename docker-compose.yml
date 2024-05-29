@@ -3,7 +3,10 @@ services:
 
   model:
     container_name: model
-    image: model-image:latest
+    build:
+        context: ./
+        dockerfile: model/Dockerfile
+    image: model-assembly-image:latest
     network_mode: host
     stdin_open: true
     tty: true

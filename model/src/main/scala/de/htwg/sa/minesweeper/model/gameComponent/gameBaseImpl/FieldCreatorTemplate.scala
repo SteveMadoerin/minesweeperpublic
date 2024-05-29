@@ -1,9 +1,7 @@
 package de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl
 
 import de.htwg.sa.minesweeper.model.gameComponent._
-import scala.util.Random
 import de.htwg.sa.minesweeper.model.gameComponent.config.Default
-//import de.htwg.sa.minesweeper.Default
 
 abstract class FieldCreatorTemplate{
 

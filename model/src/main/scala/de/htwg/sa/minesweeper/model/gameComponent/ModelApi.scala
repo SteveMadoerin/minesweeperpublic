@@ -1,28 +1,16 @@
 package de.htwg.sa.minesweeper.model.gameComponent
 
-import de.htwg.sa.minesweeper.model.gameComponent.IGame
-import de.htwg.sa.minesweeper.model.gameComponent.IField
-
 import akka.actor.ActorSystem
-import akka.stream.{ActorMaterializer, Materializer}
-import scala.concurrent.ExecutionContext
-import akka.http.scaladsl.server.Route
-import akka.http.scaladsl.server.directives.RouteDirectives
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity}
-import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.{Route, StandardRoute}
-import scala.concurrent.ExecutionContextExecutor
-import scala.util.Failure
-import scala.util.Success
-import scala.util.matching.Regex
-import scala.util.Try
-import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl.Game
-import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl.Playfield
-import de.htwg.sa.minesweeper.model.gameComponent.config.Default
-import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl.Decider
-import scala.compiletime.ops.boolean
+import akka.http.scaladsl.server.Directives.*
+import akka.http.scaladsl.server.Route
+import akka.stream.Materializer
+import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl.{Decider, Game, Playfield}
 import play.api.libs.json.Json
+
+import scala.concurrent.ExecutionContextExecutor
+import scala.util.{Failure, Success}
 
 class ModelApi(using var game: IGame, var field: IField){
     
@@ -30,20 +18,17 @@ class ModelApi(using var game: IGame, var field: IField){
     implicit val materializer: Materializer = Materializer(system)
     implicit val executionContext: ExecutionContextExecutor = system.dispatcher
 
-
-
     def createField(leGame: IGame): IField = {
         val adjacentField = Playfield()
         val tempGame: Game = leGame.asInstanceOf[Game]
         adjacentField.newField(leGame.side, tempGame)
     }
 
-    val decider = new Decider() // is needed to decide if it is firstmove or not
+    val decider = new Decider()
         
     val route: Route = pathPrefix("model") {
         get {
             path("game") {
-                // TODO:   
                 val game = Game(10, 9, 0, "Playing")
                 complete(HttpEntity(ContentTypes.`application/json`,game.gameToJson))
             } ~
@@ -52,7 +37,6 @@ class ModelApi(using var game: IGame, var field: IField){
                 complete(HttpEntity(ContentTypes.`application/json`, message))
             } ~
             path("game"/"new") {
-                // TODO: Controller when creating new game should call here (1.)
                 parameter("bombs".as[Int], "size".as[Int], "time".as[Int]) { (bombs, size, time) =>
             
                 this.game = Game(bombs, size, time, "Playing") // new Game should always be Playing
@@ -67,7 +51,6 @@ class ModelApi(using var game: IGame, var field: IField){
                 }
             } ~
             path("field"/"new") {
-                // TODO: Controller when creating new field should call here (1.)
                 parameter("bombs".as[Int], "size".as[Int], "time".as[Int]) { (bombs, size, time) =>
         
                 val spiel = Game(bombs, size, time, "Playing")
@@ -95,7 +78,7 @@ class ModelApi(using var game: IGame, var field: IField){
                         }
 
                         val jasonStringField = feld
-                        val controllerField = field.jsonToField(jasonStringField) // TODO: check jasonToField
+                        val controllerField = field.jsonToField(jasonStringField)
                         val controllerGame = Game(bombs, size, time, newBoard)
                         val (tempGame, tempField): (IGame, IField) = decider.evaluateStrategy(b, x, y, controllerField, controllerGame)
                         val jsonGame = Json.parse(tempGame.gameToJson)
@@ -109,9 +92,8 @@ class ModelApi(using var game: IGame, var field: IField){
                 parameter("y".as[Int], "x".as[Int]) { (y, x) =>
                     entity(as[String]) { feld =>
                         val jasonStringField = feld
-                        val fieldFromController = field.jsonToField(jasonStringField) // TODO: check jasonToField
+                        val fieldFromController = field.jsonToField(jasonStringField)
                         val symbol = fieldFromController.showInvisibleCell(y, x)
-                        // Use both jsonField and symbol as needed
                         complete(HttpEntity(ContentTypes.`application/json`, Json.parse(symbol).toString()))
                     }
                 }
@@ -163,7 +145,7 @@ class ModelApi(using var game: IGame, var field: IField){
             path("field"/"gameOverField") {
                 entity(as[String]) { feld =>
                     val jasonStringField = feld
-                    val fieldFromController = field.jsonToField(jasonStringField) // TODO: check jasonToField
+                    val fieldFromController = field.jsonToField(jasonStringField)
                     val saveField = fieldFromController.gameOverField
                     val prepareJsonField = fieldFromController.fieldToJson(saveField)
                     complete(HttpEntity(ContentTypes.`application/json`, Json.parse(prepareJsonField).toString()))
@@ -172,7 +154,7 @@ class ModelApi(using var game: IGame, var field: IField){
             path("field"/"toString") {
                 entity(as[String]) { feld =>
                     val jasonStringField = feld
-                    val fieldFromController = field.jsonToField(jasonStringField) // TODO: check jasonToField
+                    val fieldFromController = field.jsonToField(jasonStringField)
                     val saveField = fieldFromController.toString
                     complete(HttpEntity(ContentTypes.`application/json`, saveField))
                 }
@@ -180,7 +162,7 @@ class ModelApi(using var game: IGame, var field: IField){
             path("field"/"cheat") {
                 entity(as[String]) { feld =>
                     val jasonStringField = feld
-                    val fieldFromController = field.jsonToField(jasonStringField) // TODO: check jasonToField
+                    val fieldFromController = field.jsonToField(jasonStringField)
                     val saveField = fieldFromController.reveal
                     val prepareJsonField = saveField.toString
                     complete(HttpEntity(ContentTypes.`application/json`, prepareJsonField))
@@ -208,45 +190,11 @@ class ModelApi(using var game: IGame, var field: IField){
                     }
                 }
             }
-/*             path("putField") {
-                entity(as[String]) { field =>
-                    val jsonField = field
-                    val symbol = "1"
-
-                    complete(HttpEntity(ContentTypes.`application/json`, Json.parse(symbol).toString))
-
-                }
-            } */ /* ~
-            path("putGame") {
-                parameter("bombs".as[Int], "size".as[Int], "time".as[Int], "board".as[String]) { (bombs, size, time, board) =>
-            
-                    val testGame: IGame = Game(bombs, size, time, board)
-                    file.saveGame(testGame)
-                    complete(HttpEntity(ContentTypes.`application/json`, Game(bombs, size, time, board).gameToJson.toString()))
-                }
-            } */  /* ~
-            path("putHighscore") {
-                parameter("player".as[String], "score".as[Int]) { (player, score) =>
-
-                    val newScoreObj = Json.obj(
-                        "player" -> player,
-                        "score" -> score
-                    )
-
-                    val pathToFile = "C:\\Playground\\minesweeperpublic\\src\\main\\data\\highscore.json"
-
-                    file.savePlayerScore(player, score, pathToFile)
-                    complete(HttpEntity(ContentTypes.`application/json`, newScoreObj.toString())) 
-
-                }
-            } */
         }
     }
 
-    //val bindFuture = Http().newServerAt("0.0.0.0", 9082).bind(route)
-    //val bindFuture = Http().bindAndHandle(route, "localhost", 9082)
     def start(): Unit = {
-        val bindFuture = Http().newServerAt("0.0.0.0", 9082).bind(route)
+        val bindFuture = Http().newServerAt("0.0.0.0", 9082).bind(route) // (route, "localhost", 9082)
 
         bindFuture.onComplete {
             case Success(binding) =>
@@ -257,10 +205,5 @@ class ModelApi(using var game: IGame, var field: IField){
                 complete("fail binding")
         }
     }
-
-/*    def unbind = bindFuture
-        .flatMap(_.unbind())
-        .onComplete(_ => system.terminate())*/
-  
 
 }

@@ -1,12 +1,11 @@
 package de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl
 
-import de.htwg.sa.minesweeper.model.gameComponent._
-import scala.io.StdIn.readLine
-import scala.util.{Random, Try}
-import scala.annotation.tailrec
+import de.htwg.sa.minesweeper.model.gameComponent.*
 import de.htwg.sa.minesweeper.model.gameComponent.config.Default
-import play.api.libs.json.Json
-import play.api.libs.json.JsValue
+import play.api.libs.json.{JsValue, Json}
+
+import scala.annotation.tailrec
+import scala.util.Random
 
 case class Game (bombs : Int, side: Int, time: Int, board : String) extends IGame:
     
@@ -28,15 +27,15 @@ case class Game (bombs : Int, side: Int, time: Int, board : String) extends IGam
 
     // currying // leGame: Game
     def prepareBoard2(s: Option[String])(leGame: Game): (IField, IGame) = {
-        val realGame = leGame.copy(optionToList(s)(1), optionToList(s)(0))
+        val realGame = leGame.copy(optionToList(s)(1), optionToList(s).head)
         val adjacentField = Playfield()
-        (adjacentField.newField(optionToList(s)(0), realGame), realGame)
+        (adjacentField.newField(optionToList(s).head, realGame), realGame)
     }
 
     def prepareBoard(s: Option[String])(leGame: IGame): (IField, IGame) = {
-        val realGame = this.copy(optionToList(s)(1), optionToList(s)(0))
+        val realGame = this.copy(optionToList(s)(1), optionToList(s).head)
         val adjacentField = Playfield()
-        (adjacentField.newField(optionToList(s)(0), realGame), realGame)
+        (adjacentField.newField(optionToList(s).head, realGame), realGame)
     }
 
     def helpMessage = 

@@ -9,6 +9,6 @@ object ModelService {
     def main(args: Array[String]): Unit = {
         ModelApi().start() // on Port 9082
         println("Press RETURN to stop...")
-        readLine() // Keep the application alive until user presses return
+        readLine()
     }
 }
