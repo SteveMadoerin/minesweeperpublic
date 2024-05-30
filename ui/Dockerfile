@@ -1,8 +1,10 @@
 FROM hseeberger/scala-sbt:17.0.2_1.6.2_3.1.1
 
-WORKDIR /app
+WORKDIR /ui
 
-ADD . /app
+COPY ui-assembly-0.1.0-SNAPSHOT.jar bin/
+
+ADD . /ui
 
 ENV DISPLAY=host.docker.internal:0.0
 
@@ -16,4 +18,4 @@ RUN apt-get update && \
 EXPOSE 9088
 EXPOSE 9087
 
-CMD sbt run
+CMD java -jar bin/ui-assembly-0.1.0-SNAPSHOT.jar

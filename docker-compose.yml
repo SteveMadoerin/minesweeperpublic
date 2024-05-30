@@ -15,7 +15,10 @@ services:
 
   persistence:
     container_name: persistence
-    image: persistence-image:latest
+    build:
+      context: ./
+      dockerfile: ui/Dockerfile
+    image: persistence-assembly-image:latest
     network_mode: host
     stdin_open: true
     tty: true
@@ -24,7 +27,10 @@ services:
 
   controller:
     container_name: controller
-    image: controller-image:latest
+    build:
+      context: ./
+      dockerfile: ui/Dockerfile
+    image: controller-assembly-image:latest
     network_mode: host
     stdin_open: true
     tty: true
@@ -36,7 +42,10 @@ services:
 
   ui:
     container_name: ui
-    image: ui-image:latest
+    build:
+      context: ./
+      dockerfile: ui/Dockerfile
+    image: ui-assembly-image:latest
     network_mode: host
     stdin_open: true
     tty: true

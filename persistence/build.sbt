@@ -23,5 +23,14 @@ lazy val commonSettings = Seq(
 
 lazy val persistence = (project in file("."))
   .settings(
-    commonSettings
+    commonSettings,
+    assemblyMergeStrategy in assembly := {
+      case PathList("META-INF", xs @ _*) => MergeStrategy.discard
+      case "reference.conf" => MergeStrategy.concat
+      case _ => MergeStrategy.first
+    }
   )
+
+scalacOptions ++= Seq("-deprecation", "-feature")
+
+assembly / target := baseDirectory.value

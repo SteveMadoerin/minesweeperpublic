@@ -1,10 +1,7 @@
 package de.htwg.sa.minesweeper.controller.controllerComponent.controllerBaseImpl
 
-import de.htwg.sa.minesweeper.util.{Command, UndoRedoManager, Move}
-import de.htwg.sa.minesweeper.controller.controllerComponent.config.Default.{given}
-import de.htwg.sa.minesweeper.util.RestUtil
-import de.htwg.sa.minesweeper.entity.FieldDTO
-import de.htwg.sa.minesweeper.entity.MatrixDTO
+import de.htwg.sa.minesweeper.entity.{FieldDTO, MatrixDTO}
+import de.htwg.sa.minesweeper.util.{Command, Move, RestUtil}
 
 
 class DoCommand(move: Move) extends Command[FieldDTO]:

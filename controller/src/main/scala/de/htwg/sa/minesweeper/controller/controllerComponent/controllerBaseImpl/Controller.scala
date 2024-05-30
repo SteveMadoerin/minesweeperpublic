@@ -1,47 +1,20 @@
 package de.htwg.sa.minesweeper.controller.controllerComponent.controllerBaseImpl
 
-import de.htwg.sa.minesweeper.controller.controllerComponent.config.Default
 import de.htwg.sa.minesweeper.controller.controllerComponent.IController
 
 import scala.language.postfixOps
-/* import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl._
-import de.htwg.sa.minesweeper.model.gameComponent._ */
-/* import de.htwg.sa.minesweeper.persistence.fileIoComponent.IFileIO */
-import de.htwg.sa.minesweeper.util.{Observable, Move, UndoRedoManager, Event}
-
-import scala.io.Source
-
-import akka.http.scaladsl.model.HttpRequest
-import akka.http.scaladsl.model.HttpMethods
-import akka.http.scaladsl.model.HttpEntity
-import akka.http.scaladsl.model.ContentTypes
-import akka.http.scaladsl.Http
-import scala.concurrent.Future
-import akka.http.scaladsl.model.HttpResponse
-import scala.concurrent.duration._
-import scala.concurrent.ExecutionContext
-import scala.concurrent.ExecutionContextExecutor
-import akka.actor.ActorSystem
-import akka.stream.Materializer
-import scala.concurrent.Await
-import scala.annotation.internal.Body
-import akka.util.ByteString
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
-import akka.stream.ActorMaterializer
-
-
-import scala.util.{Try, Success, Failure}
-import akka.http.scaladsl.unmarshalling.Unmarshal
-import scala.concurrent.Future
-import scala.concurrent.duration._
-import de.htwg.sa.minesweeper.util.RestUtil
-import play.api.libs.json.{JsArray, JsValue, Json, JsObject, JsString, JsResult, JsSuccess, JsError, Format}
-
-import java.nio.file.{Files, Paths}
-import scala.util.{Failure, Success}
+import akka.stream.Materializer
 import de.htwg.sa.minesweeper.entity.{FieldDTO, GameDTO, MatrixDTO}
+import de.htwg.sa.minesweeper.util.{Move, Observable, RestUtil, UndoRedoManager}
+import play.api.libs.json._
+
+import scala.concurrent.{Await, ExecutionContextExecutor, Future}
+import scala.concurrent.duration._
+import scala.io.Source
+import scala.util.{Failure, Success, Try}
 
 
 
@@ -63,7 +36,6 @@ class Controller() extends IController with Observable:
 
         val returnField: FieldDTO = Try {
             val result = Source.fromURL(url).mkString
-            /* RestUtil.jsonToField(result) */
             RestUtil.jsontToFieldDTO(result)
         } match {
             case Success(field) => field
@@ -237,16 +209,12 @@ class Controller() extends IController with Observable:
         val ANSI_BLUE = "\u001B[34m"
         val ANSI_RESET = "\u001B[0m"
         print(ANSI_BLUE + bodyString + ANSI_RESET)
-
-
-        //field = RestUtil.jsontToFieldDTO(bodyString)
+        
         val tempField = RestUtil.jsontToFieldDTO(bodyString)
         print (tempField.toString)
         field = FieldDTO(tempField.hidden, tempField.hidden)
-
-
-
-        notifyObserversRest("GameOver") //TODO: rewrite this call
+        
+        notifyObserversRest("GameOver") 
     
     def openRec(x: Int, y: Int, field: FieldDTO): FieldDTO = undoRedoManager.doStep(field, DoCommand(Move("recursion", x, y))) // approved
 
@@ -321,7 +289,7 @@ class Controller() extends IController with Observable:
             response.entity.toStrict(5.seconds).map(_.data.utf8String)
         }
         val bodyString = Await.result(bodyStringFuture, 5.seconds)
-        bodyString.toBoolean // parse String to boolean
+        bodyString.toBoolean
     }
 
     def checkGameOverGui: Boolean = {
@@ -337,12 +305,12 @@ class Controller() extends IController with Observable:
             response.entity.toStrict(5.seconds).map(_.data.utf8String)
         }
         val bodyString = Await.result(bodyStringFuture, 5.seconds)
-        bodyString.toBoolean // parse String to boolean
+        bodyString.toBoolean
     }
 
     def newGameGUI =
         game = GameDTO(game.bombs, game.side, game.time, "Playing")
-        notifyObserversRest("Input") //notifyObservers(Event.Input)
+        notifyObserversRest("Input")
     
     // approved
     def newGameField(optionString: Option[String]) =
@@ -357,7 +325,7 @@ class Controller() extends IController with Observable:
         
         val url = s"http://localhost:9082/model/game/newGameField?optionString=$oString"
 
-        val bodyGame = /* RestUtil.gameToJson(game) */ RestUtil.gameDtoToJson(game) // prepare the game
+        val bodyGame = RestUtil.gameDtoToJson(game) // prepare the game
         val body = bodyGame.getBytes("UTF-8")
 
         val request = requestPut(url, body)  // prepare the PUT request
@@ -380,8 +348,7 @@ class Controller() extends IController with Observable:
     def newGameForGui(side: Int, bombs: Int): Unit = 
         game = GameDTO(bombs, side, game.time, "Playing")
         field = createFieldDTO(game)
-        //notifyObserversRest("NewGame")
-        notifyObserverGui("NewGame")
+        notifyObserverGui("NewGame") //notifyObserversRest("NewGame")
         
     def notifyObserverGui(event: String) = {
         val uri2 = s"http://localhost:9087/gui/notify" + "?event=" + event
@@ -480,7 +447,7 @@ class Controller() extends IController with Observable:
         }
 
         field = makeThis(move)
-        notifyObserversRest("Next") // TODO REMOVE
+        notifyObserversRest("Next")
     
 
     def makeAndPublish(makeThis: => FieldDTO): FieldDTO =
@@ -488,7 +455,6 @@ class Controller() extends IController with Observable:
         notifyObserversRest("Next")
         field
 
-    
     
     // approved
     def saveScoreAndPlayerName(playerName: String, saveScore: Int, filePath: String) = {
@@ -550,7 +516,7 @@ class Controller() extends IController with Observable:
 
     // approved - but only to notify the TUI and GUI
     def notifyObserversRest(event: String) = {
-        // TODO: maybe register the logic
+        // later on register logic could be implemented here
 
         // _________________________ NOTIFY TUI _________________________
 

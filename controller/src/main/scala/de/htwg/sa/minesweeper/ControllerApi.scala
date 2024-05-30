@@ -3,17 +3,16 @@ package de.htwg.sa.minesweeper
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity}
-import akka.http.scaladsl.server.Directives.*
+import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.stream.Materializer
 import de.htwg.sa.minesweeper.controller.controllerComponent.IController
-import de.htwg.sa.minesweeper.util.{Event, Observer, RestUtil}
+import de.htwg.sa.minesweeper.entity.GameDTO
+import de.htwg.sa.minesweeper.util.{Event, Move, Observer, RestUtil}
+import play.api.libs.json.{JsValue, Json}
 
 import scala.concurrent.ExecutionContextExecutor
 import scala.util.{Failure, Success}
-import de.htwg.sa.minesweeper.entity.{FieldDTO, GameDTO}
-import de.htwg.sa.minesweeper.util.Move
-import play.api.libs.json.{JsValue, Json}
 
 
 class ControllerApi(using var controller: IController) extends Observer:
@@ -64,9 +63,6 @@ class ControllerApi(using var controller: IController) extends Observer:
                 },
                 path("gameOver") {
                   controller.gameOver
-/*                    val tempfield = FieldDTO(MatrixDTO(), MatrixDTO())
-                        
-                    )*/
                   complete(RestUtil.fieldDtoToJson(controller.field).toString)
                 },
                 path("field"/"toString") {
@@ -103,27 +99,11 @@ class ControllerApi(using var controller: IController) extends Observer:
                   }
                 },
                 path("newGameFieldGui") {
-                  //
                   parameter("input".as[String]) { (input) =>
                     val inputOption = Some(input)
                     controller.newGameField(inputOption)
-                      
                     complete("newGameFieldGui")
-                    
-                    // TODO: check if we need to send game and field back to GUI
-                    
-                    /*val feld = controller.field
-                    val game = controller.game
-                    val jsonField = Json.parse(RestUtil.fieldDtoToJson(feld))
-                    val jsonGame = Json.parse(RestUtil.gameDtoToJson(game))
-
-                    val jsonGameFieldArray = Json.arr(jsonGame, jsonField)
-                    complete(HttpEntity(ContentTypes.`application/json`, jsonGameFieldArray.toString))
-                    */
-                    
-
                   }
-
                 },
                 path("cheat") {
                   val cheat = controller.cheatRest
@@ -148,8 +128,7 @@ class ControllerApi(using var controller: IController) extends Observer:
                             //controller.makeAndPublish(controller.doMove, firstMoveCheck, move, controller.game)
                             controller.makeAndPublish(controller.doMove, firstMoveCheck, move, GameDTO(bombs, size, time, newBoard))
                             //controller.makeAndPublish(controller.put, move)
-                            print("move: " + move.value + " x: " + move.x + " y: " + move.y)
-
+                            // replace with logger print("move: " + move.value + " x: " + move.x + " y: " + move.y)
                             complete("success doMove")
                         }
                       }
@@ -187,17 +166,6 @@ class ControllerApi(using var controller: IController) extends Observer:
                   controller.redo
                   complete(RestUtil.fieldDtoToJson(controller.field).toString)
                 },
-  /*               path("writeDown" / StringValue) {
-                  (value: String) =>
-                    try {
-                      val currentPlayer = controller.gameESI.sendPlayerIDRequest(controller.game)
-                      val indexOfField = controller.diceCupESI.sendIndexOfFieldRequest(value)
-                      val result = controller.diceCupESI.sendResultRequest(indexOfField, controller.diceCup)
-                      complete(controller.writeDown(Move(result, currentPlayer, indexOfField)))
-                    } catch {
-                      case e: Throwable => complete("Invalid Input!")
-                    }
-                }, */
                 path("") {
                   sys.error("No such GET route")
                 }
@@ -222,10 +190,8 @@ class ControllerApi(using var controller: IController) extends Observer:
                   }
                 },
                 path("checkGameOverGui") {
-
                   val result = controller.checkGameOverGui
                   complete(result.toString)
-
                 },
                 path("newGameForGui") {
                   parameter("bombs".as[Int], "side".as[Int]) { (bombs, side) =>

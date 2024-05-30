@@ -55,14 +55,12 @@ class Persistence extends IPersistence {
   def loadField: Option[IField] = {
     FieldDao(database).findById(1) match{
       case field => Some(Util.f.jsonToField(field))
-      case _ => None
     }
   }
   
   def loadGame: Option[IGame] = {
     GameDao(database).findById(1) match
       case g => Some(g)
-      case _ => None
   }
   
   override def loadPlayerScores(filePath: String): Seq[(String, Int)] = PlayerScoreDao(database).findAll()

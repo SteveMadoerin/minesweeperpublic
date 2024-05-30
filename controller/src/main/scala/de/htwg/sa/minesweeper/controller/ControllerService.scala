@@ -9,6 +9,6 @@ object ControllerService {
   def main(args: Array[String]): Unit = {
     ControllerApi().start() // on Port 9081
     println("Press RETURN to stop...")
-    readLine() // Keep the application alive until user presses return
+    readLine()
   }
 }
