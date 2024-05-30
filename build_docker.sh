@@ -2,14 +2,13 @@
 
 # List of module directories containing Dockerfiles
 #MODULES=("persistence")
-#MODULES=("model" "persistence" "controller" "ui")
-MODULES=("ui")
+MODULES=("model" "persistence" "controller" "ui")
 
 # Function to build Dockerfile in a directory
 build_dockerfile() {
     local module=$1
     echo "Building Dockerfile in $module..."
-    docker build -t "$module"-image:latest $module
+    docker build -t "$module"-assembly-image:latest $module
 }
 
 # Loop through each module and build Dockerfile

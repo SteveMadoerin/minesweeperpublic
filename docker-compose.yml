@@ -34,9 +34,6 @@ services:
     network_mode: host
     stdin_open: true
     tty: true
-    depends_on:
-      - model
-      - persistence
   #    ports:
   #      - 9081:9081
 
