@@ -1,45 +1,39 @@
-/*package de.htwg.sa.minesweeper.ui
+package de.htwg.sa.minesweeper.ui
 
-
-import de.htwg.sa.minesweeper.controller.controllerComponent.IController
-import de.htwg.sa.minesweeper.util.Observer
-import de.htwg.sa.minesweeper.util.Event
-
-
-import de.htwg.sa.minesweeper.util.Move
-import de.htwg.sa.minesweeper.controller.controllerComponent.IController
-import de.htwg.sa.minesweeper.util.Observer
-import de.htwg.sa.minesweeper.util.Event
+import akka.actor.{Actor, ActorRef, ActorSystem, Props}
 import akka.actor.ActorSystem
 import akka.stream.{ActorMaterializer, Materializer}
-import scala.concurrent.ExecutionContext
+
+import concurrent.duration.DurationInt
+import akka.http.scaladsl.Http
+import akka.http.scaladsl.model.*
+
+import scala.concurrent.{Await, ExecutionContext, ExecutionContextExecutor, Future}
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.directives.RouteDirectives
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity}
-import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.Directives.*
 import akka.http.scaladsl.server.{Route, StandardRoute}
-import de.htwg.sa.minesweeper.ui.config.Default.{given}
-import scala.concurrent.ExecutionContextExecutor
+import de.htwg.sa.minesweeper.ui.config.Default.given
+
 import scala.util.Failure
 import scala.util.Success
 import scala.util.matching.Regex
 import scala.util.Try
-import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl.Matrix
-import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl.Field
-import de.htwg.sa.minesweeper.model.gameComponent.IField
-import de.htwg.sa.minesweeper.entity.FieldDTO
+import de.htwg.sa.minesweeper.ui.gui.RestUtil
+import de.htwg.sa.minesweeper.ui.model.{Event, FieldTui, GameTui, MatrixTui, Move}
 
 
-class WebGuiApi(using var controller: IController) extends Observer{
+class WebGuiApi() {
 
-    controller.add(this)
+    var controllerGame: GameTui = GameTui(9, 10, 0, "Playing")
+    var controllerField: FieldTui = RestUtil.requestControllerField
+    //controller.add(this)
 
-    implicit val system: ActorSystem = ActorSystem()
+    implicit val system: ActorSystem = ActorSystem("WebGuiApi")
     implicit val materializer: Materializer = Materializer(system)
     implicit val executionContext: ExecutionContextExecutor = system.dispatcher
-
-
 
     val route: Route = {
         get {
@@ -47,25 +41,37 @@ class WebGuiApi(using var controller: IController) extends Observer{
                 complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, "<h1>THE MINESWEEPER GAME</h1>"))
             } ~ 
             path("ui"/"new"/"small") {
-                controller.newGame(9, 10)
+                val (feldy, gamey) = RestUtil.requestNewGame(9, 10)
+                controllerGame = gamey
+                controllerField = feldy
+
                 fieldToHtmlNew
             } ~ 
             path("ui"/"undo") {
-                controller.makeAndPublish(controller.undo)
+
+                //controller.makeAndPublish(controller.undo)
+                RestUtil.requestControllerMakeAndPublishUndo
+                RestUtil.requestControllerField
                 fieldToHtmlNew
             } ~ 
             path("ui"/"redo") {
-                controller.makeAndPublish(controller.redo)
+                //controller.makeAndPublish(controller.redo)
+                RestUtil.requestControllerMakeAndPublishRedo
+                RestUtil.requestControllerField
                 fieldToHtmlNew
                 //fieldToHTML(controller.field.toString)
             } ~ 
             path("minesweeper" / Segment) {
                 command => {
+                    controllerGame = RestUtil.requestControllerGame
+                    controllerField = RestUtil.requestControllerField
                     parseInputfromUser(command)
-                    if (controller.game.board == "Playing") {
-                        fieldWithGameStateToHTML(fieldToHTML(controller.field), controller.game.board)
+                    controllerGame = RestUtil.requestControllerGame
+                    controllerField = RestUtil.requestControllerField
+                    if (controllerGame.board == "Playing") {
+                        fieldWithGameStateToHTML(fieldToHTML(controllerField), controllerGame.board)
                     } else {
-                        fieldWithGameStateToHTML(fieldToHTML(/* controller.field.gameOverField */FieldDTO(controller.field.hidden, controller.field.hidden)), controller.game.board)
+                        fieldWithGameStateToHTML(fieldToHTML(/* controller.field.gameOverField */FieldTui(controllerField.hidden, controllerField.hidden)), controllerGame.board)
                     }
                 } 
             } 
@@ -74,10 +80,12 @@ class WebGuiApi(using var controller: IController) extends Observer{
             path("putEvent") {
                     parameter("event".as[String]) { (event) =>
                         //
+                        controllerGame = RestUtil.requestControllerGame
+                        controllerField = RestUtil.requestControllerField
                         event match
-                            case "NewGame" => infoMessages(controller.field.toString()); true
-                            case "Start" |"Next" | "Load "=> infoMessages(controller.field.toString()); true
-                            case "GameOver" => infoMessages(s"The Game is ${controller.game.board} !", controller.field.toString()); true
+                            case "NewGame" => infoMessages(controllerField.toString()); true
+                            case "Start" |"Next" | "Load "=> infoMessages(controllerField.toString()); true
+                            case "GameOver" => infoMessages(s"The Game is ${controllerGame.board} !", controllerField.toString()); true
                             case "Exit" => System.exit(0); false
                             case _ => false
                             
@@ -93,7 +101,7 @@ class WebGuiApi(using var controller: IController) extends Observer{
 
         bindFuture.onComplete {
             case Success(binding) =>
-                println("Server online at http://localhost:9082/")
+                println("Server online at http://localhost:9080/")
                 complete(binding.toString)
             case Failure(exception) =>
                 println(s"An error occurred: $exception")
@@ -113,12 +121,12 @@ class WebGuiApi(using var controller: IController) extends Observer{
         rawInput.split("\\s+").toList match {
             case command :: xStr :: yStr :: Nil =>
             (command, xStr.toIntOption, yStr.toIntOption) match {
-                case ("o", Some(x), Some(y)) => controller.makeAndPublish(controller.doMove, firstMoveCheck, Move("open", x, y),  controller.game)
-                case ("f", Some(x), Some(y)) => controller.makeAndPublish(controller.put, Move("flag", x, y))
-                case ("u", Some(x), Some(y)) => controller.makeAndPublish(controller.put, Move("unflag", x, y))
+                case ("o", Some(x), Some(y)) => RestUtil.requestControllerMakeAndPublishDoMove(firstMoveCheck, Move("open", x, y), controllerGame)/*controller.makeAndPublish(controller.doMove, firstMoveCheck, Move("open", x, y),  controller.game)*/
+                case ("f", Some(x), Some(y)) => RestUtil.requestControllerMakeAndPublishPut(Move("flag", x, y))/*controller.makeAndPublish(controller.put, Move("flag", x, y))*/
+                case ("u", Some(x), Some(y)) => RestUtil.requestControllerMakeAndPublishPut(Move("unflag", x, y))/*controller.makeAndPublish(controller.put, Move("unflag", x, y))*/
                 case _ => println("Invalid Input Format") // Replace with your error handling
             }
-            case _ => println("Invalid Input Format") // Replace with your error handling
+            case _ => println("Invalid Input Format")
         }
     }
 
@@ -128,11 +136,12 @@ class WebGuiApi(using var controller: IController) extends Observer{
     }
 
     def gameOverFieldHtml: StandardRoute =  {
-        complete(HttpEntity(ContentTypes.`text/html(UTF-8)`,fieldToHTML(FieldDTO(controller.field.hidden, controller.field.hidden)/* controller.field.gameOverField */)))
+        complete(HttpEntity(ContentTypes.`text/html(UTF-8)`,fieldToHTML(FieldTui(controllerField.hidden, controllerField.hidden)/* controller.field.gameOverField */)))
     }
 
     def fieldToHtmlNew: StandardRoute =  {
-        complete(HttpEntity(ContentTypes.`text/html(UTF-8)`,fieldToHTML(controller.field)))
+        RestUtil.requestControllerField
+        complete(HttpEntity(ContentTypes.`text/html(UTF-8)`,fieldToHTML(controllerField)))
     }
 
     def fieldWithGameStateToHTML(input:String, additionalInfo: String): StandardRoute =  {
@@ -147,11 +156,11 @@ class WebGuiApi(using var controller: IController) extends Observer{
 
     def infoMessages(text: String*) = {text.foreach(println)}
 
-    override def update(e: Event): Boolean = 
+    def update(e: Event): Boolean =
         e match
-            case Event.NewGame => infoMessages(controller.field.toString()); true
-            case Event.Start | Event.Next | Event.Load => infoMessages(controller.field.toString()); true
-            case Event.GameOver => infoMessages(s"The Game is ${controller.game.board} !", controller.field.toString()); true
+            case Event.NewGame => infoMessages(controllerField.toString()); true
+            case Event.Start | Event.Next | Event.Load => infoMessages(controllerField.toString()); true
+            case Event.GameOver => infoMessages(s"The Game is ${controllerGame.board} !", controllerField.toString()); true
             case Event.Exit => System.exit(0); false
             case _ => false
 
@@ -163,16 +172,16 @@ class WebGuiApi(using var controller: IController) extends Observer{
         case None =>
         case Some(move) => 
             move.value match {
-                case "open" => controller.makeAndPublish(controller.doMove, false, move, controller.game)
-                case "flag" => controller.makeAndPublish(controller.put, move)
-                case "unflag" => controller.makeAndPublish(controller.put, move)
-                case "help" => controller.helpMenu
+                case "open" => RestUtil.requestControllerMakeAndPublishDoMove(false, move, controllerGame) /*controller.makeAndPublish(controller.doMove, false, move, controller.game)*/
+                case "flag" => RestUtil.requestControllerMakeAndPublishPut(move) /*controller.makeAndPublish(controller.put, move)*/
+                case "unflag" => RestUtil.requestControllerMakeAndPublishPut(move) /*controller.makeAndPublish(controller.put, move)*/
+                case "help" => requestControllerHelpMenue
                 case _ => infoMessages(">> Invalid Input")
         }
 
-        controller.checkGameOver(controller.game.board) match {
+        requestCheckGameOver(controllerGame.board) match {
             case false => 
-            case true => controller.gameOver
+            case true => requestGameOver
         }
     }
         
@@ -189,12 +198,12 @@ class WebGuiApi(using var controller: IController) extends Observer{
         
         input match
             case "q" => System.exit(0); None
-            case "h" => controller.helpMenu; None
-            case "r" => controller.cheat; None
-            case "z" => controller.makeAndPublish(controller.undo); None
-            case "y" => controller.makeAndPublish(controller.redo); None
-            case "s" => controller.saveGame; None
-            case "l" => controller.loadGame; None
+            case "h" => requestControllerHelpMenue; None
+            case "r" => RestUtil.requestControllerCheat/*controller.cheat*/; None
+            case "z" => RestUtil.requestControllerMakeAndPublishUndo/*controller.makeAndPublish(controller.undo)*/; None
+            case "y" => RestUtil.requestControllerMakeAndPublishRedo/*controller.makeAndPublish(controller.redo)*/; None
+            case "s" => RestUtil.requestControllerSaveGame/*controller.saveGame*/; None
+            case "l" => RestUtil.requestControllerLoadGame/*controller.loadGame*/; None
             case "e" => None
             case _ => {
                 val charAccumulator = input.toCharArray()
@@ -210,8 +219,10 @@ class WebGuiApi(using var controller: IController) extends Observer{
                     case Failure(e) => infoMessages(s">> Invalid Move: ${e.getMessage}"); None
                 }
 
+                controllerGame = RestUtil.requestControllerGame
+
                 val validCoordinates: Option[Move] = coordinates match {
-                    case Some(i) => {if controller.game.side > i._1 && controller.game.side > i._2 then Some(Move(action, i._1, i._2)) else { infoMessages(">> Invalid Move: Coordinates out of bounds"); None}} // no var game
+                    case Some(i) => {if controllerGame.side > i._1 && controllerGame.side > i._2 then Some(Move(action, i._1, i._2)) else { infoMessages(">> Invalid Move: Coordinates out of bounds"); None}}
                     case None => None
                 }
                 validCoordinates
@@ -221,7 +232,7 @@ class WebGuiApi(using var controller: IController) extends Observer{
 
     def charArrayToInt(s: Array[Char]): Try[(Int, Int)] = Try(((s(1).toString + s(2).toString).toInt, (s(3).toString + s(4).toString).toInt))
 
-    def fieldToHTML(controllerField: FieldDTO): String = {
+    def fieldToHTML(controllerField: FieldTui): String = {
         val matrix = controllerField.matrix
         val size = controllerField.matrix.rows.size
         val html = new StringBuilder
@@ -239,5 +250,47 @@ class WebGuiApi(using var controller: IController) extends Observer{
         html.toString()
     }
 
+    def requestControllerHelpMenue = {
+
+        val url = "http://controller:9081/controller/helpMenu"
+        val request = HttpRequest(
+            method = HttpMethods.GET,
+            uri = url
+        )
+
+        val bodyStringHelpMessage = Await.result(Http().singleRequest(request).flatMap(_.entity.toStrict(5.seconds).map(_.data.utf8String)), 5.seconds)
+        infoMessages(">> Help Menu in WebGuiApi:", bodyStringHelpMessage) // use logging instead
+    }
+
+    def requestCheckGameOver(status: String) = {
+        val url = "http://controller:9081/controller/checkGameOver"
+
+        val request = HttpRequest(
+            method = HttpMethods.PUT,
+            uri = url
+        ).withEntity(status)
+
+        val responseFuture: Future[HttpResponse] = Http().singleRequest(request)
+        val bodyStringFuture: Future[String] = responseFuture.flatMap { response =>
+            response.entity.toStrict(5.seconds).map(_.data.utf8String)
+        }
+        val bodyString = Await.result(bodyStringFuture, 5.seconds)
+        bodyString.toBoolean
+    }
+
+    def requestGameOver = {
+
+        val url = "http://controller:9081/controller/gameOver"
+
+        val request = HttpRequest(
+            method = HttpMethods.GET,
+            uri = url
+        )
+
+        //val bodyString = Await.result(Http().singleRequest(request).flatMap(_.entity.toStrict(5.seconds).map(_.data.utf8String)), 5.seconds)
+        //val field = jsonToFieldTui(bodyString)
+        //implement maybe later controllerfield = field ...
+        //controller.gameOver
+    }
+
 }
-*/

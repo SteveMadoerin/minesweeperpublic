@@ -1,40 +1,29 @@
-/* package de.htwg.sa.minesweeper.controller.controllerComponent.controllerBaseImpl
+package de.htwg.sa.minesweeper.controller.controllerComponent.controllerBaseImpl
 
 
-import org.scalatest.matchers.should.Matchers._
+import org.scalatest.matchers.should.Matchers.*
 import org.scalatest.wordspec.AnyWordSpec
 
-import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl._
-
-import de.htwg.sa.minesweeper.util.{Observer, Move}
-
 import java.io.ByteArrayOutputStream
-import de.htwg.sa.minesweeper.util.Event
-
-import de.htwg.sa.minesweeper.controller.controllerComponent.config.Default.{given}
-
+import de.htwg.sa.minesweeper.util.{Event, Move, Observer}
+import de.htwg.sa.minesweeper.controller.controllerComponent.config.Default.given
 import de.htwg.sa.minesweeper.controller.controllerComponent.IController
-import de.htwg.sa.minesweeper.model.gameComponent.IGame
-import de.htwg.sa.minesweeper.persistence.fileIoComponent.IFileIO
-
 import de.htwg.sa.minesweeper.controller.controllerComponent.config.Default
 import de.htwg.sa.minesweeper.controller.controllerComponent.controllerBaseImpl.Controller
-import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl.{Playfield, Game, Field}
-import de.htwg.sa.minesweeper.model.gameComponent.IField
+import de.htwg.sa.minesweeper.entity.{FieldDTO, GameDTO, MatrixDTO}
+
 
 class ControllerSpec extends AnyWordSpec{
 
-    def createField(leGame: IGame): IField = {
-        val adjacentField = Playfield()
-        val tempGame: Game = leGame.asInstanceOf[Game]
-        adjacentField.newField(leGame.side, tempGame)
-    }
+    val initController = new Controller
+    val initGame = initController.game
+    val initField = initController.createFieldDTO(initGame)
 
 
 
     "The Controller when created" should {
-        val game1: IGame = new Game(10, 9, 0, "Playing")
-        val controller1 = new Controller(using game1)
+        val game1 = GameDTO(10, 9, 0, "Playing")
+        val controller1 = Controller()
         
         "have a game and field" in{
             controller1.game should be(game1)
@@ -47,14 +36,14 @@ class ControllerSpec extends AnyWordSpec{
 
     
     "performing a first move" should {
-        var game2 = new Game(10, 9, 0, "Playing")
+        var game2 = GameDTO(10, 9, 0, "Playing")
         val move2 = Move("open", 0 ,0)
 
-        val controller2 = new Controller(using game2)
- 
+        val controller2 = new Controller()
+
         val observer = new Observer {
             var notified = false
-            override def update(e: Event): Boolean = 
+            override def update(e: Event): Boolean =
                 notified = true
                 notified
         }
@@ -68,9 +57,9 @@ class ControllerSpec extends AnyWordSpec{
     }
 
     "flagging a field" should {
-        var game = new Game(10, 9, 0, "Playing")
+        var game = GameDTO(10, 9, 0, "Playing")
 
-        val controller = new Controller(using game)
+        val controller = new Controller()
         val observer = new Observer {
             var notified = false
             override def update(e: Event): Boolean = 
@@ -80,15 +69,15 @@ class ControllerSpec extends AnyWordSpec{
         controller.add(observer)
 
         "update the field" in {
-            controller.field.putFlag(2, 2)
-            controller.field.matrix.cell(2,2) should be ("F")
+
+            controller.field.matrix.rows(2).updated(2, "F") should be ("F")
         }
     }
 
     "unflagging a field" should {
-        var game = new Game(10, 9, 0, "Playing")
+        var game = new GameDTO(10, 9, 0, "Playing")
 
-        val controller = new Controller(using game)
+        val controller = new Controller()
         val observer = new Observer {
         var notified = false
         override def update(e: Event): Boolean = 
@@ -98,8 +87,7 @@ class ControllerSpec extends AnyWordSpec{
         controller.add(observer)
 
         "update the field" in {
-            controller.field.removeFlag(2, 2)
-            controller.field.matrix.cell(2,2) should be ("~")
+            controller.field.matrix.rows(2).updated(2, "~") should be ("~")
       }
 
     }
@@ -121,11 +109,8 @@ class ControllerSpec extends AnyWordSpec{
     }
 
     "cheat" should{
-        val game4 = Game(3, 3, 0, "Playing")
-        val spielfeld = Playfield()
-        val testfield = spielfeld.newField(3, game4)
-
-        val controller7 = new Controller(using game4)
+        val game4 = GameDTO(3, 3, 0, "Playing")
+        val controller7 = new Controller()
         val observer = new Observer {
         var notified = false
         override def update(e: Event): Boolean = 
@@ -143,13 +128,13 @@ class ControllerSpec extends AnyWordSpec{
 
     "uncover field" should {
 
-        var game22 = new Game(2, 3, 0, "Playing")
-        val emptyField = new Field(3, "~")
-        val invisible = emptyField.hidden.replaceCell(1, 1, "*")	
-        val testField = new Field(emptyField.matrix, invisible)
+        var game22 = GameDTO(2, 3, 0, "Playing")
+        val emptyField = FieldDTO(MatrixDTO(Vector.fill(3)(Vector.fill(3)("~"))), MatrixDTO(Vector.fill(3)(Vector.fill(3)("~"))))
+        val invisible = MatrixDTO(emptyField.hidden.rows.updated(1, emptyField.hidden.rows(1).updated(1, "F"))) // replaceCell(1, 1, "*")
+        val testField = FieldDTO(emptyField.matrix, invisible)
         val move3 = Move("open", 1 ,1)
 
-        val controller1 = new Controller(using game22)
+        val controller1 = new Controller()
 
         var notified = false
         val observer = new Observer {
@@ -163,14 +148,14 @@ class ControllerSpec extends AnyWordSpec{
         
             controller1.doMove(false, move3, game22)
             val resultField = controller1.field
-            resultField.showVisibleCell(2, 1) should not be ("*")
+            resultField.matrix.rows(2)(1) should not be ("*")
         }
     }
 
     "the controllers put method" should {
-        val game24: IGame = new Game(10, 9, 0, "Playing")
+        val game24= GameDTO(10, 9, 0, "Playing")
 
-        val controller = new Controller(using game24)
+        val controller = new Controller()
         val observer = new Observer {
         var notified = false
         override def update(e: Event): Boolean = 
@@ -182,14 +167,14 @@ class ControllerSpec extends AnyWordSpec{
         "put a move" in {
             val move = Move("open", 1, 1)
             controller.put(move)
-            controller.field.showVisibleCell(1, 1) should be ("~")
+            controller.field.matrix.rows(1)(1) should be ("~")
         }
     }
 
     "def makeAndPublish with 3 parameters" should {
-        val game25: IGame = new Game(10, 9, 0, "Playing")
+        val game25 = GameDTO(10, 9, 0, "Playing")
 
-        val controller8 = new Controller(using game25)
+        val controller8 = new Controller()
     
         val observer = new Observer {
         var notified = false
@@ -202,16 +187,16 @@ class ControllerSpec extends AnyWordSpec{
         "make and publish a move" in {
             val move = Move("open", 1, 1)
             controller8.makeAndPublish(controller8.doMove, false, move, game25)
-            controller8.field.showVisibleCell(1, 1) should not be (" ")
+            controller8.field.matrix.rows(1)(1) should not be (" ")
         }
     }
 
     "def makeAndPublish with 2 parameters" should {
-        val game26 = new Game(3, 3, 0, "Playing")
-        val emptyField = new Field(3, " ")
+        val game26 = GameDTO(3, 3, 0, "Playing")
+        val emptyField =  FieldDTO(MatrixDTO(Vector.fill(3)(Vector.fill(3)(" "))), MatrixDTO(Vector.fill(3)(Vector.fill(3)(" ")))) /*Field(3, " ")*/
 
 
-        val controller9 = new Controller(using game26)
+        val controller9 = new Controller()
         val observer = new Observer {
         var notified = false
         override def update(e: Event): Boolean = 
@@ -223,15 +208,15 @@ class ControllerSpec extends AnyWordSpec{
         "make and publish a move" in {
             val move = Move("flag", 1, 1)
             controller9.makeAndPublish(controller9.put, move)
-            controller9.field.showVisibleCell(1, 1) should be ("F")
+            controller9.field.matrix.rows(1)(1) should be ("F")
         }
     }
 
     "def gameOver" should {
-        val game27 = new Game(3, 3, 0, "Playing")	
-        val emptyField = new Field(3, " ")
+        val game27 = GameDTO(3, 3, 0, "Playing")
+        val emptyField = FieldDTO(MatrixDTO(Vector.fill(3)(Vector.fill(3)(" "))), MatrixDTO(Vector.fill(3)(Vector.fill(3)(" ")))) /*new Field(3, " ")*/
 
-        val controller10 = new Controller(using game27)
+        val controller10 = new Controller()
         val observer = new Observer {
         var notified = false
         override def update(e: Event): Boolean = 
@@ -242,15 +227,15 @@ class ControllerSpec extends AnyWordSpec{
 
         "make and publish a move" in {
             controller10.gameOver
-            controller10.field should be (controller10.field.gameOverField)
+            controller10.field should be (FieldDTO(controller10.field.hidden, controller10.field.hidden))
         }
     }
 
     "def openRec" should {
-        val game28: IGame = new Game(10, 9, 0, "Playing")
-        val startField = createField(game28)
+        val game28 = GameDTO(10, 9, 0, "Playing")
+        val startField = initController.createFieldDTO(game28)
 
-        val controller11 = new Controller(using game28)
+        val controller11 = new Controller()
         val observer = new Observer {
         var notified = false
         override def update(e: Event): Boolean = 
@@ -261,15 +246,15 @@ class ControllerSpec extends AnyWordSpec{
 
         "make and publish a move" in {
             controller11.openRec(1, 1, startField)
-            controller11.field.showVisibleCell(1, 1) should not be (" ")
+            controller11.field.matrix.rows(1)(1) should not be (" ")
         }
     }
 
     "def checkGameOver" should {
-        val game29 = new Game(3, 3, 0, "Playing")
-        val emptyField = new Field(3, " ")
+        val game29 = GameDTO(3, 3, 0, "Playing")
+        val emptyField =  FieldDTO(MatrixDTO(Vector.fill(3)(Vector.fill(3)(" "))), MatrixDTO(Vector.fill(3)(Vector.fill(3)(" ")))) //Field(3, " ")
 
-        val controller12 = new Controller(using game29)
+        val controller12 = new Controller()
         val observer = new Observer {
         var notified = false
         override def update(e: Event): Boolean = 
@@ -284,10 +269,10 @@ class ControllerSpec extends AnyWordSpec{
     }
 
     "def newGameGui" should {
-        val game31 = new Game(3, 3, 0, "Playing")
-        val emptyField = new Field(3, " ")  
+        val game31 = GameDTO(3, 3, 0, "Playing")
+        val emptyField =  FieldDTO(MatrixDTO(Vector.fill(3)(Vector.fill(3)(" "))), MatrixDTO(Vector.fill(3)(Vector.fill(3)(" ")))) //Field(3, " ")
 
-        val controller14 = new Controller(using game31)
+        val controller14 = new Controller()
         val observer = new Observer {
         var notified = false
         override def update(e: Event): Boolean = 
@@ -301,10 +286,10 @@ class ControllerSpec extends AnyWordSpec{
     }
 
     "def newGame" should {
-        val game32 = new Game(3, 3, 0, "Playing")
-        val emptyField = new Field(3, " ")
+        val game32 = GameDTO(3, 3, 0, "Playing")
+        val emptyField =  FieldDTO(MatrixDTO(Vector.fill(3)(Vector.fill(3)(" "))), MatrixDTO(Vector.fill(3)(Vector.fill(3)(" ")))) //new Field(3, " ")
 
-        val controller15 = new Controller(using game32)
+        val controller15 = new Controller()
         val observer = new Observer {
         var notified = false
         override def update(e: Event): Boolean = 
@@ -323,10 +308,10 @@ class ControllerSpec extends AnyWordSpec{
     }
 
     "def showVisibleCell" should {
-        val game34: IGame = new Game(10, 9, 0, "Playing")
-        val startField = createField(game34)
+        val game34 = new GameDTO(10, 9, 0, "Playing")
+        val startField = initController.createFieldDTO(game34)
 
-        val controller17 = new Controller(using game34)
+        val controller17 = new Controller()
         val observer = new Observer {
         var notified = false
         override def update(e: Event): Boolean = 
@@ -335,16 +320,16 @@ class ControllerSpec extends AnyWordSpec{
         }
 
         "make and publish a move" in {
-            controller17.field.showVisibleCell(1, 1) should be ("~")
+            controller17.field.matrix.rows(1)(1) should be ("~")
         }
     }
 
 
     "def newGameField" should{
-        val game36 = new Game(3, 3, 0, "Playing")
-        val emptyField = new Field(3, " ")
+        val game36 = GameDTO(3, 3, 0, "Playing")
+        val emptyField =  FieldDTO(MatrixDTO(Vector.fill(3)(Vector.fill(3)(" "))), MatrixDTO(Vector.fill(3)(Vector.fill(3)(" ")))) //new Field(3, " ")
 
-        val controller19 = new Controller(using game36)
+        val controller19 = new Controller()
         val observer = new Observer {
         var notified = false
         override def update(e: Event): Boolean = 
@@ -359,10 +344,10 @@ class ControllerSpec extends AnyWordSpec{
     }
 
     "def board" should {
-        val game37: IGame = new Game(10, 9, 0, "Playing")
-        val startField = createField(game37)
+        val game37 = GameDTO(10, 9, 0, "Playing")
+        val startField = initController.createFieldDTO(game37)
 
-        val controller20 = new Controller(using game37)
+        val controller20 = Controller()
         val observer = new Observer {
         var notified = false
         override def update(e: Event): Boolean = 
@@ -376,8 +361,8 @@ class ControllerSpec extends AnyWordSpec{
     }
 
     "def field" should {
-        val game38:IGame = new Game(3, 3, 0, "Playing")
-        val startField38 = createField(game38)
+        val game38 = GameDTO(3, 3, 0, "Playing")
+        val startField38 = initController.createFieldDTO(game38)
 
         val controller21 = new Controller()
         val observer = new Observer {
@@ -409,9 +394,9 @@ class ControllerSpec extends AnyWordSpec{
     }
 
     "def saveScoreAndPlayerName" should{
-        val game41 = new Game( 10, 9, 0, "Playing")
+        val game41 = GameDTO( 10, 9, 0, "Playing")
 
-        val controller24 = new Controller(using game41)
+        val controller24 = new Controller()
         val observer = new Observer {
         var notified = false
         override def update(e: Event): Boolean =
@@ -420,7 +405,7 @@ class ControllerSpec extends AnyWordSpec{
         }
 
         "make and publish a move" in {
-            val filePathHighScore = Default.filePathHighScore
+            val filePathHighScore = ""
             val score = 10
             controller24.saveScoreAndPlayerName("playerName", score, filePathHighScore)
         }
@@ -428,9 +413,9 @@ class ControllerSpec extends AnyWordSpec{
 
     // sometimes this test could fail because of concurrency
     "def loadPlayerScores" should{
-        val game42 = new Game( 10, 9, 0, "Playing")
+        val game42 = GameDTO( 10, 9, 0, "Playing")
 
-        val controller25 = new Controller(using game42)
+        val controller25 = new Controller()
         val observer = new Observer {
         var notified = false
 
@@ -447,9 +432,9 @@ class ControllerSpec extends AnyWordSpec{
     }
 
     "def Controller.loadGame" should{
-        val game43 = new Game( 10, 9, 0, "Playing")
+        val game43 = GameDTO( 10, 9, 0, "Playing")
 
-        val controller26 = new Controller(using game43)
+        val controller26 = new Controller()
         val observer = new Observer {
         var notified = false
 
@@ -463,4 +448,4 @@ class ControllerSpec extends AnyWordSpec{
         }
     }
 
-} */
+}

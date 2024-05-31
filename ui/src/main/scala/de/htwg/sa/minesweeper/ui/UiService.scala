@@ -1,13 +1,12 @@
 package de.htwg.sa.minesweeper.ui
 
-//import de.htwg.sa.minesweeper.ui.config.Default.{given}
 import de.htwg.sa.minesweeper.ui.gui.GUI
 
 import scala.io.StdIn.readLine
 
 object UiService {
     def main(args: Array[String]): Unit = {
-        //WebGuiApi().start() // on Port 9080
+        WebGuiApi().start() // on Port 9080
         val gui = GUI()
         val tui = TUI()
         gui.start() // on Port 9087
