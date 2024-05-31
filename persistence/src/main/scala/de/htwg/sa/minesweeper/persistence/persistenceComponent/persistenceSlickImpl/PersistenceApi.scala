@@ -7,15 +7,14 @@ import akka.http.scaladsl.server.Directives.*
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.unmarshalling.{FromEntityUnmarshaller, Unmarshaller}
 import akka.stream.Materializer
-import de.htwg.sa.minesweeper.persistence.entity.*
+import de.htwg.sa.minesweeper.persistence.entity._
 import de.htwg.sa.minesweeper.persistence.persistenceComponent.IPersistence
 import de.htwg.sa.minesweeper.persistence.persistenceComponent.config.Default
-import de.htwg.sa.minesweeper.persistence.persistenceComponent.config.Default.{given}
-import play.api.libs.json._
+import play.api.libs.json.*
 
 import java.io.File
-import java.nio.file.{Files, Paths}
-import scala.concurrent.{ExecutionContextExecutor, Future}
+import java.nio.file.Paths
+import scala.concurrent.ExecutionContextExecutor
 import scala.io.Source
 import scala.util.{Failure, Success, Try}
 
@@ -41,12 +40,10 @@ class PersistenceApi(using var p: IPersistence) {
             } ~
             path("game") {
                 val spiel = p.loadGame
-                //Persistence().closeConnection
                 complete(StatusCodes.OK, HttpEntity(ContentTypes.`application/json`, spiel.get.gameToJson.toString())    )
             } ~
             path("field") {
                 val field = p.loadField.getOrElse(Util.f)
-                //Persistence().closeConnection
                 complete(HttpEntity(ContentTypes.`application/json`, field.fieldToJson.toString))
             } ~
             path("highscore") {
@@ -70,16 +67,6 @@ class PersistenceApi(using var p: IPersistence) {
                 entity(as[String]) { field =>
                     val jsonField = field
                     val pathToFile = Paths.get("C:\\Playground\\minesweeperpublic\\src\\main\\data\\field.json")
-
-                    /*                    val saveFuture: Future[Unit] = Future {
-                        Files.write(pathToFile, jsonField.getBytes("UTF-8"))
-                    }
-
-                    onComplete(saveFuture) {
-                        case Success(_) => complete(StatusCodes.OK, HttpEntity(ContentTypes.`application/json`, jsonField))
-                        case Failure(ex) => complete(StatusCodes.InternalServerError, s"An error occurred: ${ex.getMessage}")
-                    }*/
-                    
                     
                     val maybeSucces = Try(p.saveField(Util.f.jsonToField(field)))
 
@@ -99,7 +86,6 @@ class PersistenceApi(using var p: IPersistence) {
                         "score" -> score
                     )
                     val path = pathToFile
-                    //val pathToFile = "C:\\Playground\\minesweeperpublic\\src\\main\\data\\highscore.json"
                     p.savePlayerScore(player, score, pathToFile)
 
                     complete(HttpEntity(ContentTypes.`application/json`, newScoreObj.toString()))
@@ -121,12 +107,6 @@ class PersistenceApi(using var p: IPersistence) {
                 complete("fail binding")
         }
     }
-
-/*    val bindFuture = Http().bindAndHandle(route, "localhost", 9083)
-
-    def unbind = bindFuture
-        .flatMap(_.unbind())
-        .onComplete(_ => system.terminate())*/
 
     def loadPlayerScoresToJson(filePath: String): JsValue = {
 
@@ -157,8 +137,5 @@ class PersistenceApi(using var p: IPersistence) {
         }
         JsArray(validScores)
     }
-
-
-    
 
 }

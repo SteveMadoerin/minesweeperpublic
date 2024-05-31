@@ -32,7 +32,7 @@ class Controller() extends IController with Observable:
     val undoRedoManager = new UndoRedoManager[FieldDTO]
 
     def createFieldDTO(leGame: GameDTO): FieldDTO = {
-        val url = s"http://localhost:9082/model/field/new?bombs=${leGame.bombs}&size=${leGame.side}&time=${leGame.time}"
+        val url = s"http://model:9082/model/field/new?bombs=${leGame.bombs}&size=${leGame.side}&time=${leGame.time}"
 
         val returnField: FieldDTO = Try {
             val result = Source.fromURL(url).mkString
@@ -57,7 +57,7 @@ class Controller() extends IController with Observable:
                 case "Lost" => 2
             }
             // ModelAPI call: model/field/decider with parameters b, x, y, bombs size, time, board
-            val url = s"http://localhost:9082/model/field/decider?b=${b}&x=${move.x}&y=${move.y}&bombs=${game.bombs}&size=${game.side}&time=${game.time}&board=$convertedBoard"
+            val url = s"http://model:9082/model/field/decider?b=${b}&x=${move.x}&y=${move.y}&bombs=${game.bombs}&size=${game.side}&time=${game.time}&board=$convertedBoard"
             val jsonFieldFirst = RestUtil.fieldDtoToJson(field)/* RestUtil.fieldToJson(field) */ // provide the controller field to the ModelAPI
             val jsonFileContentFirst = jsonFieldFirst.getBytes("UTF-8")
 
@@ -78,7 +78,7 @@ class Controller() extends IController with Observable:
 
             val request2 = HttpRequest(
                 method =  HttpMethods.PUT,
-                uri = s"http://localhost:9082/model/field/showInvisibleCell?y=${move.y}&x=${move.x}",
+                uri = s"http://model:9082/model/field/showInvisibleCell?y=${move.y}&x=${move.x}",
                 entity = HttpEntity(ContentTypes.`application/json`, jsonFileContent2)
             )
 
@@ -97,7 +97,7 @@ class Controller() extends IController with Observable:
     
     def loadGame = {
 
-        val uri = Uri("http://localhost:9083/persistence/game") // load the game
+        val uri = Uri("http://persistence:9083/persistence/game") // load the game
         val request = HttpRequest(method = HttpMethods.GET, uri = uri)
         val responseFuture: Future[HttpResponse] = Http().singleRequest(request)
         val bodyStringFuture: Future[String] = responseFuture.flatMap { response =>
@@ -121,7 +121,7 @@ class Controller() extends IController with Observable:
         game = GameDTO(gameOption.get.bombs, gameOption.get.side, gameOption.get.time, gameOption.get.board)
         // _____________________________________________________________________________________________________
         
-        val uriField = Uri("http://localhost:9083/persistence/field") // load the field
+        val uriField = Uri("http://persistence:9083/persistence/field") // load the field
 
         val requestField = HttpRequest(method = HttpMethods.GET, uri = uriField)
         val responseFutureField: Future[HttpResponse] = Http().singleRequest(requestField)
@@ -156,7 +156,7 @@ class Controller() extends IController with Observable:
             "board" -> s"${game.board}"
         )
 
-        val uri = Uri("http://localhost:9083/persistence/putGame").withQuery(queryParameters)
+        val uri = Uri("http://persistence:9083/persistence/putGame").withQuery(queryParameters)
         val request = HttpRequest(method = HttpMethods.PUT, uri = uri)
 
         val responseFuture: Future[HttpResponse] = Http().singleRequest(request)
@@ -175,7 +175,7 @@ class Controller() extends IController with Observable:
 
         val request2 = HttpRequest(
             method =  HttpMethods.PUT,
-            uri = "http://localhost:9083/persistence/putField",
+            uri = "http://persistence:9083/persistence/putField",
             entity = HttpEntity(ContentTypes.`application/json`, jsonFileContent)
         )
 
@@ -192,7 +192,7 @@ class Controller() extends IController with Observable:
 
     // approved
     def gameOver: Unit =
-        val url = s"http://localhost:9082/model/field/gameOverField"
+        val url = s"http://model:9082/model/field/gameOverField"
         val jsonField =  RestUtil.fieldDtoToJson(field) // provide the controller field to the ModelAPI
         val jsonFileContent = jsonField.getBytes("UTF-8")
         
@@ -223,7 +223,7 @@ class Controller() extends IController with Observable:
         notifyObserversRest("Help")
     
     def fieldToString: String = {
-        val url2 = s"http://localhost:9082/model/field/toString"
+        val url2 = s"http://model:9082/model/field/toString"
         val bodyField = RestUtil.fieldDtoToJson(field)
 
         val request2 = HttpRequest(
@@ -241,7 +241,7 @@ class Controller() extends IController with Observable:
     }
 
     def helpMenuRest: String = 
-        val url = s"http://localhost:9082/model/game/helpMessage"
+        val url = s"http://model:9082/model/game/helpMessage"
         // prepare the GET request
         val request = HttpRequest(
             method =  HttpMethods.GET,
@@ -260,7 +260,7 @@ class Controller() extends IController with Observable:
         notifyObserversRest("Cheat")
     
     def cheatRest: String = {
-        val url = s"http://localhost:9082/model/field/cheat"
+        val url = s"http://model:9082/model/field/cheat"
         
         val bodyField = RestUtil.fieldDtoToJson(field) // prepare the Field
 
@@ -279,7 +279,7 @@ class Controller() extends IController with Observable:
     }
 
     def checkGameOver(status: String) = {
-        val url = s"http://localhost:9082/model/game/checkExit?board=$status"
+        val url = s"http://model:9082/model/game/checkExit?board=$status"
         val request = HttpRequest(
             method =  HttpMethods.GET,
             uri = url
@@ -295,7 +295,7 @@ class Controller() extends IController with Observable:
     def checkGameOverGui: Boolean = {
         val status = game.board
 
-        val url = s"http://localhost:9082/model/game/checkExit?board=$status"
+        val url = s"http://model:9082/model/game/checkExit?board=$status"
         val request = HttpRequest(
             method = HttpMethods.GET,
             uri = url
@@ -323,7 +323,7 @@ class Controller() extends IController with Observable:
             case "Hard" => 3
         }
         
-        val url = s"http://localhost:9082/model/game/newGameField?optionString=$oString"
+        val url = s"http://model:9082/model/game/newGameField?optionString=$oString"
 
         val bodyGame = RestUtil.gameDtoToJson(game) // prepare the game
         val body = bodyGame.getBytes("UTF-8")
@@ -351,7 +351,7 @@ class Controller() extends IController with Observable:
         notifyObserverGui("NewGame") //notifyObserversRest("NewGame")
         
     def notifyObserverGui(event: String) = {
-        val uri2 = s"http://localhost:9087/gui/notify" + "?event=" + event
+        val uri2 = s"http://ui:9087/gui/notify" + "?event=" + event
 
         val request2 = HttpRequest(
             method = HttpMethods.PUT,
@@ -372,7 +372,7 @@ class Controller() extends IController with Observable:
         
         val jasonField = RestUtil.fieldDtoToJson(field)
         val jsonFileContent = jasonField.getBytes("UTF-8")
-        val request = requestPut(s"http://localhost:9082/model/field/showInvisibleCell?y=${move.y}&x=${move.x}", jsonFileContent) // -> request to ModelAPi
+        val request = requestPut(s"http://model:9082/model/field/showInvisibleCell?y=${move.y}&x=${move.x}", jsonFileContent) // -> request to ModelAPi
         val responseFuture: Future[HttpResponse] = Http().singleRequest(request)
         val bodyStringFuture: Future[String] = responseFuture.flatMap { response =>
             response.entity.toStrict(5.seconds).map(_.data.utf8String)
@@ -393,7 +393,7 @@ class Controller() extends IController with Observable:
 
                 val request = HttpRequest(
                     method =  HttpMethods.PUT,
-                    uri = s"http://localhost:9082/model/field/put/flag?x=${move.x}&y=${move.y}",
+                    uri = s"http://model:9082/model/field/put/flag?x=${move.x}&y=${move.y}",
                     entity = HttpEntity(ContentTypes.`application/json`, jsonFileContent)
                 )
 
@@ -422,7 +422,7 @@ class Controller() extends IController with Observable:
 
                 val request2 = HttpRequest(
                     method =  HttpMethods.PUT,
-                    uri = s"http://localhost:9082/model/field/put/removeFlag?x=${move.x}&y=${move.y}",
+                    uri = s"http://model:9082/model/field/put/removeFlag?x=${move.x}&y=${move.y}",
                     entity = HttpEntity(ContentTypes.`application/json`, jsonFileContent)
                 )
 
@@ -464,7 +464,7 @@ class Controller() extends IController with Observable:
             "score"  -> s"${saveScore}"
         )
 
-        val uri = Uri("http://localhost:9083/persistence/putHighscore").withQuery(queryParameters)
+        val uri = Uri("http://persistence:9083/persistence/putHighscore").withQuery(queryParameters)
         val request = HttpRequest(method = HttpMethods.PUT, uri = uri)
 
         val responseFuture: Future[HttpResponse] = Http().singleRequest(request)
@@ -477,7 +477,7 @@ class Controller() extends IController with Observable:
 
     def loadPlayerScores: Seq[(String, Int)] = {
         
-        val url = "http://localhost:9083/persistence/highscore"
+        val url = "http://persistence:9083/persistence/highscore"
         val request = HttpRequest(method = HttpMethods.GET, uri = url)
         val responseFuture: Future[HttpResponse] = Http().singleRequest(request)
         val bodyFuture: Future[String] = responseFuture.flatMap { response =>
@@ -520,7 +520,7 @@ class Controller() extends IController with Observable:
 
         // _________________________ NOTIFY TUI _________________________
 
-        val uri1 = s"http://localhost:9088/tui/notify" + "?event=" + event
+        val uri1 = s"http://ui:9088/tui/notify" + "?event=" + event
 
         val request = HttpRequest(
             method =  HttpMethods.PUT,
@@ -535,7 +535,7 @@ class Controller() extends IController with Observable:
         println(result + " - TUI")
 
         // _________________________ NOTIFY GUI _________________________
-        val uri2 = s"http://localhost:9087/gui/notify" + "?event=" + event
+        val uri2 = s"http://ui:9087/gui/notify" + "?event=" + event
 
         val request2 = HttpRequest(
             method =  HttpMethods.PUT,

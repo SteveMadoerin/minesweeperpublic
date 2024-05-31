@@ -25,7 +25,7 @@ object RestUtil{
         // take care in the uri -> this is only valid for Command.scala replacement
         val request2 = HttpRequest(
             method =  HttpMethods.PUT,
-            uri = s"http://localhost:9082/model/field/showInvisibleCell?y=${x}&x=${y}" ,
+            uri = s"http://model:9082/model/field/showInvisibleCell?y=${x}&x=${y}" ,
             entity = HttpEntity(ContentTypes.`application/json`, jsonFileContent)
         )
 
@@ -51,7 +51,7 @@ object RestUtil{
 
         val request2 = HttpRequest(
             method =  HttpMethods.PUT,
-            uri = s"http://localhost:9082/model/field/put?symbol=$extractedSymbolNew&x=${x}&y=${y}",
+            uri = s"http://model:9082/model/field/put?symbol=$extractedSymbolNew&x=${x}&y=${y}",
             entity = HttpEntity(ContentTypes.`application/json`, jsonFileContent)
         )
 
@@ -76,13 +76,12 @@ object RestUtil{
     {
         // def recursiveOpen(x: Int, y: Int, field: IField): IField
         import system.dispatcher // to get an execution context
-        // We need a request with a field in json format
-        val jasonField = /* fieldToJson(field) */ fieldDtoToJson(field)
+        val jasonField = fieldDtoToJson(field) // We need a request with a field in json format
         val jsonFileContent = jasonField.getBytes("UTF-8")
         // then we need to send x and y as a parameter
         val request = HttpRequest(
             method =  HttpMethods.PUT,
-            uri = s"http://localhost:9082/model/field/recursiveOpen?x=${x}&y=${y}",
+            uri = s"http://model:9082/model/field/recursiveOpen?x=${x}&y=${y}",
             entity = HttpEntity(ContentTypes.`application/json`, jsonFileContent)
         )
 
@@ -170,7 +169,7 @@ object RestUtil{
             case None => println("Field is not valid"); None
         }
 
-        (game, finalFieldOption.get) //finalFieldOption.get
+        (game, finalFieldOption.get)
     }
     
     def jsontToFieldDTO(jsonString: String): FieldDTO = {

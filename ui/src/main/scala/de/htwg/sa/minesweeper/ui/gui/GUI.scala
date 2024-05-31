@@ -31,7 +31,7 @@ class GUI() extends Frame:
     implicit val materializer: Materializer = Materializer(system)
     implicit val executionContext: ExecutionContextExecutor = system.dispatcher
 
-    private var boardBounds = /* controller.field.matrix.rows.size-1 */ RestUtil.requestBoardBounds // TODO: implement
+    private var boardBounds =  RestUtil.requestBoardBounds
     var controllerField: FieldTui = RestUtil.requestControllerField
     var controllerGame: GameTui = RestUtil.requestControllerGame
     
@@ -138,7 +138,6 @@ class GUI() extends Frame:
         if ((controllerGame.board == "Lost" || controllerGame.board == "Won") && b) {
             b = false
             update(Event.GameOver)
-
         }
         val firstCheck = firstMoveControl.get()
         val temp = new BorderPanel{
@@ -157,9 +156,6 @@ class GUI() extends Frame:
                 b = true
                 controllerGame = RestUtil.requestControllerGame
                 controllerField = RestUtil.requestControllerField
-//                val (newField, newGame) = RestUtil.requestNewGame(9,10)
-//                controllerField = newField
-//                controllerGame = newGame
                 
                 firstMoveControl.set(true)
                 boardBounds = controllerField.matrix.rows.size -1
@@ -185,8 +181,7 @@ class GUI() extends Frame:
             case Event.Next =>
                 
                 if(!timerStarted){
-                    restartTimer(new AtomicInteger(controllerGame.time))
-                    //restartTimer(new AtomicInteger(controller.game.time))
+                    restartTimer(new AtomicInteger(controllerGame.time)) //restartTimer(new AtomicInteger(controller.game.time))
                 } else{
                     contents = updateContents
                     repaint()
@@ -214,7 +209,6 @@ class GUI() extends Frame:
             
             case Event.Cheat =>
 
-                /* val text = s"${controller.field.gameOverField}" */
                 val cheatingField = RestUtil.requestControllerField
                 val text = s"${prettyFormat(FieldTui(cheatingField.hidden, cheatingField.hidden))}"
                 showMessage(None.orNull, text, "Cheat Menu", Message.Plain)
@@ -351,11 +345,7 @@ class GUI() extends Frame:
         val imagePath = imagePaths.getOrElse(kind, "src/main/resources/time-.jpeg")
         new ImageIcon(imagePath)
     }
-/*    def showDigits(kind: Int): ImageIcon = {
-        val imagePaths = (0 to 9).map(i => i -> s"C:/Playground/minesweeperpublic/src/main/resources/time$i.jpeg").toMap
-        val imagePath = imagePaths.getOrElse(kind, "C:/Playground/minesweeperpublic/src/main/resources/time-.jpeg")
-        new ImageIcon(imagePath)
-    }*/
+
     def showSmiley(kind: String): ImageIcon =
         val imagePath = s"src/main/resources/face$kind.jpeg"
         val icon: ImageIcon = new ImageIcon(imagePath)

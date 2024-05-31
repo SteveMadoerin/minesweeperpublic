@@ -3,7 +3,7 @@ package de.htwg.sa.minesweeper.model.gameComponent
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity}
-import akka.http.scaladsl.server.Directives.*
+import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.stream.Materializer
 import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl.{Decider, Game, Playfield}
@@ -47,7 +47,7 @@ class ModelApi(using var game: IGame, var field: IField){
             path("game"/"checkExit") {
                 parameter("board".as[String]) { (board) =>
                 val boolean = game.checkExit(board)
-                complete(HttpEntity(ContentTypes.`application/json`, boolean.toString())) // boolean to json
+                complete(HttpEntity(ContentTypes.`application/json`, boolean.toString()))
                 }
             } ~
             path("field"/"new") {
@@ -58,7 +58,6 @@ class ModelApi(using var game: IGame, var field: IField){
                 val feld = createField(spiel)
                 this.field = feld
                 complete(HttpEntity(ContentTypes.`application/json`,feld.fieldToJson))
-
                 }
             } ~
             path("field") {
@@ -194,7 +193,7 @@ class ModelApi(using var game: IGame, var field: IField){
     }
 
     def start(): Unit = {
-        val bindFuture = Http().newServerAt("0.0.0.0", 9082).bind(route) // (route, "localhost", 9082)
+        val bindFuture = Http().newServerAt("0.0.0.0", 9082).bind(route)
 
         bindFuture.onComplete {
             case Success(binding) =>
