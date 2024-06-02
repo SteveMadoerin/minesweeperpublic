@@ -197,7 +197,7 @@ package minesweeper
    		"User-Agent" -> "PostmanRuntime/7.39.0"
    )
   
-   private val uri1 = "http:localhost:9082/model"
+   private val uri1 = "http://localhost:9082/model"
 
    private val scn = scenario("ModelApiTest")
      .exec(
