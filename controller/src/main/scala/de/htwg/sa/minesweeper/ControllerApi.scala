@@ -62,6 +62,7 @@ class ControllerApi(using var controller: IController) extends Observer:
                   complete(RestUtil.fieldDtoToJson(controller.field).toString)
                 },
                 path("gameOver") {
+                  //it actually working good to display the gameOverField but we get a 500 Internal Server Error
                   controller.gameOver
                   complete(RestUtil.fieldDtoToJson(controller.field).toString)
                 },
@@ -80,6 +81,7 @@ class ControllerApi(using var controller: IController) extends Observer:
                   complete(controller.fieldToString)
                 },
                 path("newGameGui") {
+                  //actually works but needs user interaction
                   controller.newGameGUI
                   complete("newGameGui")
                 },
@@ -174,6 +176,7 @@ class ControllerApi(using var controller: IController) extends Observer:
             put {
               concat(
                 path("put") {
+                  // not used!
                   entity(as[String]) { requestBody =>
                     complete("controller.put(controller.jsonStringToMove(requestBody))")
                   }

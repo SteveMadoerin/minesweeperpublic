@@ -1,5 +1,6 @@
 package de.htwg.sa.minesweeper
 
+import de.htwg.sa.minesweeper.persistence.persistenceComponent.persistenceSlickImpl.PersistenceApi
 import de.htwg.sa.minesweeper.ui.TUI
 import de.htwg.sa.minesweeper.ui.gui.GUI
 //import de.htwg.sa.minesweeper.ui.config.Default.{given}
@@ -21,7 +22,7 @@ import scala.concurrent.duration._
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import akka.actor._
-import de.htwg.sa.minesweeper.persistence.persistenceComponent.PersistenceApi
+import de.htwg.sa.minesweeper.persistence.persistenceComponent.persistenceSlickImpl.PersistenceApi
 import concurrent.ExecutionContext.Implicits.global   
 //import de.htwg.sa.minesweeper.ui.WebGuiApi
 

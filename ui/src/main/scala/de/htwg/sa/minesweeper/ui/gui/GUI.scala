@@ -5,17 +5,15 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Directives.*
 import akka.http.scaladsl.server.Route
 import akka.stream.Materializer
-import de.htwg.sa.minesweeper.ui.model.{DigitDisplay, FieldTui, GameTui, MatrixTui}
-import de.htwg.sa.minesweeper.ui.config.Default
-import de.htwg.sa.minesweeper.ui.model.{Event, Move}
+import de.htwg.sa.minesweeper.ui.model._
 
 import java.awt.RenderingHints
 import java.awt.event.MouseEvent
 import java.awt.image.BufferedImage
 import java.util.concurrent.atomic.*
 import java.util.{Timer, TimerTask}
-import javax.swing.{BorderFactory, ImageIcon}
 import javax.swing.border.Border
+import javax.swing.{BorderFactory, ImageIcon}
 import scala.concurrent.ExecutionContextExecutor
 import scala.swing.*
 import scala.swing.Dialog.*

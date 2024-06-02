@@ -541,7 +541,7 @@ class Controller() extends IController with Observable:
             method =  HttpMethods.PUT,
             uri = uri2
         )
-        
+        // maybe make the response timeout longer
         val responseFuture2: Future[HttpResponse] = Http().singleRequest(request2)
         val bodyFieldFuture2: Future[String] = responseFuture2.flatMap { response =>
             response.entity.toStrict(5.seconds).map(_.data.utf8String)

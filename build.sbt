@@ -5,8 +5,7 @@ ThisBuild / version := "0.1.0-SNAPSHOT"
 ThisBuild / organization := "de.htwg.sa"
 ThisBuild / organizationName := "minesweeper"
 
-
-lazy val root: Project = (project in file(""))
+lazy val root: Project = (project in file("."))
     .dependsOn(controller, model, persistence, ui)
     .aggregate(controller, model, persistence, ui)
     .settings(
@@ -20,7 +19,12 @@ lazy val model = (project in file("model"))
     .settings(
         name := "model",
         version:= "0.1.0-SNAPSHOT",
-        commonSettings
+        commonSettings,
+        assemblyMergeStrategy in assembly := {
+            case PathList("META-INF", xs @ _*) => MergeStrategy.discard
+            case "reference.conf" => MergeStrategy.concat
+            case _ => MergeStrategy.first
+        }
     )
 
 lazy val persistence = (project in file("persistence"))
@@ -64,9 +68,16 @@ lazy val commonSettings = Seq(
     libraryDependencies += "com.typesafe.slick" %% "slick" % "3.5.1",
     libraryDependencies += "org.slf4j" % "slf4j-nop" % "1.6.4",
     libraryDependencies += "org.postgresql" % "postgresql" % "42.7.3",
-    libraryDependencies += ("org.mongodb.scala" %% "mongo-scala-driver" % "4.3.3").cross(CrossVersion.for3Use2_13)
+    libraryDependencies += ("org.mongodb.scala" %% "mongo-scala-driver" % "4.3.3").cross(CrossVersion.for3Use2_13),
+/*    libraryDependencies += ("io.gatling" % "gatling-test-framework" % "3.7.2" % "test")
+        .exclude("com.typesafe.akka", "akka-actor_2.13")
+        .exclude("com.typesafe.akka", "akka-slf4j_2.13")*/
 )
 
+//lazy val gatlingDependencies = Seq(
+//    "io.gatling.highcharts" % "gatling-charts-highcharts" % "3.11.3" % "it,test" exclude("com.typesafe.scala-logging", "scala-logging_2.13"),
+//    "io.gatling" % "gatling-test-framework" % "3.11.3" % "it,test" exclude("com.typesafe.scala-logging", "scala-logging_2.13"),
+//)
 
 import org.scoverage.coveralls.Imports.CoverallsKeys.*
 
