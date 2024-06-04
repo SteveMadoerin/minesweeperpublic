@@ -12,7 +12,7 @@ trait IController extends Observable{
     def helpMenu: Unit
     def helpMenuRest: String
     def fieldToString: String
-    def cheat: Unit
+    def notifyObserversRest(event: String): Unit
     def cheatRest: String
     
     def checkGameOver(status: String): Boolean

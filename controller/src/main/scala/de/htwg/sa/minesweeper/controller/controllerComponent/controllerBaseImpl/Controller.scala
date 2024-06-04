@@ -166,9 +166,8 @@ class Controller() extends IController with Observable:
             case Failure(ex)  => println(s"Request failed: $ex")
         }
 
-        // TODO: Await for the response
-
-        // _____________________________________________________________________________________________________
+        // maybe To-Do Await for the response
+        
 
         val jasonField = RestUtil.fieldDtoToJson(field)
         val jsonFileContent = jasonField.getBytes("UTF-8")
@@ -208,10 +207,10 @@ class Controller() extends IController with Observable:
         val bodyString = Await.result(bodyStringFuture, 5.seconds)
         val ANSI_BLUE = "\u001B[34m"
         val ANSI_RESET = "\u001B[0m"
-        print(ANSI_BLUE + bodyString + ANSI_RESET)
+        //print(ANSI_BLUE + bodyString + ANSI_RESET)
         
         val tempField = RestUtil.jsontToFieldDTO(bodyString)
-        print (tempField.toString)
+        //print (tempField.toString)
         field = FieldDTO(tempField.hidden, tempField.hidden)
         
         notifyObserversRest("GameOver") 
@@ -242,7 +241,7 @@ class Controller() extends IController with Observable:
 
     def helpMenuRest: String = 
         val url = s"http://model:9082/model/game/helpMessage"
-        // prepare the GET request
+        
         val request = HttpRequest(
             method =  HttpMethods.GET,
             uri = url
@@ -255,9 +254,7 @@ class Controller() extends IController with Observable:
         val bodyStringHelpMessage = Await.result(bodyStringFuture, 5.seconds)
         bodyStringHelpMessage
     
-    def cheat = 
-        cheatRest
-        notifyObserversRest("Cheat")
+    // deleted after optimization gatling tests
     
     def cheatRest: String = {
         val url = s"http://model:9082/model/field/cheat"
@@ -449,12 +446,10 @@ class Controller() extends IController with Observable:
         field = makeThis(move)
         notifyObserversRest("Next")
     
-
     def makeAndPublish(makeThis: => FieldDTO): FieldDTO =
         field = makeThis
         notifyObserversRest("Next")
         field
-
     
     // approved
     def saveScoreAndPlayerName(playerName: String, saveScore: Int, filePath: String) = {
@@ -514,10 +509,9 @@ class Controller() extends IController with Observable:
         )
     }
 
-    // approved - but only to notify the TUI and GUI
-    def notifyObserversRest(event: String) = {
-        // later on register logic could be implemented here
-
+    // approved - notifys TUI and GUI
+    def notifyObserversRest(event: String): Unit = {
+        
         // _________________________ NOTIFY TUI _________________________
 
         val uri1 = s"http://ui:9088/tui/notify" + "?event=" + event
@@ -541,7 +535,7 @@ class Controller() extends IController with Observable:
             method =  HttpMethods.PUT,
             uri = uri2
         )
-        // maybe make the response timeout longer
+        
         val responseFuture2: Future[HttpResponse] = Http().singleRequest(request2)
         val bodyFieldFuture2: Future[String] = responseFuture2.flatMap { response =>
             response.entity.toStrict(5.seconds).map(_.data.utf8String)

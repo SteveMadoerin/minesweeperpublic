@@ -69,15 +69,7 @@ lazy val commonSettings = Seq(
     libraryDependencies += "org.slf4j" % "slf4j-nop" % "1.6.4",
     libraryDependencies += "org.postgresql" % "postgresql" % "42.7.3",
     libraryDependencies += ("org.mongodb.scala" %% "mongo-scala-driver" % "4.3.3").cross(CrossVersion.for3Use2_13),
-/*    libraryDependencies += ("io.gatling" % "gatling-test-framework" % "3.7.2" % "test")
-        .exclude("com.typesafe.akka", "akka-actor_2.13")
-        .exclude("com.typesafe.akka", "akka-slf4j_2.13")*/
 )
-
-//lazy val gatlingDependencies = Seq(
-//    "io.gatling.highcharts" % "gatling-charts-highcharts" % "3.11.3" % "it,test" exclude("com.typesafe.scala-logging", "scala-logging_2.13"),
-//    "io.gatling" % "gatling-test-framework" % "3.11.3" % "it,test" exclude("com.typesafe.scala-logging", "scala-logging_2.13"),
-//)
 
 import org.scoverage.coveralls.Imports.CoverallsKeys.*
 

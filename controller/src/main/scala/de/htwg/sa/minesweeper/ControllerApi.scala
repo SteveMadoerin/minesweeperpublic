@@ -108,8 +108,8 @@ class ControllerApi(using var controller: IController) extends Observer:
                   }
                 },
                 path("cheat") {
-                  val cheat = controller.cheatRest
-                  controller.cheat
+                  val cheat = controller.cheatRest // optimized after gatling tests
+                  controller.notifyObserversRest("Cheat")
                   complete(cheat)
                 },
                 pathPrefix("makeAndPublish") {

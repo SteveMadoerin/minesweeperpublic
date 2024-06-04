@@ -144,10 +144,10 @@ class ModelApi(using var game: IGame, var field: IField){
             path("field"/"gameOverField") {
                 entity(as[String]) { feld =>
                     val jasonStringField = feld
-                    val fieldFromController = field.jsonToField(jasonStringField)
-                    val saveField = fieldFromController.gameOverField
-                    val prepareJsonField = fieldFromController.fieldToJson(saveField)
-                    complete(HttpEntity(ContentTypes.`application/json`, Json.parse(prepareJsonField).toString()))
+                    // optimization after gatling test
+                    val newJsonString = updateMatrixWithHidden(jasonStringField)
+                    println("field/gameOverField")
+                    complete(HttpEntity(ContentTypes.`application/json`, Json.parse(newJsonString).toString()))
                 }
             } ~
             path("field"/"toString") {
@@ -190,6 +190,23 @@ class ModelApi(using var game: IGame, var field: IField){
                 }
             }
         }
+    }
+
+    def updateMatrixWithHidden(jsonString: String): String = {
+        // Find the start and end indices of the "matrix" and "hidden" arrays
+        val matrixStart = jsonString.indexOf("\"matrix\": [") + "\"matrix\": [".length
+        val matrixEnd = jsonString.indexOf("]", matrixStart)
+        val hiddenStart = jsonString.indexOf("\"hidden\": [") + "\"hidden\": [".length
+        val hiddenEnd = jsonString.indexOf("]", hiddenStart)
+
+        // Extract the matrix and hidden strings
+        val matrixString = jsonString.substring(matrixStart, matrixEnd)
+        val hiddenString = jsonString.substring(hiddenStart, hiddenEnd)
+
+        // Replace the matrix string with the hidden string
+        val newJsonString = jsonString.substring(0, matrixStart) + hiddenString + jsonString.substring(matrixEnd)
+
+        newJsonString
     }
 
     def start(): Unit = {
