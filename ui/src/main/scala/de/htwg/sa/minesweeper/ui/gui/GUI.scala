@@ -200,9 +200,10 @@ class GUI() extends Frame:
                 
                 resetTimer()
                 //showMessage(None.orNull, text, "GameOver", Message.Info)
-
-                saveScoreNew(saveScore)
-                loadScoreNew
+                val playerName = showInput(None.orNull, "Enter your Name to save your score!", "Save Score", Message.Info, Swing.EmptyIcon, Nil, "Sly").getOrElse("Default") // was null before
+                print(s"playerName: $playerName, saveScore: $saveScore")
+                loadScoreNew(playerName, saveScore)
+                saveScoreNew(playerName, saveScore)
                 true
             
             case Event.Cheat =>
@@ -353,28 +354,25 @@ class GUI() extends Frame:
         showInput(None.orNull, "Choose Difficulty", "NewGame", Message.Info, Swing.EmptyIcon, List("SuperEasy","Easy", "Medium", "Hard"), "Easy") // was null before
     }
     
-    def saveScoreNew(saveScore: Int): Unit = {
-        val playerName =  showInput(None.orNull, "Enter your Name to save your score!", "Save Score", Message.Info, Swing.EmptyIcon, Nil, "Sly").getOrElse("Default") // was null before
-        print(s"playerName: $playerName, saveScore: $saveScore")
-        //val filePath = Default.filePathHighScore // not in use atm
-        //controller.saveScoreAndPlayerName(playerName, saveScore, Default.filePathHighScore)
+    def saveScoreNew(playerName: String, saveScore: Int): Unit = {
+
         RestUtil.requestControllerSaveScoreAndPlayerName(saveScore, playerName)
-        // wait 5 seconds
-        Thread.sleep(5000)
     }
 
-    def loadScoreNew = {
+    def loadScoreNew(playername: String, saveScore: Int) = {
 
         val loadAndDisplayScores = () => {
             //val scores = controller.loadPlayerScores // path is set in Persistence
             val scores = RestUtil.requestLoadPlayerScores
-
-            val top10 = scores.sortBy(-_._2).take(10)
+            val newScores = scores :+ (playername, saveScore)
+            val top10 = newScores.sortBy(-_._2).take(10)
+            //add score
             val message = top10.zipWithIndex.map { case ((name, score), index) =>
                 s"${index + 1}. $name: $score"
             }.mkString("\n")
-
+            //add new score list to db
             Dialog.showMessage(None.orNull, message, "Top 10 High Scores", Message.Info)
+
         }
         loadAndDisplayScores()
     }
@@ -434,7 +432,7 @@ class GUI() extends Frame:
     def calcFlagCount: Int = calcMineAndFlag(controllerField.matrix, controllerGame)
 
     def prettyFormat(fieldTui: FieldTui): String = {
-        fieldTui.matrix.rows.map(_.mkString(" ")).mkString("\n")
+            fieldTui.matrix.rows.map(_.mkString(" ")).mkString("\n")
     }
 
     def calcMineAndFlag(visibleMatrix: MatrixTui[String], gamely: GameTui) = {
