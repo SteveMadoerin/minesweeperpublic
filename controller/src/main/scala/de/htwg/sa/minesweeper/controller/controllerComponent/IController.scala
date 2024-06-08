@@ -4,6 +4,7 @@ import de.htwg.sa.minesweeper.util.{Observable, Move}
 import de.htwg.sa.minesweeper.entity.{FieldDTO, GameDTO}
 
 trait IController extends Observable{
+    def testStreams: Unit
     def doMove(b: Boolean, move: Move, game: GameDTO): FieldDTO
     def loadGame: Unit
     def saveGame: Unit

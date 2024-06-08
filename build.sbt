@@ -19,12 +19,7 @@ lazy val model = (project in file("model"))
     .settings(
         name := "model",
         version:= "0.1.0-SNAPSHOT",
-        commonSettings,
-        assemblyMergeStrategy in assembly := {
-            case PathList("META-INF", xs @ _*) => MergeStrategy.discard
-            case "reference.conf" => MergeStrategy.concat
-            case _ => MergeStrategy.first
-        }
+        commonSettings
     )
 
 lazy val persistence = (project in file("persistence"))
@@ -69,9 +64,15 @@ lazy val commonSettings = Seq(
     libraryDependencies += "org.slf4j" % "slf4j-nop" % "1.6.4",
     libraryDependencies += "org.postgresql" % "postgresql" % "42.7.3",
     libraryDependencies += ("org.mongodb.scala" %% "mongo-scala-driver" % "4.3.3").cross(CrossVersion.for3Use2_13),
+    libraryDependencies += "com.typesafe.akka" %% "akka-stream-kafka" % "6.0.0",
+    libraryDependencies += "com.typesafe.akka" %% "akka-stream" % "2.8.5",
+    libraryDependencies += "org.apache.kafka" % "kafka-clients" % "3.7.0",
+    libraryDependencies += ("org.apache.kafka" %% "kafka-streams-scala" % "3.7.0").cross(CrossVersion.for3Use2_13),
 )
 
 import org.scoverage.coveralls.Imports.CoverallsKeys.*
 
 coverallsTokenFile := sys.env.get("COVERALLS_REPO_TOKEN")
 coverallsService := Some(GitHubActions)
+
+resolvers += "Akka library repository".at("https://repo.akka.io/maven")

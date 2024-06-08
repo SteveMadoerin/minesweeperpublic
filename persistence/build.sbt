@@ -18,7 +18,7 @@ lazy val commonSettings = Seq(
   libraryDependencies += "com.typesafe.slick" %% "slick" % "3.5.1",
   libraryDependencies += "org.slf4j" % "slf4j-nop" % "1.6.4",
   libraryDependencies += "org.postgresql" % "postgresql" % "42.7.3",
-  libraryDependencies += ("org.mongodb.scala" %% "mongo-scala-driver" % "4.3.3").cross(CrossVersion.for3Use2_13)
+  libraryDependencies += ("org.mongodb.scala" %% "mongo-scala-driver" % "4.3.3").cross(CrossVersion.for3Use2_13),
 )
 
 lazy val persistence = (project in file("."))

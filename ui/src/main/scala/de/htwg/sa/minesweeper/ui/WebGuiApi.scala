@@ -1,4 +1,4 @@
-package de.htwg.sa.minesweeper.ui
+/*package de.htwg.sa.minesweeper.ui
 
 import akka.actor.{Actor, ActorRef, ActorSystem, Props}
 import akka.actor.ActorSystem
@@ -293,4 +293,4 @@ class WebGuiApi() {
         //controller.gameOver
     }
 
-}
+}*/

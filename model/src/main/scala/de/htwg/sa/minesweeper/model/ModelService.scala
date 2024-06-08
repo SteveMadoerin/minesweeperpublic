@@ -10,5 +10,6 @@ object ModelService {
         ModelApi().start() // on Port 9082
         println("Press RETURN to stop...")
         readLine()
+        
     }
 }

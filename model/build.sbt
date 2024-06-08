@@ -31,4 +31,3 @@ scalacOptions ++= Seq("-deprecation", "-feature")
 
 assembly / target := baseDirectory.value
 
-

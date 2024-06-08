@@ -158,6 +158,12 @@ class ModelApi(using var game: IGame, var field: IField){
                     complete(HttpEntity(ContentTypes.`application/json`, saveField))
                 }
             } ~
+            path("test") {
+                entity(as[String]) { entity =>
+                    println(entity)
+                    complete(HttpEntity(ContentTypes.`application/json`, entity))
+                }
+            } ~
             path("field"/"cheat") {
                 entity(as[String]) { feld =>
                     val jasonStringField = feld

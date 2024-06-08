@@ -72,6 +72,10 @@ class ControllerApi(using var controller: IController) extends Observer:
                 path("game") {
                   complete(RestUtil.gameDtoToJson(controller.game).toString)
                 },
+                path("teststream") {
+                  controller.testStreams
+                  complete("TESTSTREAM")
+                },
                 path("helpMenu") {
                   controller.helpMenu // this also notifies the observer
                   complete(controller.helpMenuRest)
