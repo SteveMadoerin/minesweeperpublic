@@ -1,0 +1,323 @@
+package de.htwg.sa.minesweeper.controller.controllerComponent.controllerBaseImpl
+
+import akka.NotUsed
+import akka.actor.ActorSystem
+import akka.http.scaladsl.Http
+import akka.http.scaladsl.model.{HttpMethods, HttpRequest, HttpResponse, Uri}
+import akka.http.scaladsl.unmarshalling.Unmarshal
+import akka.stream.{ClosedShape, Materializer}
+import akka.stream.scaladsl.{Broadcast, Flow, GraphDSL, RunnableGraph, Sink, Source, Zip}
+import de.htwg.sa.minesweeper.controller.controllerComponent.IController
+import de.htwg.sa.minesweeper.entity.{FieldDTO, GameDTO, MatrixDTO}
+import de.htwg.sa.minesweeper.util.{Move, Observable, RestUtil}
+
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, ExecutionContextExecutor, Future}
+import scala.util.{Failure, Success, Try}
+
+
+class Controller() extends IController with Observable:
+    implicit val system: ActorSystem = ActorSystem("ControllerSystem")
+    implicit val materializer: Materializer = Materializer(system)
+    implicit val executionContext: ExecutionContextExecutor = system.dispatcher
+
+    //case class GameDTO(side: Int, bombs: Int, time: Int, board: String)
+    var field: FieldDTO = FieldDTO(MatrixDTO[String](Vector.empty), MatrixDTO[String](Vector.empty))
+
+
+    // we need to transform the Future to a GameDTO
+    var game: GameDTO = GameDTO(10, 9, 0, "Playing")
+
+    createFieldDTO(game)
+
+    def createFieldDTO(leGame: GameDTO): Unit = {
+        val url = s"http://model:9082/model/field/new?bombs=${leGame.bombs}&size=${leGame.side}&time=${leGame.time}"
+        val request = HttpRequest(uri = url)
+
+        // Create a source from the single http request
+        val source = Source.single(request)
+
+        // Flow to send the request and receive the response
+        val requestFlow = Flow[HttpRequest].mapAsync(1)(Http().singleRequest(_))
+
+        // Flow to unmarshal HttpResponse to a string
+        val responseFlow = Flow[HttpResponse].mapAsync(1)(response => Unmarshal(response.entity).to[String])
+
+        // A sink that processes each JSON string and updates the field
+        val fieldDTOSink = Sink.foreach[String] { jsonString =>
+            this.field = RestUtil.jsontToFieldDTO(jsonString)
+        }.mapMaterializedValue(_ => Future.successful(())) // Map the materialized value to Unit
+
+        // Assemble the stream and run it, using the onComplete callback to handle completion and potential failure
+        source.via(requestFlow).via(responseFlow).runWith(fieldDTOSink).onComplete {
+            case Success(_) =>
+                println("Field created")
+            // Stream completed successfully, do nothing or add custom logic if necessary
+            case Failure(e) =>
+                println(s"Error fetching or parsing field data: ${e.getMessage}")
+                this.field = FieldDTO(MatrixDTO[String](Vector.empty), new MatrixDTO[String](Vector.empty)) // Assign a default field or handle the error appropriately
+        }(system.dispatcher) // Ensure that the implicit ExecutionContext is in scope
+
+    }
+
+
+    def getGameDTOBlocking(): GameDTO = {
+        val futureGameDTO: Future[GameDTO] = getGameDTO() // Call the asynchronous function
+        Await.result(futureGameDTO, Duration.Inf) // Block until the future completes
+    }
+
+    def getGameDTOTest(): Future[GameDTO] = {
+        // Use Akka HTTP client to send a GET request to the 'game' endpoint
+        Http().singleRequest(HttpRequest(uri = "http://model:9082/model/game")).flatMap { response =>
+            // Unmarshal the response entity to a String and then convert it to GameDTO
+            Unmarshal(response.entity).to[String].map { jsonString =>
+                // Assuming RestUtil has a method to convert JSON string to GameDTO
+                RestUtil.jsonToGameDTO(jsonString)
+            }
+        }
+    }
+
+    def getGameDTO(): Future[GameDTO] = {
+        // Define the source of the graph as a single HTTP request
+        val source = Source.single(HttpRequest(uri = "http://model:9082/model/game"))
+
+        // Define the flow that sends the request and unmarshals the response
+        val requestFlow = Flow[HttpRequest].mapAsync(1)(Http().singleRequest(_))
+        val responseFlow = Flow[HttpResponse].mapAsync(1)(response => Unmarshal(response.entity).to[String])
+
+        // Define the sink that converts the JSON string to GameDTO
+        val sink = Sink.head[String].mapMaterializedValue(_.flatMap(jsonString => Future(RestUtil.jsonToGameDTO(jsonString))))
+
+        // Assemble the graph
+        val graph = GraphDSL.createGraph(sink) { implicit builder =>
+            sinkShape =>
+                import GraphDSL.Implicits.*
+
+                // Create flow shapes from the defined flows
+                val requestFlowShape = builder.add(requestFlow)
+                val responseFlowShape = builder.add(responseFlow)
+
+                // Connect the source, flows, and sink within the graph
+                source ~> requestFlowShape ~> responseFlowShape ~> sinkShape
+
+                // Build the graph with a closed shape
+                ClosedShape
+        }
+
+        // Run the graph and obtain the future result
+        RunnableGraph.fromGraph(graph).run()
+    }
+
+    def testStreams2: Unit = {
+        import akka.http.scaladsl.Http
+        import akka.http.scaladsl.model.*
+        import akka.stream.scaladsl.{Flow, Sink, Source}
+        import akka.util.ByteString
+
+        import scala.concurrent.Future
+        import scala.util.{Failure, Success}
+        val source = Source(1 to 22)
+        val flow = Flow[Int].map(_.toString)
+        val sink = Sink.foreach[String] { data =>
+            val entity = HttpEntity(ContentTypes.`application/json`, ByteString(s"""{"number": $data}"""))
+
+            // Replace `http://example.com/endpoint` with your actual endpoint
+            val responseFuture: Future[HttpResponse] = Http().singleRequest(HttpRequest(
+                method = HttpMethods.PUT,
+                uri = "http://model:9082/model/test",
+                entity = entity
+            ))
+
+            responseFuture.onComplete {
+                case Success(res) => println(s"Received response: $res")
+                case Failure(e) => println(s"Request failed: $e")
+            }
+        }
+
+        val graph = source.via(flow).to(sink)
+        graph.run()
+    }
+
+    def testStreams: Unit = {
+        import akka.http.scaladsl.Http
+        import akka.http.scaladsl.model.*
+        import akka.stream.scaladsl.{Flow, Sink, Source}
+        import akka.util.ByteString
+
+        import scala.concurrent.Future
+        import scala.util.{Failure, Success}
+
+        implicit val system = ActorSystem("GraphBasics")
+        // step 1 - setting up the fundamentals for the graph
+        val graph =
+            GraphDSL.create() { implicit builder: GraphDSL.Builder[NotUsed] => // builder = MUTABLE data structure
+                import GraphDSL.Implicits._ // brings some nice operators into scope
+
+
+
+
+
+                val source = Source(1 to 11)
+                val flow = Flow[Int].map(_.toString)
+                val sink = Sink.foreach[String] { data =>
+                    val entity = HttpEntity(ContentTypes.`application/json`, ByteString(s"""{"number": $data}"""))
+
+                    // Replace `http://example.com/endpoint` with your actual endpoint
+                    val responseFuture: Future[HttpResponse] = Http().singleRequest(HttpRequest(
+                        method = HttpMethods.PUT,
+                        uri = "http://model:9082/model/test",
+                        entity = entity
+                    ))
+
+                    responseFuture.onComplete {
+                        case Success(res) => println(s"Received response: $res")
+                        case Failure(e) => println(s"Request failed: $e")
+                    }
+                }
+
+                // step 2 - add the necessary components of this graph
+                val input = builder.add (source)
+                val counter = builder.add (flow)
+                val output = builder.add (sink)
+
+
+                // step 3 - tying up the components
+                input ~> counter ~> output
+
+
+                // step 4 - return a closed shape
+                ClosedShape
+            }
+
+        val runnableGraph = RunnableGraph.fromGraph(graph)
+        runnableGraph.run()
+
+//        val graph = source.via(flow).to(sink)
+//        graph.run()
+    }
+
+    override def doMove(b: Boolean, move: Move, game: GameDTO): FieldDTO = ???
+
+    override def loadGame: Unit = {
+        val gameUri = Uri("http://persistence:9083/persistence/game")
+        val fieldUri = Uri("http://persistence:9083/persistence/field")
+
+        // Create sources for game and field HTTP requests
+        val gameRequestSource = Source.single(HttpRequest(method = HttpMethods.GET, uri = gameUri))
+        val fieldRequestSource = Source.single(HttpRequest(method = HttpMethods.GET, uri = fieldUri))
+
+        // Common flow to send request and receive response
+        val requestFlow = Flow[HttpRequest].mapAsync(1)(Http().singleRequest(_))
+
+        // Common flow to unmarshal HttpResponse to a string
+        val responseFlow = Flow[HttpResponse].mapAsync(1)(response => Unmarshal(response.entity).to[String])
+
+        // Sink to process game JSON string and update the game state
+        val gameSink = Sink.foreach[String] { jsonString =>
+            Try(RestUtil.jsonToGameDTO(jsonString)) match {
+                case Success(gameDto) =>
+                    this.game = gameDto
+                    notifyObserversRest("Load")
+                case Failure(_) => // Handle error appropriately
+            }
+        }
+
+        // Sink to process field JSON string and update the field state
+        val fieldSink = Sink.foreach[String] { jsonString =>
+            Try(RestUtil.jsontToFieldDTO(jsonString)) match {
+                case Success(fieldDto) =>
+                    this.field = fieldDto
+                    notifyObserversRest("Load")
+                case Failure(_) => // Handle error appropriately
+            }
+        }
+
+        // Run the game stream
+        gameRequestSource.via(requestFlow).via(responseFlow).runWith(gameSink)
+
+        // Run the field stream
+        fieldRequestSource.via(requestFlow).via(responseFlow).runWith(fieldSink)
+    }
+
+/*    override def loadGame: Unit = {
+        // Define source as a single HTTP request to load the game
+        val gameRequestSource = Source.single(HttpRequest(method = HttpMethods.GET, uri = "http://persistence:9083/persistence/game"))
+
+        // Define a flow that sends the request and processes the response
+        val gameRequestFlow = Flow[HttpRequest].mapAsync(1)(Http().singleRequest(_))
+        val gameResponseFlow = Flow[HttpResponse].mapAsync(1) { response =>
+            Unmarshal(response.entity).to[String]
+        }
+
+        // Define a sink that converts the JSON response to a GameDTO and updates the state
+        val gameSink = Sink.foreach[String] { jsonString =>
+            val gameOpt = Try {
+                RestUtil.jsonToGameDTO(jsonString)
+            } match {
+                case Success(game) => Some(game)
+                case Failure(_) => None
+            }
+            gameOpt.foreach { gameDto =>
+                this.game = gameDto
+                notifyObserversRest("Load")
+            }
+        }
+
+        // Assemble the stream for handling the game loading process
+        gameRequestSource.via(gameRequestFlow).via(gameResponseFlow).runWith(gameSink)
+
+        
+        // Similar stream can be created for loading the field
+        // ...
+    }*/
+
+    override def saveGame: Unit = ???
+
+    override def gameOver: Unit = ???
+
+    override def openRec(x: Int, y: Int, field: FieldDTO): FieldDTO = ???
+
+    override def helpMenu: Unit = ???
+
+    override def helpMenuRest: String = ???
+
+    override def fieldToString: String = ???
+
+    override def notifyObserversRest(event: String): Unit = ???
+
+    override def cheatRest: String = ???
+
+    override def checkGameOver(status: String): Boolean = ???
+
+    override def checkGameOverGui: Boolean = ???
+
+    override def newGameGUI: Unit = ???
+
+    override def newGameForGui(side: Int, bombs: Int): Unit = ???
+
+    override def newGameField(optionString: Option[String]): Unit = ???
+
+    override def newGame(side: Int, bombs: Int): Unit = ???
+
+    override def makeAndPublish(makeThis: (Boolean, Move, GameDTO) => FieldDTO, b: Boolean, move: Move, game: GameDTO): Unit = ???
+
+    override def makeAndPublish(makeThis: Move => FieldDTO, move: Move): Unit = ???
+
+    override def makeAndPublish(makeThis: => FieldDTO): FieldDTO = ???
+
+    override def loadPlayerScores: Seq[(String, Int)] = ???
+
+    override def saveScoreAndPlayerName(playerName: String, saveScore: Int, filePath: String): Unit = ???
+
+    //override def field: FieldDTO = ???
+
+    override def put(move: Move): FieldDTO = ???
+
+    override def undo: FieldDTO = ???
+
+    override def redo: FieldDTO = ???
+
+    override def exit: Unit = ???
+
+    override def saveTime(currentTime: Int): Unit = ???
+
