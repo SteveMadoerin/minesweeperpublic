@@ -120,7 +120,7 @@ class ControllerSpec extends AnyWordSpec{
         controller7.add(observer)
 
         "reveal all fields" in {
-            controller7.cheat
+            controller7.cheatRest
 
         }
 

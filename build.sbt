@@ -6,14 +6,20 @@ ThisBuild / organization := "de.htwg.sa"
 ThisBuild / organizationName := "minesweeper"
 
 lazy val root: Project = (project in file("."))
-    .dependsOn(controller, model, persistence, ui)
-    .aggregate(controller, model, persistence, ui)
+    .dependsOn(controller, model, persistence, ui, kafka)
+    .aggregate(controller, model, persistence, ui, kafka)
     .settings(
         name := "Minesweeper",
         version:= "0.1.0-SNAPSHOT",
         commonSettings
     )
 
+lazy val kafka = (project in file("kafka"))
+    .settings(
+        name := "model",
+        version:= "0.1.0-SNAPSHOT",
+        commonSettings
+    )
 
 lazy val model = (project in file("model"))
     .settings(
@@ -68,6 +74,9 @@ lazy val commonSettings = Seq(
     libraryDependencies += "com.typesafe.akka" %% "akka-stream" % "2.8.5",
     libraryDependencies += "org.apache.kafka" % "kafka-clients" % "3.7.0",
     libraryDependencies += ("org.apache.kafka" %% "kafka-streams-scala" % "3.7.0").cross(CrossVersion.for3Use2_13),
+    libraryDependencies += "io.circe" %% "circe-core" % "0.14.7",
+    libraryDependencies += "io.circe" %% "circe-generic" % "0.14.7",
+    libraryDependencies += "io.circe" %% "circe-parser" % "0.14.7"
 )
 
 import org.scoverage.coveralls.Imports.CoverallsKeys.*
