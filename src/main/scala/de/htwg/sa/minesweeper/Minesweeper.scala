@@ -5,7 +5,6 @@ import de.htwg.sa.minesweeper.ui.TUI
 import de.htwg.sa.minesweeper.ui.gui.GUI
 //import de.htwg.sa.minesweeper.ui.config.Default.{given}
 import de.htwg.sa.minesweeper.Default.given
-import de.htwg.sa.minesweeper.model.gameComponent.ModelApi
 
 import akka.actor._
 import scala.concurrent.ExecutionContextExecutor
@@ -35,14 +34,15 @@ object Minesweeper {
         } else {
             
             
-            ModelApi() // on Port 9082
-            PersistenceApi() // on Port 9083
-            ControllerApi() // on Port 9081
+            //ModelApi() // on Port 9082
+            //PersistenceApi() // on Port 9083
+            //ControllerApi() // on Port 9081
             //WebGuiApi() // on Port 9080
 
-            GUI().run // on Port 9087
-            TUI().run // on Port 9088
+            //GUI().run // on Port 9087
+            //TUI().run // on Port 9088
         }
         
     }
+    
 }
