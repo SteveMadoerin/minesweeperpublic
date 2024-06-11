@@ -149,7 +149,7 @@ class PersistenceApi(using var p: IPersistence) {
     })
 
     //val bindFuture = Http().newServerAt("0.0.0.0", 9083).bind(route)
-    Http().newServerAt("localhost", 9083).bind(
+    Http().newServerAt("0.0.0.0", 9083).bind(
         pathPrefix("persistence") {
             extractRequest { request =>
                 complete(

@@ -15,8 +15,8 @@ class Persistence extends IPersistence {
     private val databaseUser: String = sys.env.getOrElse("MONGO_USERNAME", "mongodb") // USER: mongodb
     private val databasePassword: String = sys.env.getOrElse("MONGO_PASSWORD", "mongodb") // PASSWORD: mongodb
     private val databasePort: String = sys.env.getOrElse("MONGO_PORT", "27017") // PORT: 27017
-    //private val databaseHost: String = sys.env.getOrElse("MONGO_HOST", "host.docker.internal") // HOST: localhost
-    private val databaseHost: String = sys.env.getOrElse("MONGO_HOST", "localhost") // HOST: localhost
+    private val databaseHost: String = sys.env.getOrElse("MONGO_HOST", "host.docker.internal") // HOST: localhost
+    //private val databaseHost: String = sys.env.getOrElse("MONGO_HOST", "localhost") // HOST: localhost
     private val databaseURI: String = s"mongodb://$databaseHost:$databasePort" // mongodb://localhost:27017
     private val client: MongoClient = MongoClient(databaseURI)
 
