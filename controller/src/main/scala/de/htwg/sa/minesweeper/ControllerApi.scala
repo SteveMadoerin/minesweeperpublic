@@ -2,27 +2,32 @@ package de.htwg.sa.minesweeper
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.model.{ContentTypes, HttpEntity}
-import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.Route
+import akka.http.scaladsl.server.Directives.*
 import akka.stream.Materializer
+import akka.http.scaladsl.unmarshalling.Unmarshal
+import akka.stream.scaladsl.{Broadcast, Flow, GraphDSL, Merge, Sink, Source}
+import akka.stream.{FlowShape, UniformFanInShape, UniformFanOutShape}
+import akka.http.scaladsl.model.{HttpRequest, HttpResponse}
+import akka.stream.scaladsl.GraphDSL.Builder
+import akka.NotUsed
 import de.htwg.sa.minesweeper.controller.controllerComponent.IController
 import de.htwg.sa.minesweeper.entity.GameDTO
 import de.htwg.sa.minesweeper.util.{Event, Move, Observer, RestUtil}
 import play.api.libs.json.{JsValue, Json}
 
-import scala.concurrent.ExecutionContextExecutor
+import java.util.concurrent.TimeUnit
+import scala.concurrent.duration.Duration
+import scala.concurrent.{ExecutionContextExecutor, Future}
 import scala.util.{Failure, Success}
 
 
 class ControllerApi(using var controller: IController) extends Observer:
     controller.add(this)
-    
+
     implicit val system: ActorSystem = ActorSystem()
-    implicit val materializer: Materializer = Materializer(system)
     implicit val executionContext: ExecutionContextExecutor = system.dispatcher
 
-    @Override def update(e: Event): Boolean = 
+    @Override def update(e: Event): Boolean =
         e match
             case Event.Start => true
             case Event.NewGame => true
@@ -37,208 +42,188 @@ class ControllerApi(using var controller: IController) extends Observer:
     }
 
     def jsonToMove(json: JsValue): Move = {
-      val x = (json \ "x").get.toString.toInt
-      val y = (json \ "y").get.toString.toInt
-      val action1 = (json \ "value").get.toString
-      val action2 = action1.replace("\"", "")
-      Move(action2, x, y)
+        val x = (json \ "x").get.toString.toInt
+        val y = (json \ "y").get.toString.toInt
+        val action1 = (json \ "value").get.toString
+        val action2 = action1.replace("\"", "")
+        Move(action2, x, y)
     }
 
+    private val controllerFlow: Flow[HttpRequest, String, NotUsed] = Flow.fromGraph(GraphDSL.create() { implicit builder: Builder[NotUsed] =>
+        import GraphDSL.Implicits.*
 
-    val route: Route = (
-      //
-      concat(
-        pathPrefix("controller") {
-          concat(
-            get {
-              concat(
-                pathSingleSlash {
-                  complete(controller.toString)
-                },
-                path("controller") {
-                  complete(controller.toString())
-                },
-                path("field") {
-                  complete(RestUtil.fieldDtoToJson(controller.field).toString)
-                },
-                path("gameOver") {
-                  //it actually working good to display the gameOverField but we get a 500 Internal Server Error
-                  controller.gameOver
-                  complete(RestUtil.fieldDtoToJson(controller.field).toString)
-                },
-                path("field"/"toString") {
-                  complete(controller.fieldToString)
-                },
-                path("game") {
-                  complete(RestUtil.gameDtoToJson(controller.game).toString)
-                },
-                path("teststream") {
-                  controller.testStreams
-                  complete("TESTSTREAM")
-                },
-                path("helpMenu") {
-                  controller.helpMenu // this also notifies the observer
-                  complete(controller.helpMenuRest)
-                },
-                path("loadGame") {
-                  controller.loadGame
-                  complete(controller.fieldToString)
-                },
-                path("newGameGui") {
-                  //actually works but needs user interaction
-                  controller.newGameGUI
-                  complete("newGameGui")
-                },
-                path("saveTime") {
-                  //
-                  parameter("time".as[Int]) { (time) =>
-                      controller.saveTime(time)
-                      complete("Time saved")
-                  }
-                },
-                path("saveScoreAndPlayerName") {
-                  //
-                  parameter("score".as[Int],"playerName".as[String]) { (score , playerName) =>
-                      val emptypath = ""
-                      controller.saveScoreAndPlayerName(playerName, score, emptypath)
-                      complete("score saved")
-                  }
-                },
-                path("newGameFieldGui") {
-                  parameter("input".as[String]) { (input) =>
+        val broadcast: UniformFanOutShape[HttpRequest, HttpRequest] = builder.add(Broadcast[HttpRequest](2))
+        val merge: UniformFanInShape[String, String] = builder.add(Merge[String](2))
+
+        val getControllerFlow = Flow[HttpRequest].map { request =>
+            request.uri.path.toString match {
+                case "/controller/" =>
+                    HttpResponse(entity = controller.toString)
+                case "/controller/controller" =>
+                    HttpResponse(entity = controller.toString())
+                case "/controller/field" =>
+                    HttpResponse(entity = RestUtil.fieldDtoToJson(controller.field).toString)
+                case "/controller/gameOver" =>
+                    controller.gameOver
+                    HttpResponse(entity = RestUtil.fieldDtoToJson(controller.field).toString)
+                case "/controller/field/toString" =>
+                    HttpResponse(entity = controller.fieldToString)
+                case "/controller/game" =>
+                    HttpResponse(entity = RestUtil.gameDtoToJson(controller.game).toString)
+                case "/controller/helpMenu" =>
+                    controller.helpMenu
+                    HttpResponse(entity = controller.helpMenuRest)
+                case "/controller/loadGame" =>
+                    controller.loadGame
+                    HttpResponse(entity = controller.fieldToString)
+                case "/controller/newGameGui" =>
+                    controller.newGameGUI
+                    HttpResponse(entity = "newGameGui")
+                case path if path.startsWith("/controller/saveTime") =>
+                    val query = request.uri.query()
+                    val time = query.get("time").get.toInt
+                    controller.saveTime(time)
+                    HttpResponse(entity = "Time saved")
+                case path if path.startsWith("/controller/saveScoreAndPlayerName") =>
+                    val query = request.uri.query()
+                    val score = query.get("score").get.toInt
+                    val playerName = query.get("playerName").get
+                    val emptypath = ""
+                    controller.saveScoreAndPlayerName(playerName, score, emptypath)
+                    HttpResponse(entity = "score saved")
+                case path if path.startsWith("/controller/newGameFieldGui") =>
+                    val query = request.uri.query()
+                    val input = query.get("input").get
                     val inputOption = Some(input)
                     controller.newGameField(inputOption)
-                    complete("newGameFieldGui")
-                  }
-                },
-                path("cheat") {
-                  val cheat = controller.cheatRest // optimized after gatling tests
-                  controller.notifyObserversRest("Cheat")
-                  complete(cheat)
-                },
-                pathPrefix("makeAndPublish") {
-                  concat(
-                    path("doMove") {
-                      parameter("b".as[Boolean],"bombs".as[Int], "size".as[Int], "time".as[Int], "board".as[Int]) { (b, bombs, size, time, board) =>
-                        entity(as[String]) { moveEntitiy =>
-                            // doMove
-                            val firstMoveCheck = b
-                            val newBoard = board.match
-                            {
-                              case 0 => "Playing"
-                              case 1 => "Won"
-                              case 2 => "Lost"
-                            }
-                            val requestBody = Json.parse(moveEntitiy)
-                            val move = jsonToMove(requestBody)
-                            //controller.makeAndPublish(controller.doMove, firstMoveCheck, move, controller.game)
-                            controller.makeAndPublish(controller.doMove, firstMoveCheck, move, GameDTO(bombs, size, time, newBoard))
-                            //controller.makeAndPublish(controller.put, move)
-                            // replace with logger print("move: " + move.value + " x: " + move.x + " y: " + move.y)
-                            complete("success doMove")
-                        }
-                      }
-                    },
-                    path("put") {
-                      entity(as[String]) { moveEntitiy =>
-                        val requestBody = Json.parse(moveEntitiy)
+                    HttpResponse(entity = "newGameFieldGui")
+                case "/controller/cheat" =>
+                    val cheat = controller.cheatRest
+                    controller.notifyObserversRest("Cheat")
+                    HttpResponse(entity = cheat)
 
+                case path if path.startsWith("/controller/makeAndPublish/doMove") =>
+                    val query = request.uri.query()
+                    val b = query.get("b").get.toBoolean
+                    val bombs = query.get("bombs").get.toInt
+                    val size = query.get("size").get.toInt
+                    val time = query.get("time").get.toInt
+                    val board = query.get("board").get
+                    val move = Unmarshal(request.entity).to[String].map { moveEntity =>
+                        val requestBody = Json.parse(moveEntity)
+                        val move = jsonToMove(requestBody)
+                        val firstMoveCheck = b
+
+                        val newBoard = board match {
+                            case "0" => "Playing"
+                            case "1" => "Won"
+                            case "2" => "Lost"
+                        }
+                        controller.makeAndPublish(controller.doMove, firstMoveCheck, move, GameDTO(bombs, size, time, newBoard))
+                    }
+                    HttpResponse(entity = "success doMove")
+                case path if path.startsWith("/controller/makeAndPublish/put") =>
+                    val move = Unmarshal(request.entity).to[String].map { moveEntity =>
+                        val requestBody = Json.parse(moveEntity)
                         val move = jsonToMove(requestBody)
                         controller.makeAndPublish(controller.put, move)
                         print("move: " + move.value + " x: " + move.x + " y: " + move.y)
 
-                        complete("success")
-                      }
-                    },
-                    path("undo") {
-                      val returnField = controller.makeAndPublish(controller.undo)
-                      complete(controller.fieldToString)
-                    },
-                    path("redo") {
-                      val returnField = controller.makeAndPublish(controller.redo)
-                      complete(controller.fieldToString)
                     }
-                  )
-                },
-                path("saveGame") {
-                  controller.saveGame
-                  complete("successfully saved")
-                },
-                path("undo") {
-                  controller.undo
-                  complete(RestUtil.fieldDtoToJson(controller.field).toString)
-                },
-                path("redo") {
-                  controller.redo
-                  complete(RestUtil.fieldDtoToJson(controller.field).toString)
-                },
-                path("") {
-                  sys.error("No such GET route")
-                }
-              )
-            },
-            put {
-              concat(
-                path("put") {
-                  // not used!
-                  entity(as[String]) { requestBody =>
-                    complete("controller.put(controller.jsonStringToMove(requestBody))")
-                  }
-                },
-                path("exit") {
-                  controller.exit
-                  complete("exit")
-                },
-                path("checkGameOver") {
-                  entity(as[String]) { requestStatus =>
-                    val result = controller.checkGameOver(requestStatus)
+                    HttpResponse(entity = "success")
+                case "/controller/makeAndPublish/undo" =>
+                    val returnField = controller.makeAndPublish(controller.undo)
+                    HttpResponse(entity = controller.fieldToString)
+                case "/controller/makeAndPublish/redo" =>
+                    val returnField = controller.makeAndPublish(controller.redo)
+                    HttpResponse(entity = controller.fieldToString)
+                case "/controller/saveGame" =>
+                    controller.saveGame
+                    HttpResponse(entity = "successfully saved")
+                case "/controller/undo" =>
+                    controller.undo
+                    HttpResponse(entity = RestUtil.fieldDtoToJson(controller.field).toString)
+                case "/controller/redo" =>
+                    controller.redo
+                    HttpResponse(entity = RestUtil.fieldDtoToJson(controller.field).toString)
+            }
+        }
 
-                    complete(result.toString)
-                  }
-                },
-                path("checkGameOverGui") {
-                  val result = controller.checkGameOverGui
-                  complete(result.toString)
-                },
-                path("newGameForGui") {
-                  parameter("bombs".as[Int], "side".as[Int]) { (bombs, side) =>
-                      controller.newGameForGui(side, bombs)
-                      val feld = controller.field
-                      val game = controller.game
-                      val jsonField = Json.parse(RestUtil.fieldDtoToJson(feld))
-                      val jsonGame = Json.parse(RestUtil.gameDtoToJson(game))
+        val getRequestFlowShape = builder.add(getControllerFlow)
 
-                      val jsonGameFieldArray = Json.arr(jsonGame, jsonField)
-                      complete(HttpEntity(ContentTypes.`application/json`, jsonGameFieldArray.toString))
+        val getResponseFlow = Flow[HttpResponse].mapAsync(1) { response =>
+            Unmarshal(response.entity).to[String]
+        }
 
-                  }
-                },
-                path("newGame") {
-                  parameter("bombs".as[Int], "side".as[Int]) { (bombs, side) =>
+        val getResponseFlowShape = builder.add(getResponseFlow)
+
+        val putControllerFlow = Flow[HttpRequest].mapAsync(1) { request =>
+            request.uri.path.toString match {
+                case "/controller/put" =>
+                    Future.successful(HttpResponse(entity = "controller.put(controller.jsonStringToMove(requestBody))"))
+                case "/controller/exit" =>
+                    controller.exit
+                    Future.successful(HttpResponse(entity = "exit"))
+                case "/controller/checkGameOver" =>
+                    request.entity.toStrict(Duration.apply(3, TimeUnit.SECONDS)).map { entity =>
+                        val requestbody = entity.data.utf8String
+                        val result = controller.checkGameOver(requestbody.toString)
+                        print(requestbody + "checkgameover string")
+                        HttpResponse(entity = result.toString)
+                    }
+                case "/controller/checkGameOverGui" =>
+                    val result = controller.checkGameOverGui
+                    Future.successful(HttpResponse(entity = result.toString))
+                case path if path.startsWith("/controller/newGameForGui") =>
+                    val query = request.uri.query()
+                    val bombs = query.get("bombs").get.toInt
+                    val side = query.get("side").get.toInt
+                    controller.newGameForGui(side, bombs)
+                    val feld = controller.field
+                    val game = controller.game
+                    val jsonField = Json.parse(RestUtil.fieldDtoToJson(feld))
+                    val jsonGame = Json.parse(RestUtil.gameDtoToJson(game))
+                    val jsonGameFieldArray = Json.arr(jsonGame, jsonField)
+                    Future.successful(HttpResponse(entity = jsonGameFieldArray.toString))
+                case path if path.startsWith("/controller/newGame") =>
+                    val query = request.uri.query()
+                    val side = query.get("side").get.toInt
+                    val bombs = query.get("bombs").get.toInt
                     controller.newGame(side, bombs)
                     val feld = controller.field
                     val game = controller.game
                     val jsonField = Json.parse(RestUtil.fieldDtoToJson(feld))
                     val jsonGame = Json.parse(RestUtil.gameDtoToJson(game))
-
                     val jsonGameFieldArray = Json.arr(jsonGame, jsonField)
-                    complete(HttpEntity(ContentTypes.`application/json`, jsonGameFieldArray.toString))
-
-                  }
-                },
-                path("") {
-                  sys.error("No such POST route")
-                }
-              )
+                    Future.successful(HttpResponse(entity = jsonGameFieldArray.toString))
             }
-          )
         }
-      )
-    )
 
+        val putRequestFlowShape = builder.add(putControllerFlow)
+
+        val putResponseFlow = Flow[HttpResponse].mapAsync(1) { response =>
+            Unmarshal(response.entity).to[String]
+        }
+
+        val putResponseFlowShape = builder.add(putResponseFlow)
+
+        broadcast.out(0) ~> getRequestFlowShape ~> getResponseFlowShape ~> merge.in(0)
+        broadcast.out(1) ~> putRequestFlowShape ~> putResponseFlowShape ~> merge.in(1)
+
+
+        FlowShape(broadcast.in, merge.out)
+    })
 
     def start(): Unit = {
-        val bindFuture = Http().newServerAt("0.0.0.0", 9081).bind(route)
+        val bindFuture = Http().newServerAt("0.0.0.0", 9081).bind(
+            pathPrefix("controller") {
+                extractRequest { request =>
+                    complete(
+                        Source.single(request).via(controllerFlow).runWith(Sink.head).map(resp => resp)
+                    )
+                }
+            }
+        )
 
         bindFuture.onComplete {
             case Success(binding) =>
@@ -249,7 +234,5 @@ class ControllerApi(using var controller: IController) extends Observer:
                 complete("fail binding")
         }
     }
-
-
 
 end ControllerApi
