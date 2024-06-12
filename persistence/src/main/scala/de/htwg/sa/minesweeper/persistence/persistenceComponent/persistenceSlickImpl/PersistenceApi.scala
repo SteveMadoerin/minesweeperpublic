@@ -1,31 +1,23 @@
 package de.htwg.sa.minesweeper.persistence.persistenceComponent.persistenceSlickImpl
 
+import akka.NotUsed
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.model.{ContentTypes, HttpEntity, HttpRequest, HttpResponse, ResponseEntity, StatusCodes}
+import akka.http.scaladsl.model.*
 import akka.http.scaladsl.server.Directives.*
-import akka.http.scaladsl.server.Route
-import akka.http.scaladsl.unmarshalling.{FromEntityUnmarshaller, Unmarshaller}
-import akka.stream.Materializer
+import akka.http.scaladsl.unmarshalling.{FromEntityUnmarshaller, Unmarshal, Unmarshaller}
+import akka.stream.scaladsl.GraphDSL.Builder
+import akka.stream.scaladsl.{Broadcast, Flow, GraphDSL, Merge, Sink, Source}
+import akka.stream.{FlowShape, Materializer, UniformFanInShape, UniformFanOutShape}
 import de.htwg.sa.minesweeper.persistence.entity.*
 import de.htwg.sa.minesweeper.persistence.persistenceComponent.IPersistence
 import de.htwg.sa.minesweeper.persistence.persistenceComponent.config.Default
 import play.api.libs.json.*
-import akka.NotUsed
-import akka.actor.ActorSystem
-import akka.http.scaladsl.Http
-import akka.http.scaladsl.server.Directives.*
-import akka.http.scaladsl.unmarshalling.Unmarshal
-import akka.stream.scaladsl.GraphDSL.Builder
-import akka.stream.scaladsl.{Broadcast, Flow, GraphDSL, Merge, Sink, Source}
-import akka.stream.{FlowShape, UniformFanInShape, UniformFanOutShape}
 
-import java.util.concurrent.TimeUnit
-import scala.concurrent.duration.Duration
-import scala.concurrent.{Await, ExecutionContext, Future}
 import java.io.File
-import java.nio.file.Paths
-import scala.concurrent.ExecutionContextExecutor
+import java.util.concurrent.TimeUnit
+import scala.concurrent.{ExecutionContextExecutor, Future}
+import scala.concurrent.duration.Duration
 import scala.io.Source
 import scala.util.{Failure, Success, Try}
 
@@ -36,8 +28,7 @@ class PersistenceApi(using var p: IPersistence) {
             Json.parse(data.decodeString(charset.nioCharset.name))
         }
     }
-    
-    //var db = new Persistence()
+
     implicit val system: ActorSystem = ActorSystem("PersistenceService")
     implicit val materializer: Materializer = Materializer(system)
     implicit val executionContext: ExecutionContextExecutor = system.dispatcher
@@ -45,7 +36,7 @@ class PersistenceApi(using var p: IPersistence) {
     private val pathToFile = Default.filePathHighScore
 
     private val persistFlow: Flow[HttpRequest, String, NotUsed] = Flow.fromGraph(GraphDSL.create() { implicit builder: Builder[NotUsed] =>
-        import GraphDSL.Implicits._
+        import GraphDSL.Implicits.*
 
         val broadcast: UniformFanOutShape[HttpRequest, HttpRequest] = builder.add(Broadcast[HttpRequest](2))
         val merge: UniformFanInShape[String, String] = builder.add(Merge[String](2))
@@ -85,7 +76,6 @@ class PersistenceApi(using var p: IPersistence) {
                     req.entity.toStrict(Duration.apply(3, TimeUnit.SECONDS)).map { entity =>
                         val requestBody = entity.data.utf8String
                         val maybeSucces = Try(p.saveField(Util.f.jsonToField(requestBody)))
-                        // ContentTypes.`application/json`
                         HttpResponse(entity = requestBody)
                     }
                 }
@@ -107,8 +97,7 @@ class PersistenceApi(using var p: IPersistence) {
                         }
                     }
                 }
-                
-                // http://localhost:9083/persistence/putHighscore?player=Sly&score=777
+
                 case "/persistence/putHighscore" => {
                     req.entity.toStrict(Duration.apply(3, TimeUnit.SECONDS)).map { entity =>
                         val player = (req.uri.query().get("player")).get
@@ -140,20 +129,29 @@ class PersistenceApi(using var p: IPersistence) {
         val postResponseFlowShape = builder.add(postResponseFlow)
         val putRequestFlowShape = builder.add(putRequestFlow)
 
+        // Connect the output of the broadcast to the GET request Flow and then to the GET response Flow,
+        // which then feeds into the merge node.
         broadcast.out(0) ~> leGetRequestFlowShape ~> leGetResponseFlowShape ~> merge.in(0)
+        // Connect the output of the broadcast to the PUT request Flow and then to the POST response Flow,
+        // which also feeds into the merge node.
         broadcast.out(1) ~> putRequestFlowShape ~> postResponseFlowShape ~> merge.in(1)
 
-
+        // Expose the input of the broadcast and the output of the merge as the FlowShape of the graph.
         FlowShape(broadcast.in, merge.out)
 
     })
 
-    //val bindFuture = Http().newServerAt("0.0.0.0", 9083).bind(route)
     Http().newServerAt("0.0.0.0", 9083).bind(
         pathPrefix("persistence") {
+            // Directive to extract the HttpRequest from the route context
             extractRequest { request =>
+                // Complete the HTTP request processing
                 complete(
-                    akka.stream.scaladsl.Source.single(request).via(persistFlow).runWith(Sink.head).map(resp => resp)
+                    // Create a single-element stream with the request, which is then passed through the persistFlow.
+                    akka.stream.scaladsl.Source.single(request)
+                        .via(persistFlow) // The request is processed by the persistFlow defined earlier.
+                        .runWith(Sink.head) // Run the stream and get the first (head) element from the result.
+                        .map(resp => resp) // Map the result to itself (identity function, effectively doing nothing).
                 )
             }
         }
