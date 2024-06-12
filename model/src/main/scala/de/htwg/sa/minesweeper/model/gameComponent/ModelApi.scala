@@ -3,21 +3,18 @@ package de.htwg.sa.minesweeper.model.gameComponent
 import akka.NotUsed
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.model.{HttpRequest, HttpResponse}
+import akka.http.scaladsl.model.{HttpEntity, HttpRequest, HttpResponse}
 import akka.http.scaladsl.server.Directives.{entity, *}
-import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.unmarshalling.Unmarshal
 import akka.stream.scaladsl.GraphDSL.Builder
 import akka.stream.scaladsl.{Broadcast, Flow, GraphDSL, Merge, Sink, Source}
-import akka.http.scaladsl.model.{ContentTypes, HttpEntity}
-import akka.stream.{FlowShape, Materializer, UniformFanInShape, UniformFanOutShape}
-import akka.stream.Materializer
+import akka.stream.{FlowShape, UniformFanInShape, UniformFanOutShape}
 import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl.{Decider, Game, Playfield}
 import play.api.libs.json.Json
-import scala.concurrent.Await
+
 import java.util.concurrent.TimeUnit
+import scala.concurrent.ExecutionContextExecutor
 import scala.concurrent.duration.Duration
-import scala.concurrent.{ExecutionContextExecutor, Future}
 import scala.util.{Failure, Success}
 
 class ModelApi(using var game: IGame, var field: IField){
@@ -263,10 +260,7 @@ class ModelApi(using var game: IGame, var field: IField){
 
         FlowShape(broadcast.in, merge.out)
     })
-
-
-
-
+    
 
     def updateMatrixWithHidden(jsonString: String): String = {
         // Find the start and end indices of the "matrix" and "hidden" arrays
@@ -306,21 +300,7 @@ class ModelApi(using var game: IGame, var field: IField){
         }
     }
 
-
-    /*
-        Http().newServerAt("localhost", 9082).bind(
-            pathPrefix("field") {
-                extractRequest { request =>
-                    complete(
-                        Source.single(request).via(modelFlow).runWith(Sink.head).map(resp => resp)
-                    )
-                }
-            }
-        )
     
-        def start: Future[Nothing] = Await.result(Future.never, Duration.Inf)
-    
-     */
 
 
 }
