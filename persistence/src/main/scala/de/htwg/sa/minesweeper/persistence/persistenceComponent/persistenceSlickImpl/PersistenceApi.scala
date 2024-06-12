@@ -151,7 +151,7 @@ class PersistenceApi(using var p: IPersistence) {
                     akka.stream.scaladsl.Source.single(request)
                         .via(persistFlow) // The request is processed by the persistFlow defined earlier.
                         .runWith(Sink.head) // Run the stream and get the first (head) element from the result.
-                        .map(resp => resp) // Map the result to itself (identity function, effectively doing nothing).
+                        .map(resp => resp) // Map 
                 )
             }
         }
