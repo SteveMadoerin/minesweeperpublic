@@ -1,23 +1,21 @@
-package kafka
+package de.htwg.sa.minesweeper.model.gameComponent.util
 
-import io.circe.*
-import io.circe.generic.auto.*
-import io.circe.jawn.decode
-import io.circe.syntax.*
-import io.circe.{Decoder, Encoder}
 import org.apache.kafka.common.serialization.Serde
 import org.apache.kafka.streams.kstream.{GlobalKTable, JoinWindows, TimeWindows, Windowed}
-import org.apache.kafka.streams.scala.ImplicitConversions.*
 import org.apache.kafka.streams.scala.*
+import org.apache.kafka.streams.scala.ImplicitConversions.*
 import org.apache.kafka.streams.scala.kstream.{KGroupedStream, KStream, KTable}
 import org.apache.kafka.streams.scala.serialization.Serdes
 import org.apache.kafka.streams.scala.serialization.Serdes.*
 import org.apache.kafka.streams.{KafkaStreams, StreamsConfig, Topology}
-import org.apache.kafka.streams.scala.ImplicitConversions.*
 
 import java.time.Duration
 import java.time.temporal.ChronoUnit
 import java.util.Properties
+import io.circe.generic.auto.*
+import io.circe.jawn.decode
+import io.circe.syntax.*
+import io.circe.*
 
 object ProducerGame extends App {
 
@@ -58,7 +56,7 @@ object ProducerGame extends App {
     }
 
 
-    import Domain._
+    import Domain.*
 
     implicit def serde[A >: Null : Decoder : Encoder]: Serde[A] = {
         val serializer = (a: A) => a.asJson.noSpaces.getBytes
@@ -78,7 +76,7 @@ object ProducerGame extends App {
     }
 
     import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord}
-    import org.apache.kafka.common.serialization.{StringSerializer, ByteArraySerializer}
+    import org.apache.kafka.common.serialization.{ByteArraySerializer, StringSerializer}
     // Set up Kafka producer properties
     val props = new Properties()
     props.put("bootstrap.servers", "localhost:9092")
@@ -86,7 +84,7 @@ object ProducerGame extends App {
     props.put("value.serializer", classOf[ByteArraySerializer].getName)
 
     // Usage
-    val game = Game(6, 3, 6, "Playing")
+    val game = Game(6, 9, 6, "Playing")
     val topic = "game"
 
     // Create a Kafka producer

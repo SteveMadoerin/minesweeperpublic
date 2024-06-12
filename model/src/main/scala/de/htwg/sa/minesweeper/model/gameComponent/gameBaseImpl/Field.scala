@@ -2,7 +2,7 @@ package de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl
 
 import de.htwg.sa.minesweeper.model.gameComponent.*
 
-import util.chaining.scalaUtilChainingOps
+
 import play.api.libs.json.JsValue
 import play.api.libs.json.Json
 
