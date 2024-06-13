@@ -9,10 +9,13 @@ class ControllerCommunication (using var controller: IController) extends Observ
 
     implicit val system: ActorSystem = ActorSystem()
     implicit val executionContext: ExecutionContextExecutor = system.dispatcher
-    
+
 
     val ModelCommandTopic = "model-command"
     val ControllerCommandTopic = "controller-command"
+    val GuiCommandTopic = "gui-command"
+    val TuiCommandTopic = "tui-command"
+
 
     val gameCommandProducer = new ControllerCommandProducer(system)
     val gameCommandConsumer = new ControllerCommandConsumer(system)
@@ -25,7 +28,7 @@ class ControllerCommunication (using var controller: IController) extends Observ
 
     gameCommandProducer.sendCommand("/model/game", ModelCommandTopic)
     gameCommandProducer.sendCommand("irgendwas Controller", ControllerCommandTopic)
-    
+
 
 
     override def update(e: Event): Boolean = ???
