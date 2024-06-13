@@ -14,6 +14,7 @@ lazy val commonSettings = Seq(
   libraryDependencies += "com.typesafe.akka" %% "akka-actor-typed" % "2.8.5",
   libraryDependencies += "com.typesafe.akka" %% "akka-http" % "10.5.3",
   libraryDependencies += "com.typesafe.akka" %% "akka-stream" % "2.8.5",
+  libraryDependencies += "com.typesafe.akka" %% "akka-stream-kafka" % "4.0.2",
   libraryDependencies += "org.slf4j" % "slf4j-nop" % "1.6.4",
   libraryDependencies += "io.circe" %% "circe-core" % "0.14.1",
   libraryDependencies += "io.circe" %% "circe-generic" % "0.14.1",
