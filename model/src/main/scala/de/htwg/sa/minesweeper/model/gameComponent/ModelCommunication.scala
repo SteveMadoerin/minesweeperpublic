@@ -33,8 +33,8 @@ class ModelCommunication(using var game: IGame, var field: IField){
     
     gameCommandConsumer.startConsuming()
     
-    //gameCommandProducer.sendCommand("/model/game", ModelCommandTopic)
-    //gameCommandProducer.sendCommand("irgendwas", ModelCommandTopic)
+/*    gameCommandProducer.sendCommand("/model/game", ModelCommandTopic)
+    gameCommandProducer.sendCommand("irgendwas", ModelCommandTopic)*/
     
     val gameResponseProducer = new ModelResponseProducer(system)
     val gameResponseConsumer = new ModelResponseConsumer(system)

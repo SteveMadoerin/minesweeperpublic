@@ -20,7 +20,7 @@ class ModelResponseProducer(system: ActorSystem) {
     val ControllerFieldTopic = "controller-field"
     
     private val producerSettings = ProducerSettings(system, new StringSerializer, new StringSerializer)
-        .withBootstrapServers("localhost:9092")
+        .withBootstrapServers("broker:29092")
     
     def sendResponseRecord(response: String, moduleTopic: String): Future[RecordMetadata] = {
         val record = new ProducerRecord[String, String](moduleTopic, response)

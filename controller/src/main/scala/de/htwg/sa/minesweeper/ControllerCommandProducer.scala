@@ -16,7 +16,7 @@ class ControllerCommandProducer(system: ActorSystem)(implicit val materializer: 
     val ControllerCommandTopic = "controller-command"
     
     private val producerSettings = ProducerSettings(system, new StringSerializer, new StringSerializer)
-        .withBootstrapServers("localhost:9092")
+        .withBootstrapServers("broker:29092")
     
     def sendCommand(command: String, moduleTopic: String): Future[RecordMetadata] = {
         val record = new ProducerRecord[String, String](moduleTopic, command)

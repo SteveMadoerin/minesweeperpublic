@@ -21,7 +21,10 @@ class ModelCommandProducer(system: ActorSystem)(implicit val materializer: Mater
 
     // Configuration for the producer
     private val producerSettings = ProducerSettings(system, new StringSerializer, new StringSerializer)
-        .withBootstrapServers("localhost:9092")
+        .withBootstrapServers("broker:29092")
+
+    /*    private val producerSettings = ProducerSettings(system, new StringSerializer, new StringSerializer)
+            .withBootstrapServers("localhost:9092")*/
 
     // Method to send a command and get back a Future[RecordMetadata]
     def sendCommand(command: String, moduleTopic: String): Future[RecordMetadata] = {

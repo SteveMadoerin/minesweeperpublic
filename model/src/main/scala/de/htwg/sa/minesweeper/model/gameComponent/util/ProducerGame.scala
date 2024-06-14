@@ -1,3 +1,4 @@
+/*
 package de.htwg.sa.minesweeper.model.gameComponent.util
 
 import org.apache.kafka.common.serialization.Serde
@@ -94,3 +95,4 @@ object ProducerGame extends App {
     producer.close()
 
 }
+*/

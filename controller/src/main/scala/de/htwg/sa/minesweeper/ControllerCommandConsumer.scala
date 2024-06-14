@@ -17,9 +17,10 @@ class ControllerCommandConsumer(system: ActorSystem)(implicit val materializer: 
     val CommandsTopic = "controller-command"
 
     private val consumerSettings = ConsumerSettings(system, new StringDeserializer, new StringDeserializer)
-        .withBootstrapServers("localhost:9092")
+        .withBootstrapServers("broker:29092")
         .withGroupId("test-group")
         .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
+    //.withBootstrapServers("broker:9092")
 
     // Method to start consuming
     def startConsuming(): Unit = {

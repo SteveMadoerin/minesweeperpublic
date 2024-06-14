@@ -18,7 +18,7 @@ class ModelResponseConsumer(system: ActorSystem) {
     val ResponseTopic = "model-response"
 
     private val consumerSettings = ConsumerSettings(system, new StringDeserializer, new StringDeserializer)
-        .withBootstrapServers("localhost:9092")
+        .withBootstrapServers("broker:29092")
         .withGroupId("test-group")
         .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
     

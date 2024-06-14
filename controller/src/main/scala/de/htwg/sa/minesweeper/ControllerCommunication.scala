@@ -23,11 +23,12 @@ class ControllerCommunication (using var controller: IController) extends Observ
     gameCommandConsumer.startConsuming()
 
     //val gameResponseProducer = new ControllerResponseProducer(system)
-    val gameResponseConsumer = new ControllerResponseConsumer(system)
+    val gameResponseConsumer = new ControllerResponseConsumer2(system)
+
     gameResponseConsumer.startConsuming()
 
     gameCommandProducer.sendCommand("/model/game", ModelCommandTopic)
-    gameCommandProducer.sendCommand("irgendwas Controller", ControllerCommandTopic)
+    //gameCommandProducer.sendCommand("irgendwas Controller", ControllerCommandTopic)
 
 
 

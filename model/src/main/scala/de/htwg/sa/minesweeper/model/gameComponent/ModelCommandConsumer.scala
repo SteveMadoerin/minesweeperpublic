@@ -18,7 +18,7 @@ class ModelCommandConsumer(system: ActorSystem)(implicit val materializer: Mater
     val CommandsTopic = "model-command"
 
     private val consumerSettings = ConsumerSettings(system, new StringDeserializer, new StringDeserializer)
-        .withBootstrapServers("localhost:9092")
+        .withBootstrapServers("broker:29092")
         .withGroupId("test-group")
         .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
     
@@ -55,6 +55,7 @@ class ModelCommandConsumer(system: ActorSystem)(implicit val materializer: Mater
                 println("model produces field: Start")
                 println(feld.fieldToJson)
                 println("model produces field: End")
+                command
             case _ => {
                 println("executedCommand not found: " + command)
                 command

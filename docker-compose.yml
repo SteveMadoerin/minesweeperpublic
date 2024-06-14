@@ -1,5 +1,36 @@
-
+version: '2'
 services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:6.2.0
+    hostname: zookeeper
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
+  kafka:
+    image: confluentinc/cp-kafka:6.2.0
+    hostname: broker
+    container_name: broker
+    depends_on:
+      - zookeeper
+    ports:
+      - "29092:29092" # External access
+      - "9092:9092" # Internal access within Docker network
+      - "9101:9101"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_JMX_PORT: 9101
+      KAFKA_JMX_HOSTNAME: broker # Changed from localhost to broker
 
   model:
     container_name: model
@@ -8,6 +39,11 @@ services:
         dockerfile: model/Dockerfile
     image: model-assembly-image:latest
     #network_mode: host
+    depends_on:
+      - kafka
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: broker:9092 # Use the broker service name and internal port
+      KAFKA_IN_DOCKER: true
     stdin_open: true
     tty: true
     ports:
@@ -20,6 +56,11 @@ services:
       dockerfile: persistence/Dockerfile
     image: persistence-assembly-image:latest
     #network_mode: host
+    depends_on:
+      - kafka
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: broker:9092 # Use the broker service name and internal port
+      KAFKA_IN_DOCKER: true
     stdin_open: true
     tty: true
     ports:
@@ -32,6 +73,11 @@ services:
       dockerfile: controller/Dockerfile
     image: controller-assembly-image:latest
     #network_mode: host
+    depends_on:
+      - kafka
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: broker:9092 # Use the broker service name and internal port
+      KAFKA_IN_DOCKER: true
     stdin_open: true
     tty: true
     ports:
@@ -47,9 +93,13 @@ services:
     stdin_open: true
     tty: true
     depends_on:
+      - kafka
       - controller
       - persistence
       - model
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: broker:9092 # Use the broker service name and internal port
+      KAFKA_IN_DOCKER: true
     ports:
       - "9088:9088"
       - "9087:9087"

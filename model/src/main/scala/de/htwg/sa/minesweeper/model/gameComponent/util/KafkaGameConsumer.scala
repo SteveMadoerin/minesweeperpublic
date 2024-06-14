@@ -1,3 +1,4 @@
+/*
 package de.htwg.sa.minesweeper.model.gameComponent.util
 
 import org.apache.kafka.clients.consumer.{ConsumerConfig, KafkaConsumer}
@@ -75,3 +76,4 @@ object KafkaGameConsumer extends App {
 }
 
 case class Game(bombs: Int, side: Int, time: Int, board: String)
+*/

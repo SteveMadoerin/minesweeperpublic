@@ -1,3 +1,4 @@
+/*
 package de.htwg.sa.minesweeper.model.gameComponent.util
 
 import org.apache.kafka.streams.{KafkaStreams, StreamsBuilder, StreamsConfig}
@@ -101,3 +102,4 @@ object SimpleKafkaConsumer extends App {
         consumer.close()
     }
 }
+*/
