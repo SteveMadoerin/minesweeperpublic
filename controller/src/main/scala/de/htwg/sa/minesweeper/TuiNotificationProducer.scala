@@ -13,7 +13,6 @@ import scala.concurrent.Future
 class TuiNotificationProducer(system: ActorSystem)(implicit val materializer: Materializer) {
 
     val TuiCommandTopic = "tui-notify"
-    //val GuiCommandTopic = "gui-notify"
     
     private val producerSettings = ProducerSettings(system, new StringSerializer, new StringSerializer)
         .withBootstrapServers("broker:29092")
