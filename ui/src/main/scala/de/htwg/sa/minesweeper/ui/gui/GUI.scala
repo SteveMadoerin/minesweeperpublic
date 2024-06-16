@@ -1,27 +1,22 @@
 package de.htwg.sa.minesweeper.ui.gui
 
-import akka.NotUsed
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.model.HttpMethods.{GET, PUT}
-import akka.http.scaladsl.model._
-import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.unmarshalling.Unmarshal
-import akka.stream.scaladsl.GraphDSL.Builder
-import akka.stream.scaladsl.{Broadcast, Flow, GraphDSL, Merge, Sink}
-import akka.stream.{FlowShape, Materializer, UniformFanInShape, UniformFanOutShape}
+import akka.http.scaladsl.server.Directives.*
+import akka.http.scaladsl.server.Route
+import akka.stream.Materializer
 import de.htwg.sa.minesweeper.ui.model._
 
 import java.awt.RenderingHints
 import java.awt.event.MouseEvent
 import java.awt.image.BufferedImage
-import java.util.concurrent.atomic._
+import java.util.concurrent.atomic.*
 import java.util.{Timer, TimerTask}
 import javax.swing.border.Border
 import javax.swing.{BorderFactory, ImageIcon}
-import scala.concurrent.{ExecutionContextExecutor, Future}
-import scala.swing._
-import scala.swing.Dialog._
+import scala.concurrent.ExecutionContextExecutor
+import scala.swing.*
+import scala.swing.Dialog.*
 import scala.swing.event.MouseClicked
 import scala.util.{Failure, Success}
 
@@ -37,7 +32,7 @@ class GUI() extends Frame:
     private var boardBounds =  RestUtil.requestBoardBounds
     var controllerField: FieldTui = RestUtil.requestControllerField
     var controllerGame: GameTui = RestUtil.requestControllerGame
-    
+
     private var firstMoveControl = new AtomicBoolean(true)
     private var timerStarted: Boolean = false
     private var timeLoaded: Boolean = false
@@ -59,19 +54,19 @@ class GUI() extends Frame:
         timerStarted = true
         timer.schedule(task.get, 1000L, 1000L)
     }
-    
+
     def stopTimer(): Unit = {
         task.foreach(_.cancel())
         task = None
         timerStarted = false
     }
-    
+
     def cells(first: Boolean) = {
         val tmpPanel = new CellPanel(boardBounds+1, boardBounds+1, boardBounds, first)
         tmpPanel.border = borderCreator(0, 2, 2, 2)
         tmpPanel
     }
-    
+
     def statusbar = new BorderPanel{
 
         val flagCountDisplay = buildFlagCountDisplay
@@ -80,7 +75,7 @@ class GUI() extends Frame:
         }, BorderPanel.Position.West)
 
         add(new SmileLabel(s"${controllerGame.board}"), BorderPanel.Position.Center)
-        
+
         val timerDigits = Seq(digitBar.leftDigit, digitBar.middleDigit, digitBar.rightDigit).map(showDigits)
         add(new BoxPanel(Orientation.NoOrientation){
             contents ++= timerDigits.map(new DigitLabel(_))
@@ -128,7 +123,7 @@ class GUI() extends Frame:
                 contents += new MenuItem(Action("Cheat") { update(Event.Cheat) })
             }
         }
-        
+
         resizable = false
         contents = updateContents
         pack()
@@ -159,7 +154,7 @@ class GUI() extends Frame:
                 b = true
                 controllerGame = RestUtil.requestControllerGame
                 controllerField = RestUtil.requestControllerField
-                
+
                 firstMoveControl.set(true)
                 boardBounds = controllerField.matrix.rows.size -1
                 if(digitBar.rightDigit>0 || clock.get()>0){
@@ -170,7 +165,7 @@ class GUI() extends Frame:
                 contents = updateContents
                 repaint()
                 true
-            
+
             case Event.Start =>
 
                 if(!timerStarted){
@@ -180,17 +175,17 @@ class GUI() extends Frame:
                     repaint()
                 }
                 true
-            
+
             case Event.Next =>
-                
+
                 if(!timerStarted){
-                    restartTimer(new AtomicInteger(controllerGame.time))
+                    restartTimer(new AtomicInteger(controllerGame.time)) //restartTimer(new AtomicInteger(controller.game.time))
                 } else{
                     contents = updateContents
                     repaint()
                 }
                 true
-            
+
             case Event.GameOver =>
                 val gameOverField = FieldTui(controllerField.hidden, controllerField.hidden)
                 controllerField = gameOverField
@@ -202,7 +197,7 @@ class GUI() extends Frame:
                 val saveScore: Int = calculateScore
                 controllerGame = RestUtil.requestControllerGame
                 //val text = s"Game is ${controllerGame.board} and your Score is ${calculateScore}"
-                
+
                 resetTimer()
                 //showMessage(None.orNull, text, "GameOver", Message.Info)
                 val playerName = showInput(None.orNull, "Enter your Name to save your score!", "Save Score", Message.Info, Swing.EmptyIcon, Nil, "Sly").getOrElse("Default") // was null before
@@ -210,25 +205,27 @@ class GUI() extends Frame:
                 loadScoreNew(playerName, saveScore)
                 saveScoreNew(playerName, saveScore)
                 true
-            
+
             case Event.Cheat =>
 
                 val cheatingField = RestUtil.requestControllerField
                 val text = s"${prettyFormat(FieldTui(cheatingField.hidden, cheatingField.hidden))}"
                 showMessage(None.orNull, text, "Cheat Menu", Message.Plain)
                 false
-            
+
             case Event.Help =>
 
                 false
-            
+
             case Event.Input =>
 
                 val x = showGraphicalInput
-                RestUtil.requestControllerNewGameFieldGui(x) //controller.newGameField(x)
+                //controller.newGameField(x)
+                RestUtil.requestControllerNewGameFieldGui(x)
+
 
                 true
-            
+
             case Event.Load =>
                 controllerGame = RestUtil.requestControllerGame
                 setLoadedTimer(new AtomicInteger(controllerGame.time))
@@ -237,100 +234,61 @@ class GUI() extends Frame:
                 contents = updateContents
                 repaint()
                 true
-            
+
             case Event.Save =>
-                
+
                 restartTimer(new AtomicInteger(clock.get()))
                 true
-            
+
             case Event.SaveTime =>
 
                 pauseTimer()
-                RestUtil.requestControllerSaveTime(clock.get()) //controller.saveTime(clock.get())
+                //controller.saveTime(clock.get())
+                RestUtil.requestControllerSaveTime(clock.get())
                 contents = updateContents
                 repaint()
                 true
-            
+
             case Event.Exit => System.exit(0); true
         }
     }
 
+    val route: Route = {
+        get {
+            path("gui") {
+                complete("gui")
+            } ~
+              path("gui"/"hello") {
+                  complete("hello")
+              }
+        } ~
+          put {
+              path("gui"/"notify") {
+                  parameter("event".as[String]) { event =>
+                      //
+                      event match
+                          case "NewGame" => update(Event.NewGame)
+                          case "Start" => update(Event.Start)
+                          case "Next" => update(Event.Next)
+                          case "GameOver" => update(Event.GameOver)
+                          case "Cheat" => update(Event.Cheat)
+                          case "Help" => update(Event.Help)
+                          case "Input" => update(Event.Input)
+                          case "Load" => update(Event.Load)
+                          case "Save" => update(Event.Save)
+                          case "SaveTime" => update(Event.SaveTime)
+                          case "Exit" => update(Event.Exit)
+                          case _ => false
 
-    val guiFlow: Flow[HttpRequest, String, NotUsed] = Flow.fromGraph(GraphDSL.create() { implicit builder: Builder[NotUsed] =>
-        import GraphDSL.Implicits.*
+                      complete("success notify" + event)
+                  }
+              }
+          }
 
-
-        val guiGetFlow = Flow[HttpRequest].map { request =>
-            request.uri.path.toString match {
-                case "/gui/notify" => HttpResponse(entity = "GUI Wrong Request Get")
-                case "/gui" => HttpResponse(entity = "GUI")
-                case "/gui/hello" => HttpResponse(entity = "hello")
-                case _ => HttpResponse(entity = request.uri.path.toString + "not supported get")
-            }
-        }
-        val guiFlowPost = Flow[HttpRequest].mapAsync(1) { request =>
-            val result = request.uri.path.toString match {
-                case "/gui/notify" =>
-                    val event = request.uri.query().get("event").get
-                    event match
-                        case "NewGame" => update(Event.NewGame)
-                        case "Start" => update(Event.Start)
-                        case "Next" => update(Event.Next)
-                        case "GameOver" => update(Event.GameOver)
-                        case "Cheat" => update(Event.Cheat)
-                        case "Help" => update(Event.Help)
-                        case "Input" => update(Event.Input)
-                        case "Load" => update(Event.Load)
-                        case "Save" => update(Event.Save)
-                        case "SaveTime" => update(Event.SaveTime)
-                        case "Exit" => update(Event.Exit)
-                        case _ => true
-
-                    Future.successful(HttpResponse(entity = "success notify" + event))
-
-                case _ => Future.successful(HttpResponse(entity = "not supported post" + request.uri.path.toString))
-            }
-            result
-
-        }
-
-
-        val getRequestFlowShape = builder.add(guiGetFlow)
-
-        val getResponseFlow = Flow[HttpResponse].mapAsync(1) { response =>
-            Unmarshal(response.entity).to[String]
-        }
-
-        val getResponseFlowShape = builder.add(getResponseFlow)
-
-        val putRequestFlowShape = builder.add(guiFlowPost)
-
-        val postResponseFlow = Flow[HttpResponse].mapAsync(1) { response =>
-            Unmarshal(response.entity).to[String]
-        }
-
-        val putResponseFlowShape = builder.add(postResponseFlow)
-
-        val broadcast: UniformFanOutShape[HttpRequest, HttpRequest] = builder.add(Broadcast[HttpRequest](2))
-        val merge: UniformFanInShape[String, String] = builder.add(Merge[String](2))
-
-        broadcast.out(0) ~> putRequestFlowShape ~> putResponseFlowShape ~> merge.in(0)
-        broadcast.out(1) ~> getRequestFlowShape ~> getResponseFlowShape ~> merge.in(1)
-
-
-        FlowShape(broadcast.in, merge.out)
-    })
+    }
 
     def start(): Unit = {
-        val bindFuture = Http().newServerAt("0.0.0.0", 9087).bind(
-            pathPrefix("gui") {
-                extractRequest { request =>
-                    complete(
-                        akka.stream.scaladsl.Source.single(request).via(guiFlow).runWith(Sink.head).map(resp => resp)
-                    )
-                }
-            }
-        )
+        val bindFuture = Http(system).newServerAt("0.0.0.0", 9087).bind(route)
 
         bindFuture.onComplete {
             case Success(binding) =>
@@ -342,224 +300,27 @@ class GUI() extends Frame:
         }
     }
 
-/*    val requestHandler: HttpRequest => HttpResponse = {
-        case HttpRequest(GET, Uri.Path("/"), _, _, _) =>
-            HttpResponse(entity = HttpEntity(
-                ContentTypes.`text/html(UTF-8)`,
-                "<html><body>Hello and Welcome to the MineSweeper UI written in Scala by Authors: Steve and Dennis </body></html>"))
-
-        case HttpRequest(GET, Uri.Path("/gui"), _, _, _) =>
-            HttpResponse(entity = "gui")
-
-        case HttpRequest(GET, Uri.Path("/gui/hello"), _, _, _) =>
-            HttpResponse(entity = "hello")
-
-        case HttpRequest(PUT, Uri.Path("/gui/notify"), _, attrib, _) =>
-            // extract the event from the request
-            val event = attrib.toString
-            event match
-                case "NewGame" => update(Event.NewGame)
-                case "Start" => update(Event.Start)
-                case "Next" => update(Event.Next)
-                case "GameOver" => update(Event.GameOver)
-                case "Cheat" => update(Event.Cheat)
-                case "Help" => update(Event.Help)
-                case "Input" => update(Event.Input)
-                case "Load" => update(Event.Load)
-                case "Save" => update(Event.Save)
-                case "SaveTime" => update(Event.SaveTime)
-                case "Exit" => update(Event.Exit)
-                case _ => false
-
-            val text = s"success notify event: $event"
-            HttpResponse(entity = text)
-
-
-        case HttpRequest(GET, Uri.Path("/crash"), _, _, _) =>
-            sys.error("BOOM!")
-
-        case r: HttpRequest =>
-            r.discardEntityBytes() // important to drain incoming HTTP Entity stream
-            HttpResponse(404, entity = "Unknown resource!")
-    }*/
-
-/*    val route: Route = {
-        get {
-            path("gui") {
-                complete("gui")
-            } ~
-            path("gui"/"hello") {
-                complete("hello")
-            }
-        } ~
-        put {
-            path("gui"/"notify") {
-                parameter("event".as[String]) { event =>
-                    //
-                    event match
-                        case "NewGame" => update(Event.NewGame)
-                        case "Start" => update(Event.Start)
-                        case "Next" => update(Event.Next)
-                        case "GameOver" => update(Event.GameOver)
-                        case "Cheat" => update(Event.Cheat)
-                        case "Help" => update(Event.Help)
-                        case "Input" => update(Event.Input)
-                        case "Load" => update(Event.Load)
-                        case "Save" => update(Event.Save)
-                        case "SaveTime" => update(Event.SaveTime)
-                        case "Exit" => update(Event.Exit)
-                        case _ => false
-
-                    complete("success notify " + event)
-                }
-            }
-        }
-
-    }
-
-    def start(): Unit = {
-        val serverSource = Http(system).newServerAt("0.0.0.0", 9087).bind(requestHandler)
-
-        serverSource.onComplete {
-            case Success(binding) =>
-                println("Server online at http://localhost:9087/")
-            case Failure(exception) =>
-                println(s"An error occurred: $exception")
-                system.terminate()
-        }
-    }
-    */
-
-    val requestHandler: HttpRequest => Future[HttpResponse] = {
-        case HttpRequest(GET, Uri.Path("/"), _, _, _) =>
-            Future.successful(HttpResponse(entity = HttpEntity(
-                ContentTypes.`text/html(UTF-8)`,
-                "<html><body>Hello and Welcome to the MineSweeper UI written in Scala by Authors: Steve and Dennis </body></html>")))
-
-        case HttpRequest(GET, Uri.Path("/gui"), _, _, _) =>
-            Future.successful(HttpResponse(entity = "gui"))
-
-        case HttpRequest(GET, Uri.Path("/gui/hello"), _, _, _) =>
-            Future.successful(HttpResponse(entity = "hello"))
-
-        case HttpRequest(PUT, Uri.Path("/gui/notify"), _, attrib, _) =>
-            // extract the event from the request
-            val event = attrib.toString
-            val updateResult = event match {
-                case "NewGame" => update(Event.NewGame)
-                case "Start" => update(Event.Start)
-                case "Next" => update(Event.Next)
-                case "GameOver" => update(Event.GameOver)
-                case "Cheat" => update(Event.Cheat)
-                case "Help" => update(Event.Help)
-                case "Input" => update(Event.Input)
-                case "Load" => update(Event.Load)
-                case "Save" => update(Event.Save)
-                case "SaveTime" => update(Event.SaveTime)
-                case "Exit" => update(Event.Exit)
-                case _ => false
-            }
-
-            val text = s"success notify event: $event"
-            Future.successful(HttpResponse(entity = text))
-
-        case HttpRequest(GET, Uri.Path("/crash"), _, _, _) =>
-            Future.failed(new Exception("BOOM!"))
-
-        case r: HttpRequest =>
-            r.discardEntityBytes() // important to drain incoming HTTP Entity stream
-            Future.successful(HttpResponse(404, entity = "Unknown resource!"))
-    }
-
-
-    val requestHandlerFlow: Flow[HttpRequest, HttpResponse, NotUsed] = Flow.fromGraph(GraphDSL.create() { implicit builder =>
-        import GraphDSL.Implicits.*
-
-        // Create the various flows for handling specific paths
-        val rootFlow = Flow[HttpRequest].collect {
-            case HttpRequest(GET, Uri.Path("/"), _, _, _) =>
-                HttpResponse(entity = HttpEntity(ContentTypes.`text/html(UTF-8)`, "<html><body>Hello and Welcome to the MineSweeper UI written in Scala by Authors: Steve and Dennis </body></html>"))
-        }
-
-        val guiFlow = Flow[HttpRequest].collect {
-            case HttpRequest(GET, Uri.Path("/gui"), _, _, _) =>
-                HttpResponse(entity = "gui")
-        }
-
-        val guiHelloFlow = Flow[HttpRequest].collect {
-            case HttpRequest(GET, Uri.Path("/gui/hello"), _, _, _) =>
-                HttpResponse(entity = "hello")
-        }
-
-        val guiPutUpdateFlow = Flow[HttpRequest].collect {
-            case HttpRequest(PUT, Uri.Path("/gui/notify"), _, attrib, _) =>
-                // extract the event from the request
-                val event = attrib.toString
-                val updateResult = event match {
-                    case "NewGame" => update(Event.NewGame)
-                    case "Start" => update(Event.Start)
-                    case "Next" => update(Event.Next)
-                    case "GameOver" => update(Event.GameOver)
-                    case "Cheat" => update(Event.Cheat)
-                    case "Help" => update(Event.Help)
-                    case "Input" => update(Event.Input)
-                    case "Load" => update(Event.Load)
-                    case "Save" => update(Event.Save)
-                    case "SaveTime" => update(Event.SaveTime)
-                    case "Exit" => update(Event.Exit)
-                    case _ => false
-                }
-
-                val text = s"success notify event: $event"
-                HttpResponse(entity = text)
-        }
-
-        // Create a broadcast to feed requests into each flow
-        val broadcast = builder.add(Broadcast[HttpRequest](4)) // number of flows
-        val merge = builder.add(Merge[HttpResponse](4)) // Must match the number of flows
-
-        // Connect the broadcast to each flow
-        broadcast ~> guiPutUpdateFlow ~> merge
-        broadcast ~> rootFlow ~> merge
-        broadcast ~> guiFlow ~> merge
-        broadcast ~> guiHelloFlow ~> merge
-
-        FlowShape(broadcast.in, merge.out) // Expose ports
-    })
-
-    def Start(): Unit = {
-        val serverSource = Http(system).newServerAt("0.0.0.0", 9087).bindFlow(requestHandlerFlow)
-
-        serverSource.onComplete {
-            case scala. util.Success(binding) =>
-                println("Server online at http://localhost:9087/")
-            case Failure(exception) =>
-                println(s"An error occurred: $exception")
-                system.terminate()
-        }
-    }
-
     def showHelp: Unit = {
-        val text = 
+        val text =
             """This is Minesweeper Help - Menu
-            |                                                                                                    
-            |Left klick on a cell to open. Avoid any Bombs. If you see a number         
-            |eg. 1 it means it has a bomb in one of the surronding neighboring cells.   
-            |You can flag a cell, where u think there is a bomb.                        
-            |                                                        
-            |Now lets play and have fun :-)                                             
-            |                                                        
-            |Copyright: Steve Madoerin                                                  
-            |                                                   
-            |""".stripMargin
+              |                                                                                                    
+              |Left klick on a cell to open. Avoid any Bombs. If you see a number         
+              |eg. 1 it means it has a bomb in one of the surronding neighboring cells.   
+              |You can flag a cell, where u think there is a bomb.                        
+              |                                                        
+              |Now lets play and have fun :-)                                             
+              |                                                        
+              |Copyright: Steve Madoerin                                                  
+              |                                                   
+              |""".stripMargin
 
         showMessage(None.orNull, text, "Help Menu", Message.Info)
     }
-    
+
     def scaleImage(kind: String): ImageIcon = {
         val specialCases = Map("~" -> "covered", "F" -> "flag", "*" -> "bomb", "" -> "0",  " " -> "0")
         val numericCases = (0 to 8).map(i => i.toString -> s"$i").toMap
-        val imagePaths = (specialCases ++ numericCases).map { case (key, value) => 
+        val imagePaths = (specialCases ++ numericCases).map { case (key, value) =>
             key -> s"src/main/resources/$value.png"
         }
         val imagePath = imagePaths.getOrElse(kind, "src/main/resources/0.png")
@@ -588,11 +349,11 @@ class GUI() extends Frame:
         val imagePath = s"src/main/resources/face$kind.jpeg"
         val icon: ImageIcon = new ImageIcon(imagePath)
         icon
-    
+
     def showGraphicalInput: Option[String] = {
         showInput(None.orNull, "Choose Difficulty", "NewGame", Message.Info, Swing.EmptyIcon, List("SuperEasy","Easy", "Medium", "Hard"), "Easy") // was null before
     }
-    
+
     def saveScoreNew(playerName: String, saveScore: Int): Unit = {
 
         RestUtil.requestControllerSaveScoreAndPlayerName(saveScore, playerName)
@@ -615,7 +376,7 @@ class GUI() extends Frame:
         }
         loadAndDisplayScores()
     }
-        
+
     class CellPanel(var x: Int, var y: Int, bounds: Int, first: Boolean) extends GridPanel(x,y) {
         //controller.field.matrix.rows.size -1
         //TODO: replace
@@ -632,9 +393,9 @@ class GUI() extends Frame:
         (for(
             x <- 0 to bounds;
             y <- 0 to bounds
-            ) yield(x,y, controllerField.matrix.rows(x)(y))).foreach(t => contents += new CellButton(t._1, t._2, t._3, first))
+        ) yield(x,y, controllerField.matrix.rows(x)(y))).foreach(t => contents += new CellButton(t._1, t._2, t._3, first))
     }
-    
+
     def setTime = synchronized {
         digitBar = DigitDisplay(clock.get()/100, (clock.get()%100)/10, clock.get()%10)
     }
@@ -660,7 +421,7 @@ class GUI() extends Frame:
     def calculateScore: Int =
         val score = ((controllerField.matrix.rows.size * controllerField.matrix.rows.size)) * 10 - (digitBar.leftDigit*100+digitBar.middleDigit*10+digitBar.rightDigit)
         if controllerGame.board == "Won" then score else 0
-    
+
     def resetTimer() = {
         clock.set(0)
         setTime
@@ -671,7 +432,7 @@ class GUI() extends Frame:
     def calcFlagCount: Int = calcMineAndFlag(controllerField.matrix, controllerGame)
 
     def prettyFormat(fieldTui: FieldTui): String = {
-            fieldTui.matrix.rows.map(_.mkString(" ")).mkString("\n")
+        fieldTui.matrix.rows.map(_.mkString(" ")).mkString("\n")
     }
 
     def calcMineAndFlag(visibleMatrix: MatrixTui[String], gamely: GameTui) = {
@@ -684,7 +445,7 @@ class GUI() extends Frame:
         multiIndex
           .flatMap(row => multiIndex.map(col => (row, col)))
           .count{ case(row, col) => visibleMatrix.rows(row)(col) == symbols && isValid(row, col, sizze)}
-    
+
     }
     def isValid(row: Int, col: Int, side: Int): Boolean = {row >= 0 && row <= side && col >= 0 && col <= side}
 
@@ -693,17 +454,17 @@ class GUI() extends Frame:
         val middleDigit = calcFlagCount / 10
         val rightDigit = calcFlagCount % 10
 
-        var (resLeft, resMiddle, resRight) = 
-            if (calcFlagCount < 0) { 
+        var (resLeft, resMiddle, resRight) =
+            if (calcFlagCount < 0) {
                 val corrRight = (calcFlagCount * -1)%10
                 val corrMiddle = (calcFlagCount * -1)/10
                 val corrLeft = -1
                 (showDigits(corrLeft), showDigits(corrMiddle), showDigits(corrRight))
             } else if (calcFlagCount > 999) {(showDigits(9), showDigits(9), showDigits(9))
             } else {(showDigits(leftDigit), showDigits(middleDigit), showDigits(rightDigit))}
-        
+
         (resLeft, resMiddle, resRight)
-    
+
 
     class CellButton(x: Int, y: Int, symbols: String, first: Boolean) extends Button(){
         contentAreaFilled = false
@@ -716,7 +477,7 @@ class GUI() extends Frame:
                 //controllerField = FieldTui(controllerField.hidden, controllerField.hidden)
                 update(Event.GameOver)
                 val unit = "returns unit"
-            
+
             case e: MouseClicked if e.peer.getButton == MouseEvent.BUTTON3 =>
                 // Check if controllerField is up to date
                 controllerField = RestUtil.requestControllerField
@@ -730,17 +491,17 @@ class GUI() extends Frame:
                     println(">> You can't flag an open field")
                 }
                 if first then startTimer()
-            
-            case e: MouseClicked if e.peer.getButton == MouseEvent.BUTTON1 => 
+
+            case e: MouseClicked if e.peer.getButton == MouseEvent.BUTTON1 =>
                 synchronized{
                     controllerField = RestUtil.requestControllerField
                     controllerGame = RestUtil.requestControllerGame
                     if (first) {startTimer()}
                     //controller.makeAndPublish(controller.doMove, first, Move("open", y, x), controller.game)
-                    RestUtil.requestControllerMakeAndPublishDoMove(first, Move("open", y, x), controllerGame)
+                    RestUtil.requestControllerMakeAndPublishDoMove(first, Move("open", y, x), controllerGame) // TODO: check updateGame
                     if (first) {
                         //controller.checkGameOver(controllerGame.board)  // check this
-                        RestUtil.requestCheckGameOver(controllerGame.board)
+                        RestUtil.requestCheckGameOver(controllerGame.board)  // TODO: check if updateGame works better
                     } else {
                         controllerGame = RestUtil.requestControllerGame
                         if(RestUtil.requestCheckGameOver(controllerGame.board)) {
@@ -754,12 +515,12 @@ class GUI() extends Frame:
             RestUtil.requestControllerGame
         }
     }
-    
+
     class SmileLabel(kind: String) extends Label(){
         icon = kind match {
             case "Playing" => showSmiley("smile")
             case "Lost" => showSmiley("dead")
-            case "Won" => showSmiley("win") 
+            case "Won" => showSmiley("win")
         }
     }
 
