@@ -1,21 +1,22 @@
 package de.htwg.sa.minesweeper.ui
 
 import akka.actor.ActorSystem
+import akka.http.scaladsl.server.Directives.complete
 import akka.kafka.scaladsl.Consumer
 import akka.kafka.{ConsumerSettings, Subscriptions}
 import akka.stream.Materializer
 import akka.stream.Materializer.matFromSystem
 import akka.stream.scaladsl.Sink
-import de.htwg.sa.minesweeper.ui.model.GameTui
+import de.htwg.sa.minesweeper.ui.model.{Event, GameTui}
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.{StringDeserializer, StringSerializer}
 
 import scala.concurrent.Future
 
-class NotificationConsumer(system: ActorSystem)(implicit val materializer: Materializer) {
+class NotificationConsumer(system: ActorSystem)(update : Event => Unit)(implicit val materializer: Materializer) {
 
     val TuiCommandTopic = "tui-notify"
-    val GuiCommandTopic = "gui-notify"
+    //val GuiCommandTopic = "gui-notify"
 
     private val consumerSettings = ConsumerSettings(system, new StringDeserializer, new StringDeserializer)
         .withBootstrapServers("broker:29092")
@@ -31,21 +32,21 @@ class NotificationConsumer(system: ActorSystem)(implicit val materializer: Mater
     }
 
     // Method to process the command
-    private def processCommand(command: String): Future[Unit] = {
-        val executedCommand = command match {
-            case "/controller/game" => {
-                val game = GameTui(10, 9, 0, "Playing")
-                println("HttpResponse(entity = game.gameToJson.toString())")
-                command
-                
-                //gameService.startGame()
-            }
-            case _ => {
-                println("executedCommand not found: " + command)
-                command
-                
-                // Handle other commands if needed
-            }   
+    private def processCommand(event: String): Future[Unit] = {
+        val executedCommand = event match {
+            case "NewGame" => update(Event.NewGame)
+            case "Start" => update(Event.Start)
+            case "Next" => update(Event.Next)
+            case "GameOver" => update(Event.GameOver)
+            case "Cheat" => update(Event.Cheat)
+            case "Help" => update(Event.Help)
+            case "Input" => update(Event.Input)
+            case "Load" => update(Event.Load)
+            case "Save" => update(Event.Save)
+            case "SaveTime" => update(Event.SaveTime)
+            case "Exit" => update(Event.Exit)
+            case _ => false
+
         }
         println("executedCommand: " + executedCommand)
         val response: String = s"response: $executedCommand"
