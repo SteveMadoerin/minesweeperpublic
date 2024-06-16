@@ -6,6 +6,7 @@ import akka.http.scaladsl.model.*
 import akka.http.scaladsl.unmarshalling.Unmarshal
 import akka.stream.scaladsl.{Flow, GraphDSL, RunnableGraph, Sink, Source}
 import akka.stream.{ClosedShape, Materializer}
+import de.htwg.sa.minesweeper.{GuiNotificationProducer, TuiNotificationProducer}
 import de.htwg.sa.minesweeper.controller.controllerComponent.IController
 import de.htwg.sa.minesweeper.entity.{FieldDTO, GameDTO, MatrixDTO}
 import de.htwg.sa.minesweeper.util.{Move, Observable, RestUtil, UndoRedoManager}
@@ -454,7 +455,10 @@ class Controller() extends IController with Observable:
         notifyObserverGui("NewGame") //notifyObserversRest("NewGame")
         
     def notifyObserverGui(event: String) = {
-        val uri2 = s"http://ui:9087/gui/notify" + "?event=" + event
+
+        val GuiCommandTopic = "gui-notify"
+        GuiNotificationProducer(system).sendCommand(event, GuiCommandTopic)
+/*        val uri2 = s"http://ui:9087/gui/notify" + "?event=" + event
 
         val request2 = HttpRequest(
             method = HttpMethods.PUT,
@@ -466,7 +470,7 @@ class Controller() extends IController with Observable:
             response.entity.toStrict(5.seconds).map(_.data.utf8String)
         }
         val result2 = Await.result(bodyFieldFuture2, 5.seconds)
-        println(result2 + " Only - GUI")
+        println(result2 + " Only - GUI")*/
     }
     
     // approved - doMove from TUI transfered as param -> game & field in TUI declared
@@ -617,8 +621,11 @@ class Controller() extends IController with Observable:
 
     // approved - notifys TUI and GUI
     def notifyObserversRest(event: String): Unit = {
+
+        val TuiCommandTopic = "tui-notify"
+        TuiNotificationProducer(system).sendCommand(event, TuiCommandTopic)
         
-        // _________________________ NOTIFY TUI _________________________
+/*        // _________________________ NOTIFY TUI _________________________
 
         val uri1 = s"http://ui:9088/tui/notify" + "?event=" + event
 
@@ -632,9 +639,12 @@ class Controller() extends IController with Observable:
             response.entity.toStrict(5.seconds).map(_.data.utf8String)
         }
         val result = Await.result(bodyFieldFuture, 5.seconds)
-        println(result + " - TUI")
+        println(result + " - TUI")*/
 
-        // _________________________ NOTIFY GUI _________________________
+        val GuiCommandTopic = "gui-notify"
+        GuiNotificationProducer(system).sendCommand(event, GuiCommandTopic)
+
+/*        // _________________________ NOTIFY GUI _________________________
         val uri2 = s"http://ui:9087/gui/notify" + "?event=" + event
 
         val request2 = HttpRequest(
@@ -647,7 +657,7 @@ class Controller() extends IController with Observable:
             response.entity.toStrict(5.seconds).map(_.data.utf8String)
         }
         val result2 = Await.result(bodyFieldFuture2, 5.seconds)
-        println(result2 + " - GUI")
+        println(result2 + " - GUI")*/
     }
 
     override def testStreams: Unit = ???
