@@ -8,7 +8,7 @@ import scala.io.StdIn.readLine
 object ControllerService {
   def main(args: Array[String]): Unit = {
     ControllerCommunication()
-    //ControllerApi().start() // on Port 9081
+    ControllerApi().start() // on Port 9081
     println("Press RETURN to stop...")
     readLine()
   }
