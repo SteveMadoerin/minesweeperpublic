@@ -518,7 +518,13 @@ class TUI():
     }
 
     def jsonToGameAndField(jsonString: String): (GameTui, FieldTui) = {
-        val json: JsValue = Json.parse(jsonString)
+        val json = Try(Json.parse(jsonString)) match {
+            case Success(value) => value
+            case Failure(exception) =>
+                println("jsonString: " + jsonString)
+                println(s"An error occurred:  $exception")
+                null
+        }
         val jsonGame: Option[JsValue] = (json \\ "game").headOption
         val status = (jsonGame.get \ "status").get.toString
         val bombs = (jsonGame.get \ "bombs").get.toString.toInt
@@ -533,13 +539,13 @@ class TUI():
 
         val size = (jsonValue \ "size").get.toString.toInt
 
-        val fieldVectorOption: Option[FieldTui] = Some(FieldTui(MatrixTui(Vector.tabulate(size, size) {(row, col) => "E"}), (MatrixTui(Vector.tabulate(size, size) {(row, col) => "E"}))))
-        val matrixVectorOption: Option[Vector[Vector[String]]] = Some(Vector.tabulate(size, size) {(row, col) => "E"})
-        val hiddenVectorOption: Option[Vector[Vector[String]]] = Some(Vector.tabulate(size, size) {(row, col) => "E"})
+        val fieldVectorOption: Option[FieldTui] = Some(FieldTui(MatrixTui(Vector.tabulate(size, size) { (row, col) => "E" }), (MatrixTui(Vector.tabulate(size, size) { (row, col) => "E" }))))
+        val matrixVectorOption: Option[Vector[Vector[String]]] = Some(Vector.tabulate(size, size) { (row, col) => "E" })
+        val hiddenVectorOption: Option[Vector[Vector[String]]] = Some(Vector.tabulate(size, size) { (row, col) => "E" })
 
-        val matrixVector1 = matrixVectorOption match{
+        val matrixVector1 = matrixVectorOption match {
             case Some(matrix) => matrix
-            case None => println("Matrix is not valid"); Vector.tabulate(size, size) {(row, col) => "E"}
+            case None => println("Matrix is not valid"); Vector.tabulate(size, size) { (row, col) => "E" }
         }
 
         val updatedMatrixVector: Vector[Vector[String]] = (0 until size * size).foldLeft(matrixVector1) {
@@ -550,9 +556,9 @@ class TUI():
                 currentMatrix.updated(row, currentMatrix(row).updated(col, cell))
         }
 
-        val hiddenVector1 = hiddenVectorOption match{
+        val hiddenVector1 = hiddenVectorOption match {
             case Some(m) => m
-            case None => println("Hidden is not valid"); Vector.tabulate(size, size) {(row, col) => "E"}
+            case None => println("Hidden is not valid"); Vector.tabulate(size, size) { (row, col) => "E" }
         }
 
         val updatedHiddenVector: Vector[Vector[String]] = (0 until size * size).foldLeft(hiddenVector1) {
@@ -563,7 +569,7 @@ class TUI():
                 currentHidden.updated(row, currentHidden(row).updated(col, cell))
         }
 
-        val finalFieldOption = fieldVectorOption match{
+        val finalFieldOption = fieldVectorOption match {
             case Some(f) => Some(FieldTui(MatrixTui(updatedMatrixVector), MatrixTui(updatedHiddenVector)))
             case None => println("Field is not valid"); None
         }
