@@ -1,16 +1,19 @@
 package de.htwg.sa.minesweeper.ui
 
 
+import akka.NotUsed
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.model._
-import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.Route
-import akka.stream.Materializer
-import de.htwg.sa.minesweeper.ui.model._
+import akka.http.scaladsl.model.*
+import akka.http.scaladsl.server.Directives.*
+import akka.http.scaladsl.unmarshalling.Unmarshal
+import akka.stream.scaladsl.GraphDSL.Builder
+import akka.stream.scaladsl.{Broadcast, Flow, GraphDSL, Merge, Sink}
+import akka.stream.{FlowShape, Materializer, UniformFanInShape, UniformFanOutShape}
+import de.htwg.sa.minesweeper.ui.model.*
 import play.api.libs.json.{JsValue, Json}
 
-import scala.concurrent.duration._
+import scala.concurrent.duration.*
 import scala.concurrent.{Await, ExecutionContextExecutor, Future}
 import scala.io.StdIn.readLine
 import scala.languageFeature.reflectiveCalls
@@ -18,8 +21,7 @@ import scala.util.matching.Regex
 import scala.util.{Failure, Success, Try}
 
 class TUI():
-    
-    //controller.add(this)
+
     implicit val system: ActorSystem = ActorSystem()
     implicit val materializer: Materializer = Materializer(system)
     implicit val executionContext: ExecutionContextExecutor = system.dispatcher
@@ -95,7 +97,7 @@ class TUI():
                 false
         }
 
-        controllerGame = requestControllerGame // replace controller.checkGameOver
+        controllerGame = requestControllerGame
 
         requestCheckGameOver(controllerGame.board) match {
             case false =>
@@ -128,9 +130,7 @@ class TUI():
     
     def resize: Unit = 
         val (side, bombs) = chooseDifficulty()
-        
         requestNewGame(side, bombs)
-        // maybe later - receive Game and Field from controller
     
     def chooseDifficulty() = {
         val multilineString = 
@@ -167,9 +167,6 @@ class TUI():
         }
         val bodyString = Await.result(bodyStringFuture, 5.seconds)
         val (newGame, newField): (GameTui, FieldTui) = jsonToGameAndField(bodyString)
-        //println(newGame.bombs)
-        //println(newField.hidden.rows.size)
-        //println("controller.newGame(side, bombs)")
 
         controllerField = newField
         controllerGame = newGame
@@ -211,14 +208,9 @@ class TUI():
             uri = url
         )
 
-        //val bodyString = Await.result(Http().singleRequest(request).flatMap(_.entity.toStrict(5.seconds).map(_.data.utf8String)), 5.seconds)
-        //val field = jsonToFieldTui(bodyString)
-        //implement maybe later controllerfield = field ...
-        //controller.gameOver
     }
 
     def requestControllerField = {
-        //controller.field
         val url = "http://controller:9081/controller/field"
         
         val request = HttpRequest(
@@ -284,8 +276,7 @@ class TUI():
         )
         val bodyString = Await.result(Http().singleRequest(request).flatMap(_.entity.toStrict(5.seconds).map(_.data.utf8String)), 5.seconds)
         val game = jsonToGameTui(bodyString)
-
-        game //controller.game.asInstanceOf[Game]
+        game
     }
 
     def jsonToGameTui(jsonString: String): GameTui = {
@@ -299,7 +290,6 @@ class TUI():
     }
 
     def requestControllerMakeAndPublishDoMove(firstMoveCheck: Boolean, move: Move, game: GameTui) = {
-        //controller.makeAndPublish(controller.doMove, firstMoveCheck, move, game)
         val newBoard = game.board match {
             case "Playing" => 0
             case "Won" => 1
@@ -321,11 +311,10 @@ class TUI():
         ).withEntity(HttpEntity(ContentTypes.`application/json`, bodyField.toString()))
 
         val bodyString = Await.result(Http().singleRequest(request).flatMap(_.entity.toStrict(5.seconds).map(_.data.utf8String)), 5.seconds)
-        println(bodyString) // success
+        println(bodyString)
 
     }
 
-    // approved - controller.makeAndPublish(controller.put, move)
     def requestControllerMakeAndPublishPut(move: Move) = {
 
         val url = "http://controller:9081/controller/makeAndPublish/put"
@@ -346,7 +335,6 @@ class TUI():
 
     }
 
-    // approved
     def requestControllerHelpMenue= {
 
         val url = "http://controller:9081/controller/helpMenu"
@@ -380,7 +368,6 @@ class TUI():
 
     // working
     def requestControllerMakeAndPublishUndo: Unit = {
-        //controller.makeAndPublish(controller.undo)
         val url = "http://controller:9081/controller/makeAndPublish/undo"
         val request = HttpRequest(
             method =  HttpMethods.GET,
@@ -398,7 +385,6 @@ class TUI():
 
     // working
     def requestControllerMakeAndPublishRedo: Unit = {
-        //controller.makeAndPublish(controller.redo)
         val url = "http://controller:9081/controller/makeAndPublish/redo"
         val request = HttpRequest(
             method =  HttpMethods.GET,
@@ -414,9 +400,7 @@ class TUI():
         println(bodyStringUndo) // use logging
     }
 
-    // working
     def requestControllerSaveGame: Unit = {
-        //controller.saveGame
         val url = "http://controller:9081/controller/saveGame"
 
         val request = HttpRequest(
@@ -470,42 +454,84 @@ class TUI():
         
     }
 
-    val route: Route = {
-        get {
-            path("tui") {
-                complete("TUI")
-            } ~ 
-            path("tui"/"hello") {
-                complete("hello")
-            } 
-        } ~
-        put {
-            path("tui"/"notify") {
-                    parameter("event".as[String]) { (event) =>
-                        event match
-                            case "NewGame" => update(Event.NewGame)
-                            case "Start" => update(Event.Start)
-                            case "Next" => update(Event.Next)
-                            case "GameOver" => update(Event.GameOver)
-                            case "Cheat" => update(Event.Cheat)
-                            case "Help" => update(Event.Help)
-                            case "Input" => update(Event.Input)
-                            case "Load" => update(Event.Load)
-                            case "Save" => update(Event.Save)
-                            case "SaveTime" => update(Event.SaveTime)
-                            case "Exit" => update(Event.Exit)
-                            case _ => false
-                            
-                        complete("success notify" + event)
-                    }
+    val tuiFlow: Flow[HttpRequest, String, NotUsed] = Flow.fromGraph(GraphDSL.create() { implicit builder: Builder[NotUsed] =>
+        import GraphDSL.Implicits.*
+
+        val broadcast: UniformFanOutShape[HttpRequest, HttpRequest] = builder.add(Broadcast[HttpRequest](2))
+        val merge: UniformFanInShape[String, String] = builder.add(Merge[String](2))
+
+        val tuiFlowGet = Flow[HttpRequest].map { request =>
+            request.uri.path.toString match {
+                case "/tui/notify" => HttpResponse(entity = "TUI Wrong Request Get")
+                case "/tui" => HttpResponse(entity = "TUI")
+                case "/tui/hello" => HttpResponse(entity = "hello")
+                case _ =>  HttpResponse(entity = request.uri.path.toString + "not supported get")
             }
         }
-        
-    }
+        val tuiFlowPost = Flow[HttpRequest].mapAsync(1) { request =>
+            val result = request.uri.path.toString match {
+                case "/tui/notify" =>
+                    val event = request.uri.query().get("event").get
+                    event match
+                        case "NewGame" => update(Event.NewGame)
+                        case "Start" => update(Event.Start)
+                        case "Next" => update(Event.Next)
+                        case "GameOver" => update(Event.GameOver)
+                        case "Cheat" => update(Event.Cheat)
+                        case "Help" => update(Event.Help)
+                        case "Input" => update(Event.Input)
+                        case "Load" => update(Event.Load)
+                        case "Save" => update(Event.Save)
+                        case "SaveTime" => update(Event.SaveTime)
+                        case "Exit" => update(Event.Exit)
+                        case _ => true
 
+                    Future.successful(HttpResponse(entity = "success notify" + event))
+
+                case _ => Future.successful(HttpResponse(entity = "not supported post" + request.uri.path.toString))
+            }
+            result
+
+        }
+
+        val getFlowShape = builder.add(tuiFlowGet) // Add the GET flow to the graph.
+
+        // Flow to convert HttpResponse to a String asynchronously.
+        val getResponseFlow = Flow[HttpResponse].mapAsync(1) { response =>
+            Unmarshal(response.entity).to[String]
+        }
+
+        val getResponesFlowShape = builder.add(getResponseFlow) // Add the conversion flow for GET responses to the graph.
+        val postFlowShape = builder.add(tuiFlowPost) // Add the POST flow to the graph.
+
+        // Flow to convert HttpResponse to a String asynchronously for POST.
+        val postResponseFlow = Flow[HttpResponse].mapAsync(1) { response =>
+            Unmarshal(response.entity).to[String]
+        }
+
+        val postResponesFlowShape = builder.add(postResponseFlow) // Add the conversion flow for POST responses to the graph.
+
+        broadcast.out(0) ~> postFlowShape ~> postResponesFlowShape ~> merge.in(0) // Connects the broadcast output to the POST flow, then to its response conversion, and finally to the merge stage.
+
+        broadcast.out(1) ~> getFlowShape ~> getResponesFlowShape ~> merge.in(1) // Connects the broadcast output to the GET flow, then to its response conversion, and finally to the merge stage.
+
+
+        FlowShape(broadcast.in, merge.out) // FlowShape is a tuple, with the broadcast's input and the merge's output.
+    })
 
     def start(): Unit = {
-        val bindFuture = Http().newServerAt("0.0.0.0", 9088).bind(route)
+        val bindFuture = Http().newServerAt("0.0.0.0", 9088).bind(
+            pathPrefix("tui") {
+                extractRequest { request =>
+                    complete(
+                        akka.stream.scaladsl.Source.single(request)
+                            .via(tuiFlow)
+                            .runWith(Sink.head)
+                            .map(resp => resp)
+                    )
+                }
+            }
+        )
 
         bindFuture.onComplete {
             case Success(binding) =>
@@ -518,7 +544,13 @@ class TUI():
     }
 
     def jsonToGameAndField(jsonString: String): (GameTui, FieldTui) = {
-        val json: JsValue = Json.parse(jsonString)
+        val json = Try(Json.parse(jsonString)) match {
+            case Success(value) => value
+            case Failure(exception) =>
+                println("jsonString: " + jsonString)
+                println(s"An error occurred:  $exception")
+                null
+        }
         val jsonGame: Option[JsValue] = (json \\ "game").headOption
         val status = (jsonGame.get \ "status").get.toString
         val bombs = (jsonGame.get \ "bombs").get.toString.toInt

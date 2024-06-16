@@ -6,7 +6,6 @@ import akka.http.scaladsl.model.*
 import akka.http.scaladsl.unmarshalling.Unmarshal
 import akka.stream.scaladsl.{Flow, GraphDSL, RunnableGraph, Sink, Source}
 import akka.stream.{ClosedShape, Materializer}
-import de.htwg.sa.minesweeper.{ControllerCommandConsumer, ControllerCommandProducer, FieldConsumer}
 import de.htwg.sa.minesweeper.controller.controllerComponent.IController
 import de.htwg.sa.minesweeper.entity.{FieldDTO, GameDTO, MatrixDTO}
 import de.htwg.sa.minesweeper.util.{Move, Observable, RestUtil, UndoRedoManager}
@@ -32,25 +31,8 @@ class Controller() extends IController with Observable:
     var field: FieldDTO = createFieldDTO(game)
 
     val undoRedoManager = new UndoRedoManager[FieldDTO]
-
-    def createFieldDTO(leGame: GameDTO): FieldDTO = {
-        
-        val command = s"/model/field/new?bombs=${leGame.bombs}&size=${leGame.side}&time=${leGame.time}"
-        //val url = s"http://model:9082/model/field/new?bombs=${leGame.bombs}&size=${leGame.side}&time=${leGame.time}"
-        val controllerCommandProducer = new ControllerCommandProducer(system)
-        controllerCommandProducer.sendCommand(command, "model-command")
-
-        // get the field from the model
-        val returnFieldFuture = Try {
-            FieldConsumer(system).startConsuming()
-        }
-        
-        val returnField = Await.result(returnFieldFuture.get, 5 seconds)
-        returnField
-        
-    }
     
-/*    def createFieldDTO(leGame: GameDTO): FieldDTO = {
+    def createFieldDTO(leGame: GameDTO): FieldDTO = {
         val url = s"http://model:9082/model/field/new?bombs=${leGame.bombs}&size=${leGame.side}&time=${leGame.time}"
 
         val returnField: FieldDTO = Try {
@@ -64,7 +46,7 @@ class Controller() extends IController with Observable:
             
         }
         returnField
-    }*/
+    }
 
 
     def doMove(b: Boolean, move: Move, game: GameDTO) = 
@@ -114,6 +96,100 @@ class Controller() extends IController with Observable:
             else{undoRedoManager.doStep(field, DoCommand(move))}
         }
     
+/*    def loadGame = {
+
+        val uri = Uri("http://persistence:9083/persistence/game") // load the game
+        val request = HttpRequest(method = HttpMethods.GET, uri = uri)
+        val responseFuture: Future[HttpResponse] = Http().singleRequest(request)
+        val bodyStringFuture: Future[String] = responseFuture.flatMap { response =>
+            response.entity.toStrict(5.seconds).map(_.data.utf8String)
+        }
+        val result = Await.result(bodyStringFuture, 5.seconds)
+
+        // now we need to parse the resulting jsong string representig the Game
+        val loadedGame: Option[GameDTO] = Try {
+            RestUtil.jsonToGameDTO(result)
+        } match {
+            case Success(game) => println("game loaded"); Some(game)
+            case Failure(e) => None
+        }
+
+        val gameOption = loadedGame
+        gameOption match {
+            case Some(game) => this.game = game
+            case None =>
+        }
+        game = GameDTO(gameOption.get.bombs, gameOption.get.side, gameOption.get.time, gameOption.get.board)
+        // _____________________________________________________________________________________________________
+        
+        val uriField = Uri("http://persistence:9083/persistence/field") // load the field
+
+        val requestField = HttpRequest(method = HttpMethods.GET, uri = uriField)
+        val responseFutureField: Future[HttpResponse] = Http().singleRequest(requestField)
+        val bodyStringFutureField: Future[String] = responseFutureField.flatMap { response =>
+            response.entity.toStrict(5.seconds).map(_.data.utf8String)
+        }
+        val resultField = Await.result(bodyStringFutureField, 5.seconds)
+        val loadedField: Option[FieldDTO] = Try {
+            RestUtil.jsontToFieldDTO(resultField)
+        } match {
+            case Success(field) => println("field loaded"); Some(field)
+            case Failure(e) => None
+        }
+
+        val fieldOption: Option[FieldDTO] = loadedField
+        fieldOption match {
+            case Some(field) => this.field = field
+            case None =>
+        }
+
+        notifyObserversRest("Load")
+    }*/
+
+/*    override def loadGame: Unit = {
+        val gameUri = Uri("http://persistence:9083/persistence/game")
+        val fieldUri = Uri("http://persistence:9083/persistence/field")
+
+        // Create sources for game and field HTTP requests
+        val gameRequestSource = akka.stream.scaladsl.Source.single(HttpRequest(method = HttpMethods.GET, uri = gameUri))
+        val fieldRequestSource = akka.stream.scaladsl.Source.single(HttpRequest(method = HttpMethods.GET, uri = fieldUri))
+
+        // Common flow to send request and receive response
+        val requestFlow = Flow[HttpRequest].mapAsync(1)(Http().singleRequest(_))
+
+        // Common flow to unmarshal HttpResponse to a string
+        val responseFlow = Flow[HttpResponse].mapAsync(1)(response => Unmarshal(response.entity).to[String])
+
+        // Sink to process game JSON string and update the game state
+        val gameSink = Sink.foreach[String] { jsonString =>
+            Try(RestUtil.jsonToGameDTO(jsonString)) match {
+                case Success(gameDto) =>
+                    this.game = gameDto
+                    println("game loaded")
+                    notifyObserversRest("Load")
+                case Failure(_) => // Handle error appropriately
+            }
+        }
+
+        // Sink to process field JSON string and update the field state
+        val fieldSink = Sink.foreach[String] { jsonString =>
+            Try(RestUtil.jsontToFieldDTO(jsonString)) match {
+                case Success(fieldDto) =>
+                    this.field = fieldDto
+                    println("field loaded")
+                    notifyObserversRest("Load")
+                case Failure(_) => // Handle error appropriately
+            }
+        }
+
+        // Run the game stream
+        gameRequestSource.via(requestFlow).via(responseFlow).runWith(gameSink)
+
+        // Run the field stream
+        fieldRequestSource.via(requestFlow).via(responseFlow).runWith(fieldSink)
+
+        //notifyObserversRest("Load")
+    }*/
 
     override def loadGame: Unit = {
         def loadGameDTO(): Unit = {
@@ -128,7 +204,7 @@ class Controller() extends IController with Observable:
                         this.game = gameDto
                         println("game loaded from rest")
                         notifyObserversRest("Load")
-                    case Failure(_) => // Handle error appropriately
+                    case Failure(_) =>
                 }
             }
             val gameGraph = GraphDSL.create() { implicit builder =>
@@ -155,7 +231,7 @@ class Controller() extends IController with Observable:
                         this.field = fieldDto
                         println("field loaded")
                         notifyObserversRest("Load")
-                    case Failure(_) => // Handle error appropriately
+                    case Failure(_) =>
                 }
             }
             val fieldGraph = GraphDSL.create() { implicit builder =>
@@ -168,7 +244,7 @@ class Controller() extends IController with Observable:
 
                 ClosedShape
             }
-            RunnableGraph.fromGraph(fieldGraph).run() // Run the field graph
+            RunnableGraph.fromGraph(fieldGraph).run()
         }
         loadGameDTO()
         loadFieldDTO()
