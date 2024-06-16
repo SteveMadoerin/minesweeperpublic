@@ -13,7 +13,7 @@ import org.apache.kafka.common.serialization.{StringDeserializer, StringSerializ
 
 import scala.concurrent.Future
 
-class NotificationConsumer(system: ActorSystem)(update : Event => Unit)(implicit val materializer: Materializer) {
+class TuiNotificationConsumer(system: ActorSystem)(update : Event => Unit)(implicit val materializer: Materializer) {
 
     val TuiCommandTopic = "tui-notify"
     //val GuiCommandTopic = "gui-notify"
@@ -48,7 +48,7 @@ class NotificationConsumer(system: ActorSystem)(update : Event => Unit)(implicit
             case _ => false
 
         }
-        println("executedCommand: " + executedCommand)
+        println("TUI: executedCommand: " + executedCommand)
         val response: String = s"response: $executedCommand"
         //val game = gameService.startNewGame(startGameCommand.bombs, startGameCommand.size, startGameCommand.time)
         // After processing, you can produce a response to a response topic
