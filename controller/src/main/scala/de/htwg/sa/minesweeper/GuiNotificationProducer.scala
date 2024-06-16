@@ -10,9 +10,9 @@ import org.apache.kafka.common.serialization.StringSerializer
 
 import scala.concurrent.Future
 
-class NotificationProducer(system: ActorSystem)(implicit val materializer: Materializer) {
+class GuiNotificationProducer(system: ActorSystem)(implicit val materializer: Materializer) {
 
-    val TuiCommandTopic = "tui-notify"
+    //val TuiCommandTopic = "tui-notify"
     val GuiCommandTopic = "gui-notify"
     
     private val producerSettings = ProducerSettings(system, new StringSerializer, new StringSerializer)
