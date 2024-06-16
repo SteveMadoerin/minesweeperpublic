@@ -3,14 +3,15 @@ package de.htwg.sa.minesweeper.ui
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.model._
-import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.model.*
+import akka.http.scaladsl.server.Directives.*
 import akka.http.scaladsl.server.Route
 import akka.stream.Materializer
-import de.htwg.sa.minesweeper.ui.model._
+import de.htwg.sa.minesweeper.ui.gui.RestUtil.materializer.system
+import de.htwg.sa.minesweeper.ui.model.*
 import play.api.libs.json.{JsValue, Json}
 
-import scala.concurrent.duration._
+import scala.concurrent.duration.*
 import scala.concurrent.{Await, ExecutionContextExecutor, Future}
 import scala.io.StdIn.readLine
 import scala.languageFeature.reflectiveCalls
@@ -469,8 +470,10 @@ class TUI():
         bodyStringField
 
     }
+    
+    
 
-    val route: Route = {
+/*    val route: Route = {
         get {
             path("tui") {
                 complete("TUI")
@@ -515,6 +518,16 @@ class TUI():
                 println(s"An error occurred: $exception")
                 complete("fail binding")
         }
+    }*/
+    def start(): Unit = {
+        val updateFunction: Event => Unit = (event: Event) => {
+            // Call the update method and ignore the return value
+            update(event)
+            ()
+        }
+    
+        val kafkaProducer = new TuiNotificationConsumer(system)(updateFunction)
+        kafkaProducer.startConsuming()
     }
 
     def jsonToGameAndField(jsonString: String): (GameTui, FieldTui) = {

@@ -1,4 +1,4 @@
-package de.htwg.sa.minesweeper.ui
+package de.htwg.sa.minesweeper.ui.gui
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.server.Directives.complete

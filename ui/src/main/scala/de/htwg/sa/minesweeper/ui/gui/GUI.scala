@@ -253,7 +253,19 @@ class GUI() extends Frame:
         }
     }
 
-    val route: Route = {
+    def start(): Unit = {
+        val updateFunction: Event => Unit = (event: Event) => {
+            // Call the update method and ignore the return value
+            update(event)
+            ()
+        }
+
+        val kafkaProducer = new GuiNotificationConsumer(system)(updateFunction)
+        kafkaProducer.startConsuming()
+    }
+    
+
+/*    val route: Route = {
         get {
             path("gui") {
                 complete("gui")
@@ -298,7 +310,7 @@ class GUI() extends Frame:
                 println(s"An error occurred: $exception")
                 complete("fail binding")
         }
-    }
+    }*/
 
     def showHelp: Unit = {
         val text =
