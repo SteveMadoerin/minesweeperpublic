@@ -43,7 +43,7 @@ class Controller() extends IController with Observable:
             case Success(field) => field
             case Failure(e) =>
                 println(s"Error fetching or parsing field data: ${e.getMessage}")
-                FieldDTO(MatrixDTO[String](Vector.empty), new MatrixDTO[String](Vector.empty)) // Return a default field or handle the error appropriately
+                FieldDTO(MatrixDTO[String](Vector.empty), new MatrixDTO[String](Vector.empty))
             
         }
         returnField
@@ -58,13 +58,12 @@ class Controller() extends IController with Observable:
                 case "Won" => 1
                 case "Lost" => 2
             }
-            // ModelAPI call: model/field/decider with parameters b, x, y, bombs size, time, board
+
             val url = s"http://model:9082/model/field/decider?b=${b}&x=${move.x}&y=${move.y}&bombs=${game.bombs}&size=${game.side}&time=${game.time}&board=$convertedBoard"
-            val jsonFieldFirst = RestUtil.fieldDtoToJson(field)/* RestUtil.fieldToJson(field) */ // provide the controller field to the ModelAPI
+            val jsonFieldFirst = RestUtil.fieldDtoToJson(field)
             val jsonFileContentFirst = jsonFieldFirst.getBytes("UTF-8")
 
-            val firstRequest = requestPut(url, jsonFileContentFirst) // generate put request with the controller field in body
-
+            val firstRequest = requestPut(url, jsonFileContentFirst)
             val firstResponseFuture: Future[HttpResponse] = Http().singleRequest(firstRequest) // get response
             val firstBodyStringFuture: Future[String] = firstResponseFuture.flatMap { response =>
                 response.entity.toStrict(5.seconds).map(_.data.utf8String)
@@ -96,101 +95,6 @@ class Controller() extends IController with Observable:
             else if(symbol == "0"){field}
             else{undoRedoManager.doStep(field, DoCommand(move))}
         }
-    
-/*    def loadGame = {
-
-        val uri = Uri("http://persistence:9083/persistence/game") // load the game
-        val request = HttpRequest(method = HttpMethods.GET, uri = uri)
-        val responseFuture: Future[HttpResponse] = Http().singleRequest(request)
-        val bodyStringFuture: Future[String] = responseFuture.flatMap { response =>
-            response.entity.toStrict(5.seconds).map(_.data.utf8String)
-        }
-        val result = Await.result(bodyStringFuture, 5.seconds)
-
-        // now we need to parse the resulting jsong string representig the Game
-        val loadedGame: Option[GameDTO] = Try {
-            RestUtil.jsonToGameDTO(result)
-        } match {
-            case Success(game) => println("game loaded"); Some(game)
-            case Failure(e) => None
-        }
-
-        val gameOption = loadedGame
-        gameOption match {
-            case Some(game) => this.game = game
-            case None =>
-        }
-        game = GameDTO(gameOption.get.bombs, gameOption.get.side, gameOption.get.time, gameOption.get.board)
-        // _____________________________________________________________________________________________________
-        
-        val uriField = Uri("http://persistence:9083/persistence/field") // load the field
-
-        val requestField = HttpRequest(method = HttpMethods.GET, uri = uriField)
-        val responseFutureField: Future[HttpResponse] = Http().singleRequest(requestField)
-        val bodyStringFutureField: Future[String] = responseFutureField.flatMap { response =>
-            response.entity.toStrict(5.seconds).map(_.data.utf8String)
-        }
-        val resultField = Await.result(bodyStringFutureField, 5.seconds)
-        val loadedField: Option[FieldDTO] = Try {
-            RestUtil.jsontToFieldDTO(resultField)
-        } match {
-            case Success(field) => println("field loaded"); Some(field)
-            case Failure(e) => None
-        }
-
-        val fieldOption: Option[FieldDTO] = loadedField
-        fieldOption match {
-            case Some(field) => this.field = field
-            case None =>
-        }
-
-        notifyObserversRest("Load")
-    }*/
-
-/*    override def loadGame: Unit = {
-        val gameUri = Uri("http://persistence:9083/persistence/game")
-        val fieldUri = Uri("http://persistence:9083/persistence/field")
-
-        // Create sources for game and field HTTP requests
-        val gameRequestSource = akka.stream.scaladsl.Source.single(HttpRequest(method = HttpMethods.GET, uri = gameUri))
-        val fieldRequestSource = akka.stream.scaladsl.Source.single(HttpRequest(method = HttpMethods.GET, uri = fieldUri))
-
-        // Common flow to send request and receive response
-        val requestFlow = Flow[HttpRequest].mapAsync(1)(Http().singleRequest(_))
-
-        // Common flow to unmarshal HttpResponse to a string
-        val responseFlow = Flow[HttpResponse].mapAsync(1)(response => Unmarshal(response.entity).to[String])
-
-        // Sink to process game JSON string and update the game state
-        val gameSink = Sink.foreach[String] { jsonString =>
-            Try(RestUtil.jsonToGameDTO(jsonString)) match {
-                case Success(gameDto) =>
-                    this.game = gameDto
-                    println("game loaded")
-                    notifyObserversRest("Load")
-                case Failure(_) => // Handle error appropriately
-            }
-        }
-
-        // Sink to process field JSON string and update the field state
-        val fieldSink = Sink.foreach[String] { jsonString =>
-            Try(RestUtil.jsontToFieldDTO(jsonString)) match {
-                case Success(fieldDto) =>
-                    this.field = fieldDto
-                    println("field loaded")
-                    notifyObserversRest("Load")
-                case Failure(_) => // Handle error appropriately
-            }
-        }
-
-        // Run the game stream
-        gameRequestSource.via(requestFlow).via(responseFlow).runWith(gameSink)
-
-        // Run the field stream
-        fieldRequestSource.via(requestFlow).via(responseFlow).runWith(fieldSink)
-
-        //notifyObserversRest("Load")
-    }*/
 
     override def loadGame: Unit = {
         def loadGameDTO(): Unit = {
@@ -198,7 +102,7 @@ class Controller() extends IController with Observable:
             val gameRequestSource = akka.stream.scaladsl.Source.single(HttpRequest(method = HttpMethods.GET, uri = gameUri))
             val requestFlow = Flow[HttpRequest].mapAsync(1)(Http().singleRequest(_)) // Common flow to send request and receive response
             val responseFlow = Flow[HttpResponse].mapAsync(1)(response => Unmarshal(response.entity).to[String]) // Common flow to unmarshal HttpResponse to a string
-            // Sink to process game JSON string and update the game state
+
             val gameSink = Sink.foreach[String] { jsonString =>
                 Try(RestUtil.jsonToGameDTO(jsonString)) match {
                     case Success(gameDto) =>
@@ -211,21 +115,21 @@ class Controller() extends IController with Observable:
             val gameGraph = GraphDSL.create() { implicit builder =>
                 import GraphDSL.Implicits.*
 
-                val requestFlowShape = builder.add(requestFlow) // Create flow shapes for the request and response flows
+                val requestFlowShape = builder.add(requestFlow)
                 val responseFlowShape = builder.add(responseFlow)
 
-                gameRequestSource ~> requestFlowShape ~> responseFlowShape ~> gameSink // Connect the game source to the game sink
+                gameRequestSource ~> requestFlowShape ~> responseFlowShape ~> gameSink
 
-                ClosedShape // Return the closed shape
+                ClosedShape
             }
-            RunnableGraph.fromGraph(gameGraph).run() // Run the game graph
+            RunnableGraph.fromGraph(gameGraph).run()
         }
         def loadFieldDTO(): Unit = {
             val fieldUri = Uri("http://persistence:9083/persistence/field")
             val fieldRequestSource = akka.stream.scaladsl.Source.single(HttpRequest(method = HttpMethods.GET, uri = fieldUri))
-            val requestFlow = Flow[HttpRequest].mapAsync(1)(Http().singleRequest(_)) // Common flow to send request and receive response
-            val responseFlow = Flow[HttpResponse].mapAsync(1)(response => Unmarshal(response.entity).to[String]) // Common flow to unmarshal HttpResponse to a string
-            // Sink to process field JSON string and update the field state
+            val requestFlow = Flow[HttpRequest].mapAsync(1)(Http().singleRequest(_))
+            val responseFlow = Flow[HttpResponse].mapAsync(1)(response => Unmarshal(response.entity).to[String])
+
             val fieldSink = Sink.foreach[String] { jsonString =>
                 Try(RestUtil.jsontToFieldDTO(jsonString)) match {
                     case Success(fieldDto) =>
@@ -251,7 +155,6 @@ class Controller() extends IController with Observable:
         loadFieldDTO()
     }
 
-
     def saveGame =
 
         notifyObserversRest("SaveTime")
@@ -273,9 +176,6 @@ class Controller() extends IController with Observable:
             case Failure(ex)  => println(s"Request failed: $ex")
         }
 
-        // maybe To-Do Await for the response
-        
-
         val jasonField = RestUtil.fieldDtoToJson(field)
         val jsonFileContent = jasonField.getBytes("UTF-8")
 
@@ -291,15 +191,14 @@ class Controller() extends IController with Observable:
             case Failure(ex)  => println(s"Failed to put JSON file: ${ex.getMessage}")
         }
 
-        game = GameDTO(game.bombs, game.side, game.time, "Playing") // TODO: game.time is not updated
-        notifyObserversRest("Save") //notifyObservers(Event.Save)
+        game = GameDTO(game.bombs, game.side, game.time, "Playing") // TD: game.time update
+        notifyObserversRest("Save")
     
     def exit = notifyObserversRest("Exit")
 
-    // approved
     def gameOver: Unit =
         val url = s"http://model:9082/model/field/gameOverField"
-        val jsonField =  RestUtil.fieldDtoToJson(field) // provide the controller field to the ModelAPI
+        val jsonField =  RestUtil.fieldDtoToJson(field)
         val jsonFileContent = jsonField.getBytes("UTF-8")
         
         val request = HttpRequest(
@@ -312,17 +211,12 @@ class Controller() extends IController with Observable:
             response.entity.toStrict(5.seconds).map(_.data.utf8String)
         }
         val bodyString = Await.result(bodyStringFuture, 5.seconds)
-        val ANSI_BLUE = "\u001B[34m"
-        val ANSI_RESET = "\u001B[0m"
-        //print(ANSI_BLUE + bodyString + ANSI_RESET)
         
         val tempField = RestUtil.jsontToFieldDTO(bodyString)
-        //print (tempField.toString)
         field = FieldDTO(tempField.hidden, tempField.hidden)
-        
         notifyObserversRest("GameOver") 
     
-    def openRec(x: Int, y: Int, field: FieldDTO): FieldDTO = undoRedoManager.doStep(field, DoCommand(Move("recursion", x, y))) // approved
+    def openRec(x: Int, y: Int, field: FieldDTO): FieldDTO = undoRedoManager.doStep(field, DoCommand(Move("recursion", x, y)))
 
     def helpMenu = 
         helpMenuRest
@@ -342,7 +236,7 @@ class Controller() extends IController with Observable:
         val bodyStringFuture2: Future[String] = responseFuture2.flatMap { response =>
             response.entity.toStrict(5.seconds).map(_.data.utf8String)
         }
-        val bodyString2 = Await.result(bodyStringFuture2, 5.seconds) // now get the printed field from the modelApi
+        val bodyString2 = Await.result(bodyStringFuture2, 5.seconds)
         bodyString2
     }
 
@@ -354,19 +248,17 @@ class Controller() extends IController with Observable:
             uri = url
         )
 
-        val responseFuture: Future[HttpResponse] = Http().singleRequest(request) // now get the message from the modelApi
+        val responseFuture: Future[HttpResponse] = Http().singleRequest(request)
         val bodyStringFuture: Future[String] = responseFuture.flatMap { response =>
             response.entity.toStrict(5.seconds).map(_.data.utf8String)
         }
         val bodyStringHelpMessage = Await.result(bodyStringFuture, 5.seconds)
         bodyStringHelpMessage
     
-    // deleted after optimization gatling tests
-    
     def cheatRest: String = {
         val url = s"http://model:9082/model/field/cheat"
         
-        val bodyField = RestUtil.fieldDtoToJson(field) // prepare the Field
+        val bodyField = RestUtil.fieldDtoToJson(field)
 
         val request = HttpRequest(
             method =  HttpMethods.PUT,
@@ -374,7 +266,7 @@ class Controller() extends IController with Observable:
             entity = HttpEntity(ContentTypes.`application/json`, bodyField)
         )
 
-        val responseFuture: Future[HttpResponse] = Http().singleRequest(request) // now get the printed field from the modelApi
+        val responseFuture: Future[HttpResponse] = Http().singleRequest(request)
         val bodyStringFuture: Future[String] = responseFuture.flatMap { response =>
             response.entity.toStrict(5.seconds).map(_.data.utf8String)
         }
@@ -415,8 +307,8 @@ class Controller() extends IController with Observable:
     def newGameGUI =
         game = GameDTO(game.bombs, game.side, game.time, "Playing")
         notifyObserversRest("Input")
-    
-    // approved
+
+
     def newGameField(optionString: Option[String]) =
         game = GameDTO(game.bombs, game.side, game.time, "Playing")
 
@@ -429,10 +321,10 @@ class Controller() extends IController with Observable:
         
         val url = s"http://model:9082/model/game/newGameField?optionString=$oString"
 
-        val bodyGame = RestUtil.gameDtoToJson(game) // prepare the game
+        val bodyGame = RestUtil.gameDtoToJson(game)
         val body = bodyGame.getBytes("UTF-8")
 
-        val request = requestPut(url, body)  // prepare the PUT request
+        val request = requestPut(url, body)
 
         val responseFuture: Future[HttpResponse] = Http().singleRequest(request)
         val bodyStringFuture: Future[String] = responseFuture.flatMap { response =>
@@ -442,7 +334,7 @@ class Controller() extends IController with Observable:
         val (newGame, newField): (GameDTO, FieldDTO) = RestUtil.jsonToGameAndFieldDTO(returnedJsonGameAndField)
         field = newField                
         game = GameDTO(newGame.bombs, newGame.side, newGame.time, newGame.board) 
-        notifyObserversRest("NewGame") //notifyObservers(Event.NewGame)
+        notifyObserversRest("NewGame")
     
     def newGame(side: Int, bombs: Int) =
         game = GameDTO(bombs, side, game.time, "Playing")
@@ -452,7 +344,7 @@ class Controller() extends IController with Observable:
     def newGameForGui(side: Int, bombs: Int): Unit = 
         game = GameDTO(bombs, side, game.time, "Playing")
         field = createFieldDTO(game)
-        notifyObserverGui("NewGame") //notifyObserversRest("NewGame")
+        notifyObserverGui("NewGame")
         
     def notifyObserverGui(event: String) = {
 
@@ -472,8 +364,7 @@ class Controller() extends IController with Observable:
         val result2 = Await.result(bodyFieldFuture2, 5.seconds)
         println(result2 + " Only - GUI")*/
     }
-    
-    // approved - doMove from TUI transfered as param -> game & field in TUI declared
+
     def makeAndPublish(makeThis: (Boolean, Move, GameDTO) => FieldDTO, b: Boolean, move: Move, game: GameDTO): Unit =
         field = makeThis(b, move, game)  // doMove
         
@@ -560,8 +451,7 @@ class Controller() extends IController with Observable:
         field = makeThis
         notifyObserversRest("Next")
         field
-    
-    // approved
+
     def saveScoreAndPlayerName(playerName: String, saveScore: Int, filePath: String) = {
 
         val queryParameters = Uri.Query(
@@ -590,16 +480,16 @@ class Controller() extends IController with Observable:
         }
         val jsonStringApiResult: String = Await.result(bodyFuture, 5.seconds)
         
-        case class PlayerScore(player: String, score: Int) // body needs to be convertoed to a Seq[(String, Int)]
+        case class PlayerScore(player: String, score: Int)
         implicit val playerScoreFormat: Format[PlayerScore] = Json.format[PlayerScore]
         
-        val json: JsValue = Json.parse(jsonStringApiResult) // Parse the JSON string into a sequence of PlayerScore objects
+        val json: JsValue = Json.parse(jsonStringApiResult)
         val playerScoresResult: JsResult[Seq[PlayerScore]] = Json.fromJson[Seq[PlayerScore]](json)
 
         val playerScores: Seq[(String, Int)] = playerScoresResult match {
         case JsSuccess(scores, _) => scores.map(ps => (ps.player, ps.score))
-        case JsError(errors) => Seq.empty // Handle the error appropriately
-        } // Map the sequence of PlayerScore objects to the desired Seq[(String, Int)]
+        case JsError(errors) => Seq.empty
+        }
 
         playerScores
     }
@@ -619,7 +509,6 @@ class Controller() extends IController with Observable:
         )
     }
 
-    // approved - notifys TUI and GUI
     def notifyObserversRest(event: String): Unit = {
 
         val TuiCommandTopic = "tui-notify"
@@ -659,5 +548,3 @@ class Controller() extends IController with Observable:
         val result2 = Await.result(bodyFieldFuture2, 5.seconds)
         println(result2 + " - GUI")*/
     }
-
-    override def testStreams: Unit = ???
