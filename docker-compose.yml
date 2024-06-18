@@ -38,7 +38,6 @@ services:
         context: ./
         dockerfile: model/Dockerfile
     image: model-assembly-image:latest
-    #network_mode: host
     depends_on:
       - kafka
     environment:
@@ -55,7 +54,6 @@ services:
       context: ./
       dockerfile: persistence/Dockerfile
     image: persistence-assembly-image:latest
-    #network_mode: host
     depends_on:
       - kafka
     environment:
@@ -72,7 +70,6 @@ services:
       context: ./
       dockerfile: controller/Dockerfile
     image: controller-assembly-image:latest
-    #network_mode: host
     depends_on:
       - kafka
     environment:
@@ -89,7 +86,6 @@ services:
       context: ./
       dockerfile: ui/Dockerfile
     image: ui-assembly-image:latest
-    #network_mode: host
     stdin_open: true
     tty: true
     depends_on:
