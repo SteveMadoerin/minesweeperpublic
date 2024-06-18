@@ -1,10 +1,10 @@
 package de.htwg.sa.minesweeper.persistence.persistenceComponent.persistenceMongoImpl.Dao
 
 import de.htwg.sa.minesweeper.persistence.persistenceComponent.persistenceSlickImpl.IDao
-import org.mongodb.scala.*
+import org.mongodb.scala._
 import org.mongodb.scala.bson.BsonTransformer.TransformImmutableDocument
 import org.mongodb.scala.bson.Document
-import org.mongodb.scala.result.*
+import org.mongodb.scala.result._
 
 import scala.concurrent.Await
 import scala.concurrent.duration.DurationInt

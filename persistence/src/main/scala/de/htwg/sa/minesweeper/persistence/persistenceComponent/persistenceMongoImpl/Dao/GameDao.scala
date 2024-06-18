@@ -4,9 +4,9 @@ import de.htwg.sa.minesweeper.persistence.entity.Game
 import de.htwg.sa.minesweeper.persistence.persistenceComponent.persistenceSlickImpl.IDao
 import org.mongodb.scala.*
 import org.mongodb.scala.bson.conversions.Bson
-import org.mongodb.scala.model.Filters.*
-import org.mongodb.scala.model.Updates.*
-import org.mongodb.scala.result.*
+import org.mongodb.scala.model.Filters._
+import org.mongodb.scala.model.Updates._
+import org.mongodb.scala.result._
 
 import scala.concurrent.Await
 import scala.concurrent.duration.DurationInt
@@ -40,21 +40,12 @@ class GameDao(db: MongoDatabase) extends IDao[Game, Int] {
         val insertObservable: SingleObservable[InsertOneResult] = gameCollection.insertOne(document)
 
         insertObservable.subscribe(new Observer[InsertOneResult] {
-            override def onNext(result: InsertOneResult): Unit = {
-                println(s"Inserted: $result") // This is called when the operation is successful.
-            }
-
-            override def onError(e: Throwable): Unit = {
-                println(s"Failed to insert document: ${e.getMessage}") // This is called when there's an error during the operation.
-            }
-
-            override def onComplete(): Unit = {
-                println("Insertion completed.") // This is called when the operation is completed, after `onNext`.
-            }
+            override def onNext(result: InsertOneResult): Unit = { println(s"Inserted: $result") }
+            override def onError(e: Throwable): Unit = { println(s"Failed to insert document: ${e.getMessage}") }
+            override def onComplete(): Unit = { println("Insertion completed.")}
         })
         
         obj
-
     }
 
     override def findAll(): Seq[Game] = {
@@ -69,7 +60,6 @@ class GameDao(db: MongoDatabase) extends IDao[Game, Int] {
         }
     }
 
-
     override def findById(id: Int): Game = {
         val query = Document("id" -> id)
         val results = Await.result(gameCollection.find(query).toFuture(), 5.seconds)
@@ -83,9 +73,7 @@ class GameDao(db: MongoDatabase) extends IDao[Game, Int] {
             case None => Game(0, 0, 0, "")
         }
     }
-
-
-
+    
     override def update(id: Int, obj: Game): Game = {
         val filter: Bson  = equal("id", id) 
         val update: Bson  = combine(

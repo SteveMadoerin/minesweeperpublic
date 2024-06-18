@@ -2,7 +2,7 @@ package de.htwg.sa.minesweeper.controller.controllerComponent.controllerBaseImpl
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.model.*
+import akka.http.scaladsl.model._
 import akka.http.scaladsl.unmarshalling.Unmarshal
 import akka.stream.scaladsl.{Flow, GraphDSL, RunnableGraph, Sink, Source}
 import akka.stream.{ClosedShape, Materializer}
@@ -10,14 +10,13 @@ import de.htwg.sa.minesweeper.{GuiNotificationProducer, TuiNotificationProducer}
 import de.htwg.sa.minesweeper.controller.controllerComponent.IController
 import de.htwg.sa.minesweeper.entity.{FieldDTO, GameDTO, MatrixDTO}
 import de.htwg.sa.minesweeper.util.{Move, Observable, RestUtil, UndoRedoManager}
-import play.api.libs.json.*
+import play.api.libs.json._
 
-import scala.concurrent.duration.*
+import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContextExecutor, Future}
 import scala.io.Source
 import scala.language.postfixOps
 import scala.util.{Failure, Success, Try}
-
 
 
 
@@ -64,13 +63,13 @@ class Controller() extends IController with Observable:
             val jsonFileContentFirst = jsonFieldFirst.getBytes("UTF-8")
 
             val firstRequest = requestPut(url, jsonFileContentFirst)
-            val firstResponseFuture: Future[HttpResponse] = Http().singleRequest(firstRequest) // get response
+            val firstResponseFuture: Future[HttpResponse] = Http().singleRequest(firstRequest)
             val firstBodyStringFuture: Future[String] = firstResponseFuture.flatMap { response =>
                 response.entity.toStrict(5.seconds).map(_.data.utf8String)
             }
 
             val returnedJsonGameAndField = Await.result(firstBodyStringFuture, 5.seconds)
-            val (newGame, newField): (GameDTO, FieldDTO) = RestUtil.jsonToGameAndFieldDTO(returnedJsonGameAndField) // JsonArray with Game and Field converting
+            val (newGame, newField): (GameDTO, FieldDTO) = RestUtil.jsonToGameAndFieldDTO(returnedJsonGameAndField)
             field = newField
             this.game = newGame
             
@@ -100,8 +99,8 @@ class Controller() extends IController with Observable:
         def loadGameDTO(): Unit = {
             val gameUri = Uri("http://persistence:9083/persistence/game")
             val gameRequestSource = akka.stream.scaladsl.Source.single(HttpRequest(method = HttpMethods.GET, uri = gameUri))
-            val requestFlow = Flow[HttpRequest].mapAsync(1)(Http().singleRequest(_)) // Common flow to send request and receive response
-            val responseFlow = Flow[HttpResponse].mapAsync(1)(response => Unmarshal(response.entity).to[String]) // Common flow to unmarshal HttpResponse to a string
+            val requestFlow = Flow[HttpRequest].mapAsync(1)(Http().singleRequest(_))
+            val responseFlow = Flow[HttpResponse].mapAsync(1)(response => Unmarshal(response.entity).to[String])
 
             val gameSink = Sink.foreach[String] { jsonString =>
                 Try(RestUtil.jsonToGameDTO(jsonString)) match {
@@ -113,7 +112,7 @@ class Controller() extends IController with Observable:
                 }
             }
             val gameGraph = GraphDSL.create() { implicit builder =>
-                import GraphDSL.Implicits.*
+                import GraphDSL.Implicits._
 
                 val requestFlowShape = builder.add(requestFlow)
                 val responseFlowShape = builder.add(responseFlow)
@@ -140,7 +139,7 @@ class Controller() extends IController with Observable:
                 }
             }
             val fieldGraph = GraphDSL.create() { implicit builder =>
-                import GraphDSL.Implicits.*
+                import GraphDSL.Implicits._
 
                 val requestFlowShape = builder.add(requestFlow)
                 val responseFlowShape = builder.add(responseFlow)
@@ -191,7 +190,7 @@ class Controller() extends IController with Observable:
             case Failure(ex)  => println(s"Failed to put JSON file: ${ex.getMessage}")
         }
 
-        game = GameDTO(game.bombs, game.side, game.time, "Playing") // TD: game.time update
+        game = GameDTO(game.bombs, game.side, game.time, "Playing") // T-D-G-T
         notifyObserversRest("Save")
     
     def exit = notifyObserversRest("Exit")
@@ -320,12 +319,10 @@ class Controller() extends IController with Observable:
         }
         
         val url = s"http://model:9082/model/game/newGameField?optionString=$oString"
-
         val bodyGame = RestUtil.gameDtoToJson(game)
         val body = bodyGame.getBytes("UTF-8")
 
         val request = requestPut(url, body)
-
         val responseFuture: Future[HttpResponse] = Http().singleRequest(request)
         val bodyStringFuture: Future[String] = responseFuture.flatMap { response =>
             response.entity.toStrict(5.seconds).map(_.data.utf8String)
@@ -347,30 +344,16 @@ class Controller() extends IController with Observable:
         notifyObserverGui("NewGame")
         
     def notifyObserverGui(event: String) = {
-
         val GuiCommandTopic = "gui-notify"
         GuiNotificationProducer(system).sendCommand(event, GuiCommandTopic)
-/*        val uri2 = s"http://ui:9087/gui/notify" + "?event=" + event
-
-        val request2 = HttpRequest(
-            method = HttpMethods.PUT,
-            uri = uri2
-        )
-
-        val responseFuture2: Future[HttpResponse] = Http().singleRequest(request2)
-        val bodyFieldFuture2: Future[String] = responseFuture2.flatMap { response =>
-            response.entity.toStrict(5.seconds).map(_.data.utf8String)
-        }
-        val result2 = Await.result(bodyFieldFuture2, 5.seconds)
-        println(result2 + " Only - GUI")*/
     }
 
     def makeAndPublish(makeThis: (Boolean, Move, GameDTO) => FieldDTO, b: Boolean, move: Move, game: GameDTO): Unit =
-        field = makeThis(b, move, game)  // doMove
+        field = makeThis(b, move, game)
         
         val jasonField = RestUtil.fieldDtoToJson(field)
         val jsonFileContent = jasonField.getBytes("UTF-8")
-        val request = requestPut(s"http://model:9082/model/field/showInvisibleCell?y=${move.y}&x=${move.x}", jsonFileContent) // -> request to ModelAPi
+        val request = requestPut(s"http://model:9082/model/field/showInvisibleCell?y=${move.y}&x=${move.x}", jsonFileContent)
         val responseFuture: Future[HttpResponse] = Http().singleRequest(request)
         val bodyStringFuture: Future[String] = responseFuture.flatMap { response =>
             response.entity.toStrict(5.seconds).map(_.data.utf8String)
@@ -514,37 +497,7 @@ class Controller() extends IController with Observable:
         val TuiCommandTopic = "tui-notify"
         TuiNotificationProducer(system).sendCommand(event, TuiCommandTopic)
         
-/*        // _________________________ NOTIFY TUI _________________________
-
-        val uri1 = s"http://ui:9088/tui/notify" + "?event=" + event
-
-        val request = HttpRequest(
-            method =  HttpMethods.PUT,
-            uri = uri1
-        )
-        
-        val responseFuture: Future[HttpResponse] = Http().singleRequest(request)
-        val bodyFieldFuture: Future[String] = responseFuture.flatMap { response =>
-            response.entity.toStrict(5.seconds).map(_.data.utf8String)
-        }
-        val result = Await.result(bodyFieldFuture, 5.seconds)
-        println(result + " - TUI")*/
-
         val GuiCommandTopic = "gui-notify"
         GuiNotificationProducer(system).sendCommand(event, GuiCommandTopic)
-
-/*        // _________________________ NOTIFY GUI _________________________
-        val uri2 = s"http://ui:9087/gui/notify" + "?event=" + event
-
-        val request2 = HttpRequest(
-            method =  HttpMethods.PUT,
-            uri = uri2
-        )
         
-        val responseFuture2: Future[HttpResponse] = Http().singleRequest(request2)
-        val bodyFieldFuture2: Future[String] = responseFuture2.flatMap { response =>
-            response.entity.toStrict(5.seconds).map(_.data.utf8String)
-        }
-        val result2 = Await.result(bodyFieldFuture2, 5.seconds)
-        println(result2 + " - GUI")*/
     }

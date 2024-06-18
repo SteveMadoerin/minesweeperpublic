@@ -6,6 +6,5 @@ class PlayerScoreTable(tag: Tag) extends Table[(Option[Int], Int, String)](tag, 
   def id = column[Option[Int]]("id", O.PrimaryKey, O.AutoInc)
   def score = column[Int]("score")
   def name = column[String]("name")
-
   def * = (id, score, name)
 }

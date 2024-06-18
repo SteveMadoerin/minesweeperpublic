@@ -19,8 +19,7 @@ class Persistence extends IPersistence{
         }
         pw.get.close
     }
-
-
+    
     def gameToJson(game: IGame): String = {
         Json.prettyPrint(
             Json.obj(
@@ -54,7 +53,7 @@ class Persistence extends IPersistence{
         val side = (json \ "game" \ "side").get.toString.toInt
         val time = (json \ "game" \ "time").get.toString.toInt
         
-        Some(Game(bombs, side, time, "Playing")) // after loading should always be playing
+        Some(Game(bombs, side, time, "Playing"))
     
     def saveField(field: IField) = {
         import java.io._
@@ -80,7 +79,7 @@ class Persistence extends IPersistence{
                             Json.obj(
                                 "row" -> row,
                                 "col" -> col,
-                                "cell" -> field.showVisibleCell(row, col).toString
+                                "cell" -> field.showVisibleCell(row, col)
                             )
                         }
                     ),
@@ -92,7 +91,7 @@ class Persistence extends IPersistence{
                             Json.obj(
                                 "row" -> row,
                                 "col" -> col,
-                                "cell" -> field.showInvisibleCell(row, col).toString
+                                "cell" -> field.showInvisibleCell(row, col)
                             )
                         }
                     )
@@ -103,15 +102,14 @@ class Persistence extends IPersistence{
 
     def loadField(field: String): Option[IField] = {
         
-        val source = field // Source.fromFile("C:\\Playground\\minesweeperpublic\\src\\main\\data\\field.json").getLines.mkString
+        val source = field
         val json: JsValue = Json.parse(source)
         val size = (json \ "field" \ "size").get.toString.toInt
 
         val fieldOption: Option[IField] = Some(Default.scalableField(size, "E"))
         val matrixOption: Option[Matrix[String]] = Some(Default.scalableMatrix(size, "E"))
         val hiddenOption: Option[Matrix[String]] = Some(Default.scalableMatrix(size, "E"))
-
-
+        
         val matrix1 = matrixOption match{
             case Some(matrix) => matrix
             case None => println("Matrix is not valid"); Default.scalableMatrix(size, "E")
@@ -164,8 +162,7 @@ class Persistence extends IPersistence{
         }
         maybeFinalScores.getOrElse(Seq.empty)
     }
-
-    // try to make only a JsArray
+    
     def savePlayerScore(playerName: String, score: Int, filePath: String): Unit = {
         
         val maybeFile =  Try{ new File(filePath) } 

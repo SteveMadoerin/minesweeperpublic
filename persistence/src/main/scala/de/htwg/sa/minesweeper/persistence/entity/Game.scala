@@ -8,7 +8,6 @@ import play.api.libs.json.JsValue
 
 case class Game (bombs : Int, side: Int, time: Int, board : String) extends IGame:
     
-
     def gameToJson: String = {
         Json.prettyPrint(
             Json.obj(
@@ -28,7 +27,7 @@ case class Game (bombs : Int, side: Int, time: Int, board : String) extends IGam
         val bombs = (json \ "game" \ "bombs").get.toString.toInt
         val side = (json \ "game" \ "side").get.toString.toInt
         val time = (json \ "game" \ "time").get.toString.toInt
-        val statusWithoutQuotes = status.replace("\"", "") // \Playing\ -> Playing
+        val statusWithoutQuotes = status.replace("\"", "")
         Game(bombs, side, time, statusWithoutQuotes)
     }
 

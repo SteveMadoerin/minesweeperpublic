@@ -11,7 +11,6 @@ import slick.lifted.TableQuery
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Failure, Success}
 
-/* Slick implementation of IPersistence */
 class Persistence extends IPersistence {
 
   private val logger = org.slf4j.LoggerFactory.getLogger(classOf[Persistence])

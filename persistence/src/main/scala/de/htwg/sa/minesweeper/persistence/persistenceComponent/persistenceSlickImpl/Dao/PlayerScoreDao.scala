@@ -3,9 +3,8 @@ package de.htwg.sa.minesweeper.persistence.persistenceComponent.persistenceSlick
 
 import de.htwg.sa.minesweeper.persistence.persistenceComponent.persistenceSlickImpl.{IDao, PlayerScoreTable}
 import slick.jdbc.JdbcBackend.Database
-import slick.jdbc.PostgresProfile.api.*
+import slick.jdbc.PostgresProfile.api._
 import slick.lifted.TableQuery
-
 import scala.concurrent.Await
 import scala.concurrent.duration.DurationInt
 
@@ -56,7 +55,6 @@ class PlayerScoreDao(db: Database)  extends IDao[(String, Int), Int] {
         println("Database find Player Score by id")
         fieldSeq.head
     }
-
 
     override def update(id: Int, obj: (String, Int)): (String, Int) = {
         val query = playerScoreTable

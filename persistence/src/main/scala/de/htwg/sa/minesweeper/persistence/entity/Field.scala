@@ -1,8 +1,6 @@
 package de.htwg.sa.minesweeper.persistence.entity
 
-import util.chaining.scalaUtilChainingOps
-import play.api.libs.json.JsValue
-import play.api.libs.json.Json
+import play.api.libs.json.{JsValue, Json}
 
 case class Field(matrix: Matrix[String], hidden: Matrix[String]) extends IField:
     val size = matrix.size
@@ -19,7 +17,7 @@ case class Field(matrix: Matrix[String], hidden: Matrix[String]) extends IField:
     def showInvisibleCell(x: Int, y: Int): String =  hidden.cell(x, y)
 
     def fieldToJson: String = {
-        import play.api.libs.json._
+        import play.api.libs.json.*
         Json.prettyPrint(
             Json.obj(
                 "field" -> Json.obj(
@@ -32,7 +30,7 @@ case class Field(matrix: Matrix[String], hidden: Matrix[String]) extends IField:
                             Json.obj(
                                 "row" -> row,
                                 "col" -> col,
-                                "cell" -> this.showVisibleCell(row, col).toString
+                                "cell" -> this.showVisibleCell(row, col)
                             )
                         }
                     ),
@@ -44,7 +42,7 @@ case class Field(matrix: Matrix[String], hidden: Matrix[String]) extends IField:
                             Json.obj(
                                 "row" -> row,
                                 "col" -> col,
-                                "cell" -> this.showInvisibleCell(row, col).toString
+                                "cell" -> this.showInvisibleCell(row, col)
                             )
                         }
                     )
@@ -54,7 +52,7 @@ case class Field(matrix: Matrix[String], hidden: Matrix[String]) extends IField:
     }
 
     def fieldToJson(fieldInput: IField): String = {
-        import play.api.libs.json._
+        import play.api.libs.json.*
         Json.prettyPrint(
             Json.obj(
                 "field" -> Json.obj(
@@ -67,7 +65,7 @@ case class Field(matrix: Matrix[String], hidden: Matrix[String]) extends IField:
                             Json.obj(
                                 "row" -> row,
                                 "col" -> col,
-                                "cell" -> fieldInput.showVisibleCell(row, col).toString
+                                "cell" -> fieldInput.showVisibleCell(row, col)
                             )
                         }
                     ),
@@ -79,7 +77,7 @@ case class Field(matrix: Matrix[String], hidden: Matrix[String]) extends IField:
                             Json.obj(
                                 "row" -> row,
                                 "col" -> col,
-                                "cell" -> fieldInput.showInvisibleCell(row, col).toString
+                                "cell" -> fieldInput.showInvisibleCell(row, col)
                             )
                         }
                     )

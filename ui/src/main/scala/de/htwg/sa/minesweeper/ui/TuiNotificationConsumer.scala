@@ -1,15 +1,14 @@
 package de.htwg.sa.minesweeper.ui
 
 import akka.actor.ActorSystem
-import akka.http.scaladsl.server.Directives.complete
 import akka.kafka.scaladsl.Consumer
 import akka.kafka.{ConsumerSettings, Subscriptions}
 import akka.stream.Materializer
 import akka.stream.Materializer.matFromSystem
 import akka.stream.scaladsl.Sink
-import de.htwg.sa.minesweeper.ui.model.{Event, GameTui}
+import de.htwg.sa.minesweeper.ui.model.Event
 import org.apache.kafka.clients.consumer.ConsumerConfig
-import org.apache.kafka.common.serialization.{StringDeserializer, StringSerializer}
+import org.apache.kafka.common.serialization.StringDeserializer
 
 import scala.concurrent.Future
 

@@ -3,11 +3,11 @@ package de.htwg.sa.minesweeper.persistence.persistenceComponent.persistenceMongo
 import org.mongodb.scala.bson.Document
 import de.htwg.sa.minesweeper.persistence.entity.{Field, Matrix}
 import de.htwg.sa.minesweeper.persistence.persistenceComponent.persistenceSlickImpl.IDao
-import org.mongodb.scala.*
+import org.mongodb.scala._
 import org.mongodb.scala.bson.conversions.Bson
-import org.mongodb.scala.model.Filters.*
-import org.mongodb.scala.model.Updates.*
-import org.mongodb.scala.result.*
+import org.mongodb.scala.model.Filters._
+import org.mongodb.scala.model.Updates._
+import org.mongodb.scala.result._
 import org.mongodb.scala.bson.BsonTransformer.TransformImmutableDocument
 
 import scala.concurrent.Await

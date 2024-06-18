@@ -18,10 +18,9 @@ object Default{
     def scalableMatrix(size: Int, filling: String): Matrix[String] = new Matrix(size, filling)
     def scalableField(size: Int, filling: String): IField = new Field(size, filling)
     def mergeMatrixToField(sichtbar: Matrix[String], unsichtbar: Matrix[String] ): IField = new Field(sichtbar, unsichtbar)
-
-    //given IPersistence = new MongoFileIO
+    
     given IPersistence = choose
-    //given IPersistence = choose
+    
     private def choose: IPersistence =
         println("Choose Persistence: 1. JsonFileIO, 2. XmlFileIO, 3. SlickFileIO, 4. MongoFileIO: ")
         readLine().toInt match {
@@ -30,10 +29,5 @@ object Default{
         case 3 => new SlickFileIO()
         case 4 => new MongoFileIO()
     }
-
-    //var filePathHighScore = "C:\\Playground\\minesweeperpublic\\src\\main\\data\\highscore.json"
-    //given IPersistence = new JsonFileIO() //choose Implementation here
-    //given IFileIO = new XmlFileIO() //choose Implementation here
-    //val filePathHighScore = "C:\\Playground\\minesweeperpublic\\src\\main\\data\\highscore.xml"
     
 }

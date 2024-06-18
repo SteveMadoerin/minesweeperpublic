@@ -8,7 +8,6 @@ class GameTable(tag: Tag) extends Table[(Option[Int], Int, Int, Int, String)](ta
   def size = column[Int]("size")
   def time = column[Int]("time")
   def board = column[String]("board")
-
   def * = (id, bombs, size, time, board)
 
 }

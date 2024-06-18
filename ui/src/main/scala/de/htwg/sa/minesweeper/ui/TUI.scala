@@ -3,15 +3,13 @@ package de.htwg.sa.minesweeper.ui
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.model.*
-import akka.http.scaladsl.server.Directives.*
-import akka.http.scaladsl.server.Route
+import akka.http.scaladsl.model._
+import akka.http.scaladsl.server.Directives._
 import akka.stream.Materializer
-import de.htwg.sa.minesweeper.ui.gui.RestUtil.materializer.system
-import de.htwg.sa.minesweeper.ui.model.*
+import de.htwg.sa.minesweeper.ui.model._
 import play.api.libs.json.{JsValue, Json}
 
-import scala.concurrent.duration.*
+import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContextExecutor, Future}
 import scala.io.StdIn.readLine
 import scala.languageFeature.reflectiveCalls
@@ -20,7 +18,6 @@ import scala.util.{Failure, Success, Try}
 
 class TUI():
 
-    //controller.add(this)
     implicit val system: ActorSystem = ActorSystem()
     implicit val materializer: Materializer = Materializer(system)
     implicit val executionContext: ExecutionContextExecutor = system.dispatcher
@@ -96,7 +93,7 @@ class TUI():
                 false
         }
 
-        controllerGame = requestControllerGame // replace controller.checkGameOver
+        controllerGame = requestControllerGame
 
         requestCheckGameOver(controllerGame.board) match {
             case false =>
@@ -106,7 +103,6 @@ class TUI():
                 restart
         }
     }
-
 
     def processMove(move: Move, firstMoveCheck: Boolean): Boolean = {
         controllerGame = requestControllerGame
@@ -129,9 +125,7 @@ class TUI():
 
     def resize: Unit =
         val (side, bombs) = chooseDifficulty()
-
         requestNewGame(side, bombs)
-    // maybe later - receive Game and Field from controller
 
     def chooseDifficulty() = {
         val multilineString =
@@ -168,9 +162,6 @@ class TUI():
         }
         val bodyString = Await.result(bodyStringFuture, 5.seconds)
         val (newGame, newField): (GameTui, FieldTui) = jsonToGameAndField(bodyString)
-        //println(newGame.bombs)
-        //println(newField.hidden.rows.size)
-        //println("controller.newGame(side, bombs)")
 
         controllerField = newField
         controllerGame = newGame
@@ -212,14 +203,10 @@ class TUI():
             uri = url
         )
 
-        //val bodyString = Await.result(Http().singleRequest(request).flatMap(_.entity.toStrict(5.seconds).map(_.data.utf8String)), 5.seconds)
-        //val field = jsonToFieldTui(bodyString)
-        //implement maybe later controllerfield = field ...
-        //controller.gameOver
     }
 
     def requestControllerField = {
-        //controller.field
+
         val url = "http://controller:9081/controller/field"
 
         val request = HttpRequest(
@@ -228,8 +215,7 @@ class TUI():
         )
 
         val bodyString = Await.result(Http().singleRequest(request).flatMap(_.entity.toStrict(5.seconds).map(_.data.utf8String)), 5.seconds)
-        val field = jsonToFieldTui(bodyString)
-        field
+        jsonToFieldTui(bodyString)
     }
 
     def jsonToFieldTui(jsonString: String): FieldTui = {
@@ -286,7 +272,7 @@ class TUI():
         val bodyString = Await.result(Http().singleRequest(request).flatMap(_.entity.toStrict(5.seconds).map(_.data.utf8String)), 5.seconds)
         val game = jsonToGameTui(bodyString)
 
-        game //controller.game.asInstanceOf[Game]
+        game
     }
 
     def jsonToGameTui(jsonString: String): GameTui = {
@@ -295,12 +281,12 @@ class TUI():
         val bombs = (json \ "game" \ "bombs").get.toString.toInt
         val side = (json \ "game" \ "side").get.toString.toInt
         val time = (json \ "game" \ "time").get.toString.toInt
-        val statusWithoutQuotes = status.replace("\"", "") // \Playing\ -> Playing
+        val statusWithoutQuotes = status.replace("\"", "")
         GameTui(bombs, side, time, statusWithoutQuotes)
     }
 
     def requestControllerMakeAndPublishDoMove(firstMoveCheck: Boolean, move: Move, game: GameTui) = {
-        //controller.makeAndPublish(controller.doMove, firstMoveCheck, move, game)
+
         val newBoard = game.board match {
             case "Playing" => 0
             case "Won" => 1
@@ -322,11 +308,10 @@ class TUI():
         ).withEntity(HttpEntity(ContentTypes.`application/json`, bodyField.toString()))
 
         val bodyString = Await.result(Http().singleRequest(request).flatMap(_.entity.toStrict(5.seconds).map(_.data.utf8String)), 5.seconds)
-        println(bodyString) // success
+        println(bodyString)
 
     }
 
-    // approved - controller.makeAndPublish(controller.put, move)
     def requestControllerMakeAndPublishPut(move: Move) = {
 
         val url = "http://controller:9081/controller/makeAndPublish/put"
@@ -344,10 +329,8 @@ class TUI():
         ).withEntity(HttpEntity(ContentTypes.`application/json`, bodyField.toString()))
 
         val bodyString = Await.result(Http().singleRequest(request).flatMap(_.entity.toStrict(5.seconds).map(_.data.utf8String)), 5.seconds)
-
     }
 
-    // approved
     def requestControllerHelpMenue= {
 
         val url = "http://controller:9081/controller/helpMenu"
@@ -360,7 +343,6 @@ class TUI():
         infoMessages(">> Help Menu in TUI:", bodyStringHelpMessage) // use logging instead
     }
 
-    // working
     def requestControllerCheat: Unit = {
 
         val url = "http://controller:9081/controller/cheat"
@@ -376,12 +358,11 @@ class TUI():
         }
 
         val bodyStringCheat = Await.result(bodyStringFuture, 5.seconds)
-        println(bodyStringCheat) // use logging instead
+        println(bodyStringCheat)
     }
 
-    // working
     def requestControllerMakeAndPublishUndo: Unit = {
-        //controller.makeAndPublish(controller.undo)
+
         val url = "http://controller:9081/controller/makeAndPublish/undo"
         val request = HttpRequest(
             method =  HttpMethods.GET,
@@ -397,9 +378,8 @@ class TUI():
         println(bodyStringUndo)
     }
 
-    // working
     def requestControllerMakeAndPublishRedo: Unit = {
-        //controller.makeAndPublish(controller.redo)
+
         val url = "http://controller:9081/controller/makeAndPublish/redo"
         val request = HttpRequest(
             method =  HttpMethods.GET,
@@ -412,12 +392,11 @@ class TUI():
         }
 
         val bodyStringUndo = Await.result(bodyStringFuture, 5.seconds)
-        println(bodyStringUndo) // use logging
+        println(bodyStringUndo)
     }
 
-    // working
     def requestControllerSaveGame: Unit = {
-        //controller.saveGame
+
         val url = "http://controller:9081/controller/saveGame"
 
         val request = HttpRequest(
@@ -431,12 +410,11 @@ class TUI():
         }
 
         val bodyStringSave = Await.result(bodyStringFuture, 5.seconds)
-        println(bodyStringSave) // use logging
+        println(bodyStringSave)
     }
 
-    // working
     def requestControllerLoadGame: Unit = {
-        //controller.loadGame
+
         val url = "http://controller:9081/controller/loadGame"
 
         val request = HttpRequest(
@@ -450,10 +428,9 @@ class TUI():
         }
 
         val bodyStringLoad = Await.result(bodyStringFuture, 5.seconds)
-        println(bodyStringLoad) // use logging
+        println(bodyStringLoad)
     }
 
-    // working
     def requestControllerFieldToString: String = {
         val url = "http://controller:9081/controller/field/toString"
 
@@ -470,58 +447,9 @@ class TUI():
         bodyStringField
 
     }
-    
-    
 
-/*    val route: Route = {
-        get {
-            path("tui") {
-                complete("TUI")
-            } ~
-              path("tui"/"hello") {
-                  complete("hello")
-              }
-        } ~
-          put {
-              path("tui"/"notify") {
-                  parameter("event".as[String]) { (event) =>
-                      event match
-                          case "NewGame" => update(Event.NewGame)
-                          case "Start" => update(Event.Start)
-                          case "Next" => update(Event.Next)
-                          case "GameOver" => update(Event.GameOver)
-                          case "Cheat" => update(Event.Cheat)
-                          case "Help" => update(Event.Help)
-                          case "Input" => update(Event.Input)
-                          case "Load" => update(Event.Load)
-                          case "Save" => update(Event.Save)
-                          case "SaveTime" => update(Event.SaveTime)
-                          case "Exit" => update(Event.Exit)
-                          case _ => false
-
-                      complete("success notify" + event)
-                  }
-              }
-          }
-
-    }
-
-
-    def start(): Unit = {
-        val bindFuture = Http().newServerAt("0.0.0.0", 9088).bind(route)
-
-        bindFuture.onComplete {
-            case Success(binding) =>
-                println("Server online at http://localhost:9088/")
-                complete(binding.toString)
-            case Failure(exception) =>
-                println(s"An error occurred: $exception")
-                complete("fail binding")
-        }
-    }*/
-    def start(): Unit = {
+    def start: Unit = {
         val updateFunction: Event => Unit = (event: Event) => {
-            // Call the update method and ignore the return value
             update(event)
             ()
         }

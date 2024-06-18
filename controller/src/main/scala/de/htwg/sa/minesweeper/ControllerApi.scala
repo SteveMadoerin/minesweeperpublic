@@ -2,7 +2,7 @@ package de.htwg.sa.minesweeper
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.server.Directives.*
+import akka.http.scaladsl.server.Directives._
 import akka.stream.Materializer
 import akka.http.scaladsl.unmarshalling.Unmarshal
 import akka.stream.scaladsl.{Broadcast, Flow, GraphDSL, Merge, Sink, Source}
@@ -50,7 +50,7 @@ class ControllerApi(using var controller: IController) extends Observer:
     }
 
     private val controllerFlow: Flow[HttpRequest, String, NotUsed] = Flow.fromGraph(GraphDSL.create() { implicit builder: Builder[NotUsed] =>
-        import GraphDSL.Implicits.*
+        import GraphDSL.Implicits._
 
         val broadcast: UniformFanOutShape[HttpRequest, HttpRequest] = builder.add(Broadcast[HttpRequest](2))
         val merge: UniformFanInShape[String, String] = builder.add(Merge[String](2))
@@ -62,14 +62,14 @@ class ControllerApi(using var controller: IController) extends Observer:
                 case "/controller/controller" =>
                     HttpResponse(entity = controller.toString())
                 case "/controller/field" =>
-                    HttpResponse(entity = RestUtil.fieldDtoToJson(controller.field).toString)
+                    HttpResponse(entity = RestUtil.fieldDtoToJson(controller.field))
                 case "/controller/gameOver" =>
                     controller.gameOver
-                    HttpResponse(entity = RestUtil.fieldDtoToJson(controller.field).toString)
+                    HttpResponse(entity = RestUtil.fieldDtoToJson(controller.field))
                 case "/controller/field/toString" =>
                     HttpResponse(entity = controller.fieldToString)
                 case "/controller/game" =>
-                    HttpResponse(entity = RestUtil.gameDtoToJson(controller.game).toString)
+                    HttpResponse(entity = RestUtil.gameDtoToJson(controller.game))
                 case "/controller/helpMenu" =>
                     controller.helpMenu
                     HttpResponse(entity = controller.helpMenuRest)
@@ -127,8 +127,6 @@ class ControllerApi(using var controller: IController) extends Observer:
                         val requestBody = Json.parse(moveEntity)
                         val move = jsonToMove(requestBody)
                         controller.makeAndPublish(controller.put, move)
-                        print("move: " + move.value + " x: " + move.x + " y: " + move.y)
-
                     }
                     HttpResponse(entity = "success")
                 case "/controller/makeAndPublish/undo" =>
@@ -142,10 +140,10 @@ class ControllerApi(using var controller: IController) extends Observer:
                     HttpResponse(entity = "successfully saved")
                 case "/controller/undo" =>
                     controller.undo
-                    HttpResponse(entity = RestUtil.fieldDtoToJson(controller.field).toString)
+                    HttpResponse(entity = RestUtil.fieldDtoToJson(controller.field))
                 case "/controller/redo" =>
                     controller.redo
-                    HttpResponse(entity = RestUtil.fieldDtoToJson(controller.field).toString)
+                    HttpResponse(entity = RestUtil.fieldDtoToJson(controller.field))
             }
         }
 
@@ -167,7 +165,7 @@ class ControllerApi(using var controller: IController) extends Observer:
                 case "/controller/checkGameOver" =>
                     request.entity.toStrict(Duration.apply(3, TimeUnit.SECONDS)).map { entity =>
                         val requestbody = entity.data.utf8String
-                        val result = controller.checkGameOver(requestbody.toString)
+                        val result = controller.checkGameOver(requestbody)
                         print(requestbody + "checkgameover string")
                         HttpResponse(entity = result.toString)
                     }
@@ -209,8 +207,7 @@ class ControllerApi(using var controller: IController) extends Observer:
 
         broadcast.out(0) ~> getRequestFlowShape ~> getResponseFlowShape ~> merge.in(0)
         broadcast.out(1) ~> putRequestFlowShape ~> putResponseFlowShape ~> merge.in(1)
-
-
+        
         FlowShape(broadcast.in, merge.out)
     })
 

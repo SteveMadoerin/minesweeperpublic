@@ -1,8 +1,6 @@
 package de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl
 
-import de.htwg.sa.minesweeper.model.gameComponent.*
-
-
+import de.htwg.sa.minesweeper.model.gameComponent._
 import play.api.libs.json.JsValue
 import play.api.libs.json.Json
 
@@ -40,16 +38,13 @@ case class Field(matrix: Matrix[String], hidden: Matrix[String]) extends IField:
         (gameStatus, returnField)
     
     def gameOverField: IField = new Field(this.hidden)
-    
-    def reveal = new Field(this.hidden) //.tap(y => println(y.toString())) // function chaining
-
+    def reveal = new Field(this.hidden)
     def put(symbol: String, x: Int, y: Int) = copy(matrix.replaceCell(x, y, symbol))
     def showVisibleCell(x: Int, y: Int): String = matrix.cell(x, y)
     def showInvisibleCell(x: Int, y: Int): String =  hidden.cell(x, y)
     def isValidF(row: Int, col: Int, side: Int): Boolean = {row >= 0 && row <= side && col >= 0 && col <= side}
     def openNew(x: Int, y: Int, field: IField): IField = field.put(field.showInvisibleCell(y, x), y, x)
     
-    // recursion
     def recursiveOpen(x: Int, y: Int, field: IField): IField = {
         val directions = List(
             (-1, -1), (-1, 0), (-1, 1),
@@ -94,7 +89,7 @@ case class Field(matrix: Matrix[String], hidden: Matrix[String]) extends IField:
                             Json.obj(
                                 "row" -> row,
                                 "col" -> col,
-                                "cell" -> this.showVisibleCell(row, col).toString
+                                "cell" -> this.showVisibleCell(row, col)
                             )
                         }
                     ),
@@ -106,7 +101,7 @@ case class Field(matrix: Matrix[String], hidden: Matrix[String]) extends IField:
                             Json.obj(
                                 "row" -> row,
                                 "col" -> col,
-                                "cell" -> this.showInvisibleCell(row, col).toString
+                                "cell" -> this.showInvisibleCell(row, col)
                             )
                         }
                     )
@@ -129,7 +124,7 @@ case class Field(matrix: Matrix[String], hidden: Matrix[String]) extends IField:
                             Json.obj(
                                 "row" -> row,
                                 "col" -> col,
-                                "cell" -> fieldInput.showVisibleCell(row, col).toString
+                                "cell" -> fieldInput.showVisibleCell(row, col)
                             )
                         }
                     ),
@@ -141,7 +136,7 @@ case class Field(matrix: Matrix[String], hidden: Matrix[String]) extends IField:
                             Json.obj(
                                 "row" -> row,
                                 "col" -> col,
-                                "cell" -> fieldInput.showInvisibleCell(row, col).toString
+                                "cell" -> fieldInput.showInvisibleCell(row, col)
                             )
                         }
                     )

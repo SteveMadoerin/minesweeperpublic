@@ -11,7 +11,6 @@ abstract class FieldCreatorTemplate{
         initialisedField
 
     protected def createEmptyField(side: Int ): IField = Default.scalableField(side, "~")
-
     protected def initialiseInvisibleMatrix(field: IField, game: Game): IField = field
 }
 
@@ -28,12 +27,10 @@ class Minefield extends FieldCreatorTemplate{
         val newUnsichtbareMatrix = game.intitializeBombs(unsichtbareMatrix, bombs)
         val newField = Default.mergeMatrixToField(sichtbareMatrix, newUnsichtbareMatrix)
         newField
-
 }
 
 class Playfield extends FieldCreatorTemplate{
     override protected def createEmptyField(side: Int): IField = super.createEmptyField(side)
-
     override protected def initialiseInvisibleMatrix(field: IField, game: Game): IField = 
 
         val bombs = game.bombs
@@ -44,11 +41,9 @@ class Playfield extends FieldCreatorTemplate{
         val newUnsichtbareMatrixAdjacent = game.initializeAdjacentNumbers(newUnsichtbareMatrix)
         val newField = Default.mergeMatrixToField(sichtbareMatrix, newUnsichtbareMatrixAdjacent)
         newField
-
 }
 
 class EmptyField extends FieldCreatorTemplate{
     override protected def createEmptyField(side: Int): IField = super.createEmptyField(side)
-
     override protected def initialiseInvisibleMatrix(field: IField, game: Game): IField = super.initialiseInvisibleMatrix(field, game)
 }

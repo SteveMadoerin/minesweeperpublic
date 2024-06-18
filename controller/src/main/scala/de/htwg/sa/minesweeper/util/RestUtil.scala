@@ -8,7 +8,7 @@ import de.htwg.sa.minesweeper.entity.{FieldDTO, GameDTO, MatrixDTO}
 import play.api.libs.json.{JsObject, JsValue, Json}
 
 import scala.concurrent.{Await, ExecutionContextExecutor, Future}
-import scala.concurrent.duration.*
+import scala.concurrent.duration._
 
 object RestUtil{
 
@@ -17,12 +17,11 @@ object RestUtil{
     implicit val executionContext: ExecutionContextExecutor = system.dispatcher
     
     def requestShowInvisibleCell(x: Int, y: Int, field: FieldDTO): String = {
-        import system.dispatcher
 
+        import system.dispatcher
         val jasonField =  fieldDtoToJson(field)
         val jsonFileContent = jasonField.getBytes("UTF-8")
 
-        // take care in the uri -> this is only valid for Command.scala replacement
         val request2 = HttpRequest(
             method =  HttpMethods.PUT,
             uri = s"http://model:9082/model/field/showInvisibleCell?y=${x}&x=${y}" ,
@@ -35,18 +34,14 @@ object RestUtil{
         }
 
         val result = Await.result(bodyStringFuture, 5.seconds)
-        
         if (result.length()>3) {"E"} else {result}
     }
-    
-    // approved
+
     def requestFieldPut(extractedSymbol: String, x: Int, y: Int, field: FieldDTO): FieldDTO = {
         
         import system.dispatcher
-
         val jasonField = fieldDtoToJson(field)
         val jsonFileContent = jasonField.getBytes("UTF-8")
-        
         val extractedSymbolNew = if (extractedSymbol.length()>3) {"E"} else {extractedSymbol}
 
         val request2 = HttpRequest(
@@ -62,23 +57,19 @@ object RestUtil{
         }
 
         var jsonBodyField = jasonField
-
         val result = Await.result(bodyFieldFuture, 5.seconds)
         jsonBodyField = result
 
         val fieldFromController = jsontToFieldDTO(jsonString = jsonBodyField )
         fieldFromController
-        //Additionally check the field 
     }
 
-    // approved
     def requestRecursiveOpen(x: Int, y: Int, field: FieldDTO): FieldDTO = 
     {
-        // def recursiveOpen(x: Int, y: Int, field: IField): IField
-        import system.dispatcher // to get an execution context
-        val jasonField = fieldDtoToJson(field) // We need a request with a field in json format
+        import system.dispatcher
+        val jasonField = fieldDtoToJson(field)
         val jsonFileContent = jasonField.getBytes("UTF-8")
-        // then we need to send x and y as a parameter
+
         val request = HttpRequest(
             method =  HttpMethods.PUT,
             uri = s"http://model:9082/model/field/recursiveOpen?x=${x}&y=${y}",
@@ -92,7 +83,6 @@ object RestUtil{
         val result = Await.result(bodyFieldFuture, 5.seconds)
         val fieldFromController = jsontToFieldDTO(result)
         fieldFromController
-        
     }
     
     def jsonToGameDTO(jsonString: String): GameDTO = {
@@ -104,7 +94,7 @@ object RestUtil{
         val statusWithoutQuotes = status.replace("\"", "") // \Playing\ -> Playing
         GameDTO(bombs, side, time, statusWithoutQuotes)
     }
-
+    
     def gameDtoToJson(currentGame: GameDTO): String = {
         Json.prettyPrint(
             Json.obj(
@@ -117,7 +107,7 @@ object RestUtil{
             )
         )
     }
-
+    
     def jsonToGameAndFieldDTO(jsonString: String): (GameDTO, FieldDTO) = {
         val json: JsValue = Json.parse(jsonString)
         val jsonGame: Option[JsValue] = (json \\ "game").headOption
@@ -129,9 +119,7 @@ object RestUtil{
         val game = GameDTO(bombs, side, time, statusWithoutQuotes)
 
         val jsonField: Option[JsValue] = (json \\ "field").headOption
-
         val jsonValue = jsonField.get
-
         val size = (jsonValue \ "size").get.toString.toInt
 
         val fieldVectorOption: Option[FieldDTO] = Some(FieldDTO(MatrixDTO(Vector.tabulate(size, size) {(row, col) => "E"}), (MatrixDTO(Vector.tabulate(size, size) {(row, col) => "E"}))))
@@ -142,7 +130,7 @@ object RestUtil{
             case Some(matrix) => matrix
             case None => println("Matrix is not valid"); Vector.tabulate(size, size) {(row, col) => "E"}
         }
-
+        
         val updatedMatrixVector: Vector[Vector[String]] = (0 until size * size).foldLeft(matrixVector1) {
             case (currentMatrix, index) =>
                 val row = (jsonValue \ "matrix" \\ "row")(index).as[Int]
@@ -228,7 +216,7 @@ object RestUtil{
                             Json.obj(
                                 "row" -> row,
                                 "col" -> col,
-                                "cell" -> fieldInput.matrix.rows(row)(col).toString // def cell(row: Int, col: Int): T = rows(row)(col)
+                                "cell" -> fieldInput.matrix.rows(row)(col)
                             )
                         }
                     ),
@@ -240,7 +228,7 @@ object RestUtil{
                             Json.obj(
                                 "row" -> row,
                                 "col" -> col,
-                                "cell" -> fieldInput.hidden.rows(row)(col).toString //fieldInput.showInvisibleCell(row, col).toString
+                                "cell" -> fieldInput.hidden.rows(row)(col)
                             )
                         }
                     )

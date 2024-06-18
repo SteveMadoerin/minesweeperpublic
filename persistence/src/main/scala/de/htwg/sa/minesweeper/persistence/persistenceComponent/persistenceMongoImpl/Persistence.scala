@@ -6,18 +6,16 @@ import de.htwg.sa.minesweeper.persistence.persistenceComponent.persistenceMongoI
 import scala.util.{Failure, Success, Try}
 import org.mongodb.scala._
 
-/* MongoDB implementation of IPersistence */
 class Persistence extends IPersistence {
 
     private val logger = org.slf4j.LoggerFactory.getLogger(classOf[Persistence])
 
-    private val databaseDB: String = sys.env.getOrElse("MONGO_DB", "mongo") // DATABASE: mongo
-    private val databaseUser: String = sys.env.getOrElse("MONGO_USERNAME", "mongodb") // USER: mongodb
-    private val databasePassword: String = sys.env.getOrElse("MONGO_PASSWORD", "mongodb") // PASSWORD: mongodb
-    private val databasePort: String = sys.env.getOrElse("MONGO_PORT", "27017") // PORT: 27017
-    private val databaseHost: String = sys.env.getOrElse("MONGO_HOST", "host.docker.internal") // HOST: localhost
-    //private val databaseHost: String = sys.env.getOrElse("MONGO_HOST", "localhost") // HOST: localhost
-    private val databaseURI: String = s"mongodb://$databaseHost:$databasePort" // mongodb://localhost:27017
+    private val databaseDB: String = sys.env.getOrElse("MONGO_DB", "mongo")
+    private val databaseUser: String = sys.env.getOrElse("MONGO_USERNAME", "mongodb")
+    private val databasePassword: String = sys.env.getOrElse("MONGO_PASSWORD", "mongodb")
+    private val databasePort: String = sys.env.getOrElse("MONGO_PORT", "27017")
+    private val databaseHost: String = sys.env.getOrElse("MONGO_HOST", "host.docker.internal")
+    private val databaseURI: String = s"mongodb://$databaseHost:$databasePort"
     private val client: MongoClient = MongoClient(databaseURI)
 
     val db: MongoDatabase = client.getDatabase(databaseDB) // DATABASE: mongo
@@ -36,8 +34,7 @@ class Persistence extends IPersistence {
             case Failure(exception) => logger.error(exception.getMessage);false
             case Success(value) => logger.info("Tables created"); true
     }
-
-
+    
     override def loadGame: Option[IGame] = {
         Try(GameDao(db).findById(GameDao(db).loadNextGameId-1)) match {
             case Success(game) => Some(game)
@@ -55,13 +52,10 @@ class Persistence extends IPersistence {
     }
 
     override def saveField(field: IField): Unit = FieldDao(db).save(field.asInstanceOf[de.htwg.sa.minesweeper.persistence.entity.Field])
-
     override def loadPlayerScores(filePath: String): Seq[(String, Int)] = PlayerScoreDao(db).findAll()
-
     override def savePlayerScore(playerName: String, score: Int, filePath: String): Unit = PlayerScoreDao(db).save((playerName, score))
 
     def dropTable(): Unit = db.drop()
-
     def closeConnection: Unit = client.close()
 
 }

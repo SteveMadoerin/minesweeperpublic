@@ -1,30 +1,25 @@
 package de.htwg.sa.minesweeper.ui.gui
 
 import akka.actor.ActorSystem
-import akka.http.scaladsl.Http
-import akka.http.scaladsl.server.Directives.*
-import akka.http.scaladsl.server.Route
 import akka.stream.Materializer
 import de.htwg.sa.minesweeper.ui.model._
 
 import java.awt.RenderingHints
 import java.awt.event.MouseEvent
 import java.awt.image.BufferedImage
-import java.util.concurrent.atomic.*
+import java.util.concurrent.atomic._
 import java.util.{Timer, TimerTask}
 import javax.swing.border.Border
 import javax.swing.{BorderFactory, ImageIcon}
 import scala.concurrent.ExecutionContextExecutor
-import scala.swing.*
-import scala.swing.Dialog.*
+import scala.swing._
+import scala.swing.Dialog._
 import scala.swing.event.MouseClicked
-import scala.util.{Failure, Success}
 
 
 
 class GUI() extends Frame:
-
-    //controller.add(this)
+    
     implicit val system: ActorSystem = ActorSystem("gui")
     implicit val materializer: Materializer = Materializer(system)
     implicit val executionContext: ExecutionContextExecutor = system.dispatcher
@@ -179,7 +174,7 @@ class GUI() extends Frame:
             case Event.Next =>
 
                 if(!timerStarted){
-                    restartTimer(new AtomicInteger(controllerGame.time)) //restartTimer(new AtomicInteger(controller.game.time))
+                    restartTimer(new AtomicInteger(controllerGame.time))
                 } else{
                     contents = updateContents
                     repaint()
@@ -196,10 +191,7 @@ class GUI() extends Frame:
 
                 val saveScore: Int = calculateScore
                 controllerGame = RestUtil.requestControllerGame
-                //val text = s"Game is ${controllerGame.board} and your Score is ${calculateScore}"
-
                 resetTimer()
-                //showMessage(None.orNull, text, "GameOver", Message.Info)
                 val playerName = showInput(None.orNull, "Enter your Name to save your score!", "Save Score", Message.Info, Swing.EmptyIcon, Nil, "Sly").getOrElse("Default") // was null before
                 print(s"playerName: $playerName, saveScore: $saveScore")
                 loadScoreNew(playerName, saveScore)
@@ -213,17 +205,11 @@ class GUI() extends Frame:
                 showMessage(None.orNull, text, "Cheat Menu", Message.Plain)
                 false
 
-            case Event.Help =>
-
-                false
-
+            case Event.Help => false
             case Event.Input =>
 
                 val x = showGraphicalInput
-                //controller.newGameField(x)
                 RestUtil.requestControllerNewGameFieldGui(x)
-
-
                 true
 
             case Event.Load =>
@@ -243,7 +229,6 @@ class GUI() extends Frame:
             case Event.SaveTime =>
 
                 pauseTimer()
-                //controller.saveTime(clock.get())
                 RestUtil.requestControllerSaveTime(clock.get())
                 contents = updateContents
                 repaint()
@@ -253,9 +238,8 @@ class GUI() extends Frame:
         }
     }
 
-    def start(): Unit = {
+    def start: Unit = {
         val updateFunction: Event => Unit = (event: Event) => {
-            // Call the update method and ignore the return value
             update(event)
             ()
         }
@@ -264,54 +248,6 @@ class GUI() extends Frame:
         kafkaProducer.startConsuming()
     }
     
-
-/*    val route: Route = {
-        get {
-            path("gui") {
-                complete("gui")
-            } ~
-              path("gui"/"hello") {
-                  complete("hello")
-              }
-        } ~
-          put {
-              path("gui"/"notify") {
-                  parameter("event".as[String]) { event =>
-                      //
-                      event match
-                          case "NewGame" => update(Event.NewGame)
-                          case "Start" => update(Event.Start)
-                          case "Next" => update(Event.Next)
-                          case "GameOver" => update(Event.GameOver)
-                          case "Cheat" => update(Event.Cheat)
-                          case "Help" => update(Event.Help)
-                          case "Input" => update(Event.Input)
-                          case "Load" => update(Event.Load)
-                          case "Save" => update(Event.Save)
-                          case "SaveTime" => update(Event.SaveTime)
-                          case "Exit" => update(Event.Exit)
-                          case _ => false
-
-                      complete("success notify" + event)
-                  }
-              }
-          }
-
-    }
-
-    def start(): Unit = {
-        val bindFuture = Http(system).newServerAt("0.0.0.0", 9087).bind(route)
-
-        bindFuture.onComplete {
-            case Success(binding) =>
-                println("Server online at http://localhost:9087/")
-                complete(binding.toString)
-            case Failure(exception) =>
-                println(s"An error occurred: $exception")
-                complete("fail binding")
-        }
-    }*/
-
     def showHelp: Unit = {
         val text =
             """This is Minesweeper Help - Menu
@@ -374,33 +310,18 @@ class GUI() extends Frame:
     def loadScoreNew(playername: String, saveScore: Int) = {
 
         val loadAndDisplayScores = () => {
-            //val scores = controller.loadPlayerScores // path is set in Persistence
             val scores = RestUtil.requestLoadPlayerScores
             val newScores = scores :+ (playername, saveScore)
             val top10 = newScores.sortBy(-_._2).take(10)
-            //add score
             val message = top10.zipWithIndex.map { case ((name, score), index) =>
                 s"${index + 1}. $name: $score"
             }.mkString("\n")
-            //add new score list to db
             Dialog.showMessage(None.orNull, message, "Top 10 High Scores", Message.Info)
-
         }
         loadAndDisplayScores()
     }
 
     class CellPanel(var x: Int, var y: Int, bounds: Int, first: Boolean) extends GridPanel(x,y) {
-        //controller.field.matrix.rows.size -1
-        //TODO: replace
-        if (x == 0 && y == 0) {
-            x = 1
-            y = 1
-        } else if (x == 0 && y > 0) {
-            x = 1
-        } else if (x > 0 && y == 0) {
-            y = 1
-        }
-
         controllerField = RestUtil.requestControllerField
         (for(
             x <- 0 to bounds;
@@ -439,18 +360,12 @@ class GUI() extends Frame:
         setTime
         timerStarted = false
     }
-
-    /* def calcFlagCount: Int = controller.game.calcMineAndFlag(controller.field.matrix) */
+    
     def calcFlagCount: Int = calcMineAndFlag(controllerField.matrix, controllerGame)
-
-    def prettyFormat(fieldTui: FieldTui): String = {
-        fieldTui.matrix.rows.map(_.mkString(" ")).mkString("\n")
-    }
-
-    def calcMineAndFlag(visibleMatrix: MatrixTui[String], gamely: GameTui) = {
-        (gamely.bombs - calcX("F")(visibleMatrix))
-    }
-
+    def prettyFormat(fieldTui: FieldTui): String = { fieldTui.matrix.rows.map(_.mkString(" ")).mkString("\n") }
+    def calcMineAndFlag(visibleMatrix: MatrixTui[String], gamely: GameTui) = { (gamely.bombs - calcX("F")(visibleMatrix)) }
+    def isValid(row: Int, col: Int, side: Int): Boolean = {row >= 0 && row <= side && col >= 0 && col <= side}
+    
     def calcX(symbols: String)(visibleMatrix: MatrixTui[String]): Int = {
         val sizze = visibleMatrix.rows.size -1
         val multiIndex = 0 to sizze
@@ -459,24 +374,25 @@ class GUI() extends Frame:
           .count{ case(row, col) => visibleMatrix.rows(row)(col) == symbols && isValid(row, col, sizze)}
 
     }
-    def isValid(row: Int, col: Int, side: Int): Boolean = {row >= 0 && row <= side && col >= 0 && col <= side}
-
+    
     def buildFlagCountDisplay: (ImageIcon, ImageIcon, ImageIcon) =
         val leftDigit =  calcFlagCount / 100
         val middleDigit = calcFlagCount / 10
         val rightDigit = calcFlagCount % 10
 
-        var (resLeft, resMiddle, resRight) =
+        val (resLeft, resMiddle, resRight) =
             if (calcFlagCount < 0) {
-                val corrRight = (calcFlagCount * -1)%10
-                val corrMiddle = (calcFlagCount * -1)/10
+                val corrRight = (calcFlagCount * -1) % 10
+                val corrMiddle = (calcFlagCount * -1) / 10
                 val corrLeft = -1
                 (showDigits(corrLeft), showDigits(corrMiddle), showDigits(corrRight))
-            } else if (calcFlagCount > 999) {(showDigits(9), showDigits(9), showDigits(9))
-            } else {(showDigits(leftDigit), showDigits(middleDigit), showDigits(rightDigit))}
+            } else if (calcFlagCount > 999) {
+                (showDigits(9), showDigits(9), showDigits(9))
+            } else {
+                (showDigits(leftDigit), showDigits(middleDigit), showDigits(rightDigit))
+            }
 
         (resLeft, resMiddle, resRight)
-
 
     class CellButton(x: Int, y: Int, symbols: String, first: Boolean) extends Button(){
         contentAreaFilled = false
@@ -509,23 +425,18 @@ class GUI() extends Frame:
                     controllerField = RestUtil.requestControllerField
                     controllerGame = RestUtil.requestControllerGame
                     if (first) {startTimer()}
-                    //controller.makeAndPublish(controller.doMove, first, Move("open", y, x), controller.game)
-                    RestUtil.requestControllerMakeAndPublishDoMove(first, Move("open", y, x), controllerGame) // TODO: check updateGame
+                    RestUtil.requestControllerMakeAndPublishDoMove(first, Move("open", y, x), controllerGame)
                     if (first) {
-                        //controller.checkGameOver(controllerGame.board)  // check this
-                        RestUtil.requestCheckGameOver(controllerGame.board)  // TODO: check if updateGame works better
+                        RestUtil.requestCheckGameOver(controllerGame.board)
                     } else {
                         controllerGame = RestUtil.requestControllerGame
                         if(RestUtil.requestCheckGameOver(controllerGame.board)) {
                             RestUtil.requestGameOver
                         }
-                        //if(controller.checkGameOver(controllerGame.board)){controller.gameOver}
                     }
                 }
         }
-        def updateGame: GameTui = {
-            RestUtil.requestControllerGame
-        }
+        def updateGame: GameTui = { RestUtil.requestControllerGame }
     }
 
     class SmileLabel(kind: String) extends Label(){

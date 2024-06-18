@@ -4,17 +4,13 @@ import de.htwg.sa.minesweeper.persistence.persistenceComponent.IPersistence
 import de.htwg.sa.minesweeper.persistence.entity.*
 import de.htwg.sa.minesweeper.persistence.persistenceComponent.config.Default
 
-import java.io.*
+import java.io._
 import scala.util.{Failure, Success, Try}
-import scala.xml.*
-
-
+import scala.xml._
 
 class Persistence extends IPersistence {
 
-
     override def loadGame: Option[IGame] = {
-        // TRY OPTION for file
         val maybeFile: Try[Elem] = Try(scala.xml.XML.loadFile("C:\\Playground\\minesweeperpublic\\src\\main\\data\\game.xml"))
         val file = maybeFile match {
             case Success(file) => file
@@ -26,7 +22,7 @@ class Persistence extends IPersistence {
         val side = (file \\ "side").text.toInt
         val time = (file \\ "time").text.toInt
 
-        Some(Game(bombs, side, time, "Playing")) // after loading should always be playing
+        Some(Game(bombs, side, time, "Playing"))
     }
 
     def gameToXml(game: IGame) = {
@@ -39,7 +35,6 @@ class Persistence extends IPersistence {
 
     override def saveGame(game: IGame): Unit = {scala.xml.XML.save("C:\\Playground\\minesweeperpublic\\src\\main\\data\\game.xml", gameToXml(game))}
     
-    
     def loadField(field: String): Option[IField] = {
         val maybeFile: Try[Elem] = Try(scala.xml.XML.loadFile("C:\\Playground\\minesweeperpublic\\src\\main\\data\\field.xml"))
         val file = maybeFile match {
@@ -48,7 +43,6 @@ class Persistence extends IPersistence {
         }
 
         val size = (file \\ "field" \@ "size").toInt
-
         val matrixOption = Some(Default.scalableMatrix(size, "~"))
         val hiddenOption = Some(Default.scalableMatrix(size, "~"))
         val fieldOption = Some(Default.scalableField(size, "~"))
@@ -69,9 +63,7 @@ class Persistence extends IPersistence {
             h.replaceCell(row, col, symbol)
         }
 
-        fieldOption.map { f =>
-            Default.mergeMatrixToField(matrix, hidden)
-        }
+        fieldOption.map { f => Default.mergeMatrixToField(matrix, hidden) }
     }
 
     def fieldToXml(field: IField) = {
@@ -102,7 +94,7 @@ class Persistence extends IPersistence {
     def saveField(field: IField): Unit = saveString(field)
 
     def saveString(field: IField): Unit = {
-        import java.io.*
+        import java.io._
 
         val pw = Try(new PrintWriter(new File("C:\\Playground\\minesweeperpublic\\src\\main\\data\\field.xml")))
         pw match {
@@ -136,7 +128,6 @@ class Persistence extends IPersistence {
                 println(s"An error occurred while loading scores: ${exception.getMessage}")
                 Seq.empty
         }
-
     }
 
     def savePlayerScore(playerName: String, score: Int, filePath: String): Unit = {
@@ -174,7 +165,6 @@ class Persistence extends IPersistence {
         }
 
         val size = (file \\ "field" \@ "size").toInt
-
         val matrixOption = Some(Default.scalableMatrix(size, "~"))
         val hiddenOption = Some(Default.scalableMatrix(size, "~"))
         val fieldOption = Some(Default.scalableField(size, "~"))
@@ -195,8 +185,6 @@ class Persistence extends IPersistence {
             h.replaceCell(row, col, symbol)
         }
 
-        fieldOption.map { f =>
-            Default.mergeMatrixToField(matrix, hidden)
-        }
+        fieldOption.map { f => Default.mergeMatrixToField(matrix, hidden) }
     }
 }

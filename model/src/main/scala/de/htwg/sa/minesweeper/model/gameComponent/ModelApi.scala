@@ -40,7 +40,7 @@ class ModelApi(using var game: IGame, var field: IField){
             request.uri.path.toString match {
                 case "/model/game" =>
                     val game = Game(10, 9, 0, "Playing")
-                    HttpResponse(entity = game.gameToJson.toString())
+                    HttpResponse(entity = game.gameToJson)
                 case "/model/game/helpMessage" =>
                     val message = game.helpMessage
                     HttpResponse(entity = message)
@@ -51,7 +51,7 @@ class ModelApi(using var game: IGame, var field: IField){
                     val size = params(1).split("=")(1).toInt
                     val time = params(2).split("=")(1).toInt
                     this.game = Game(bombs, size, time, "Playing")
-                    HttpResponse(entity = game.gameToJson.toString())
+                    HttpResponse(entity = game.gameToJson)
                 case path if path.startsWith("/model/game/checkExit") =>
                     val queryString = request.uri.query().toString()
                     val params = queryString.split("&")
@@ -70,7 +70,7 @@ class ModelApi(using var game: IGame, var field: IField){
                     this.field = feld
                     HttpResponse(entity = feld.fieldToJson)
                 case "/model/field" =>
-                    HttpResponse(entity = field.fieldToJson.toString())
+                    HttpResponse(entity = field.fieldToJson)
             }
         }
 
@@ -96,7 +96,6 @@ class ModelApi(using var game: IGame, var field: IField){
                     val board = params(6).split("=")(1).toInt
 
                     request.entity.toStrict(Duration.apply(3, TimeUnit.SECONDS)).map { entity =>
-                        // doMove
                         val newBoard = board match {
                             case 0 => "Playing"
                             case 1 => "Won"
@@ -158,8 +157,7 @@ class ModelApi(using var game: IGame, var field: IField){
                         val flaggedJsonField = fieldFromController.fieldToJson(flaggedField)
                         HttpResponse(entity = Json.parse(flaggedJsonField).toString())
                     }
-
-
+                    
                 case path if path.startsWith("/model/field/put") =>
                     val queryString = request.uri.query().toString()
                     val params = queryString.split("&")
@@ -174,8 +172,7 @@ class ModelApi(using var game: IGame, var field: IField){
                         val flaggedJsonField = fieldFromController.fieldToJson(flaggedField)
                         HttpResponse(entity = Json.parse(flaggedJsonField).toString())
                     }
-
-
+                    
                 case path if path.startsWith("/model/field/recursiveOpen") =>
                     val queryString = request.uri.query().toString()
                     val params = queryString.split("&")
@@ -189,7 +186,6 @@ class ModelApi(using var game: IGame, var field: IField){
                         val openedField = saveField.fieldToJson(saveField)
                         HttpResponse(entity = Json.parse(openedField).toString())
                     }
-
 
                 case "/model/field/gameOverField" =>
                     request.entity.toStrict(Duration.apply(3, TimeUnit.SECONDS)).map { entity =>
@@ -209,7 +205,6 @@ class ModelApi(using var game: IGame, var field: IField){
                         val saveField = fieldFromController.toString
                         HttpResponse(entity = saveField)
                     }
-
 
                 case "/model/field/cheat" =>
                     request.entity.toStrict(Duration.apply(3, TimeUnit.SECONDS)).map { entity =>
@@ -248,7 +243,6 @@ class ModelApi(using var game: IGame, var field: IField){
         }
 
         val putRequestFlowShape = builder.add(putModelFlow)
-
         val putResponseFlow = Flow[HttpResponse].mapAsync(1) { response =>
             Unmarshal(response.entity).to[String]
         }
@@ -262,7 +256,7 @@ class ModelApi(using var game: IGame, var field: IField){
     })
 
     def updateMatrixWithHidden(jsonString: String): String = {
-        // Find the start and end indices of the "matrix" and "hidden" arrays
+        
         val matrixStart = jsonString.indexOf("\"matrix\": [") + "\"matrix\": [".length
         val matrixEnd = jsonString.indexOf("]", matrixStart)
         val hiddenStart = jsonString.indexOf("\"hidden\": [") + "\"hidden\": [".length

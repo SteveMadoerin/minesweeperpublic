@@ -3,7 +3,7 @@ package de.htwg.sa.minesweeper.persistence.persistenceComponent.persistenceSlick
 import de.htwg.sa.minesweeper.persistence.entity.Game
 import de.htwg.sa.minesweeper.persistence.persistenceComponent.persistenceSlickImpl.{GameTable, IDao}
 import slick.jdbc.JdbcBackend.Database
-import slick.jdbc.PostgresProfile.api.*
+import slick.jdbc.PostgresProfile.api._
 import slick.lifted.TableQuery
 
 import scala.concurrent.Await
@@ -57,8 +57,7 @@ class GameDao(db: Database)  extends IDao[Game, Int] {
         println("Database find Game by id")
         gameSeq.head
     }
-
-
+    
     override def update(id: Int, obj: Game): Game = {
         val query = gameTable
             .filter(_.id === id)

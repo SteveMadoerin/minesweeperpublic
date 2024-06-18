@@ -1,6 +1,6 @@
 package de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl
 
-import de.htwg.sa.minesweeper.model.gameComponent.*
+import de.htwg.sa.minesweeper.model.gameComponent._
 import de.htwg.sa.minesweeper.model.gameComponent.config.Default
 import play.api.libs.json.{JsValue, Json}
 
@@ -13,7 +13,6 @@ case class Game (bombs : Int, side: Int, time: Int, board : String) extends IGam
     def insertSide(newSide: Int): Game = copy(side = newSide)
     def insertTime(newTime: Int): Game = copy(time = newTime)
     def insertBoard(newBoard: String): Game = copy(board = newBoard)
-    
 
     def optionToList(s: Option[String]): List[Int] = {
         s match{
@@ -25,7 +24,6 @@ case class Game (bombs : Int, side: Int, time: Int, board : String) extends IGam
         }
     }
 
-    // currying // leGame: Game
     def prepareBoard2(s: Option[String])(leGame: Game): (IField, IGame) = {
         val realGame = leGame.copy(optionToList(s)(1), optionToList(s).head)
         val adjacentField = Playfield()
@@ -56,12 +54,9 @@ case class Game (bombs : Int, side: Int, time: Int, board : String) extends IGam
             |* Copyright: Steve Madoerin                                                  *
             |*                                                                            *
             |******************************************************************************""".stripMargin
-            
-        //println(s"$helpMsg")
-        //println("This is helpMenue from Game: ")
+
         helpMsg
-    
-    
+
     def premierMove(x: Int, y: Int, field: IField): IField = 
         val adjacent = Playfield()
         val adjacentInitialised = adjacent.newField(side, this)
@@ -99,8 +94,7 @@ case class Game (bombs : Int, side: Int, time: Int, board : String) extends IGam
             case _ => field 
         }
     }
-    
-    // currying
+
     def calcX(symbols: String)(visibleMatrix: Matrix[String]): Int = {
         val sizze = visibleMatrix.size -1
         val multiIndex = 0 to sizze
@@ -111,9 +105,7 @@ case class Game (bombs : Int, side: Int, time: Int, board : String) extends IGam
 
     def calcCovered (visibleMatrix: Matrix[String]): Int = calcX("~")(visibleMatrix)
     def calcFlag (visibleMatrix: Matrix[String]): Int = calcX("F")(visibleMatrix)
-
     def calcMineAndFlag(visibleMatrix: Matrix[String]): Int = (this.bombs - calcFlag(visibleMatrix))
-
     def calcAdjacentMines(row: Int, col: Int, side: Int, invisibleMatrix: Matrix[String]): Int = {
 
         val neighbors = List(
@@ -131,15 +123,15 @@ case class Game (bombs : Int, side: Int, time: Int, board : String) extends IGam
 
     def calcWonOrLost(visibleMatrix: Matrix[String], mines: Int): Boolean = (mines+1 - (calcFlag(visibleMatrix) + calcCovered(visibleMatrix)) == 0)
     
-    def isMine(row: Int, col: Int, m: Matrix[String]): Boolean = {if(m.cell(row, col) == "*") true else false} // fc
-    def isValid(row: Int, col: Int, side: Int): Boolean = {row >= 0 && row <= side && col >= 0 && col <= side} // fc
+    def isMine(row: Int, col: Int, m: Matrix[String]): Boolean = {if(m.cell(row, col) == "*") true else false}
+    def isValid(row: Int, col: Int, side: Int): Boolean = {row >= 0 && row <= side && col >= 0 && col <= side}
 
     def initializeAdjacentNumbers(matrix: Matrix[String]): Matrix[String] =
         val si = matrix.size - 1
         val multiIndex = 0 to si
         multiIndex
-            .flatMap(col => multiIndex.map(row => (row, col))) // .flatMap and .map to create collection of all possible (row, col) pairs
-            .foldLeft(matrix) { // .foldLeft to iterate over each pair & update Matrix
+            .flatMap(col => multiIndex.map(row => (row, col)))
+            .foldLeft(matrix) {
                 (matr, pos) => val (row, col) = pos
                 if(matr.cell(row, col) != "*" && isValid(row, col, si)) {
                     val numero = calcAdjacentMines(row, col, si, matrix)
@@ -162,7 +154,6 @@ case class Game (bombs : Int, side: Int, time: Int, board : String) extends IGam
         val sizze = matrix.size - 1
         val random = new Random()
 
-        // recursion
         @tailrec
         def placeMines(ma: Matrix[String], minesPlaced: Int): Matrix[String] = {
             if (minesPlaced >= bombs) ma
@@ -172,9 +163,9 @@ case class Game (bombs : Int, side: Int, time: Int, board : String) extends IGam
 
                 if (ma.cell(row, col) != "*") {
                     val updatedMatrix = ma.replaceCell(row, col,"*")
-                    placeMines(updatedMatrix, minesPlaced + 1) // recursion
+                    placeMines(updatedMatrix, minesPlaced + 1)
                 } else {
-                    placeMines(ma, minesPlaced) // recursion
+                    placeMines(ma, minesPlaced)
                 }
             }
         }
@@ -202,10 +193,9 @@ case class Game (bombs : Int, side: Int, time: Int, board : String) extends IGam
         val bombs = (json \ "game" \ "bombs").get.toString.toInt
         val side = (json \ "game" \ "side").get.toString.toInt
         val time = (json \ "game" \ "time").get.toString.toInt
-        val statusWithoutQuotes = status.replace("\"", "") // \Playing\ -> Playing
+        val statusWithoutQuotes = status.replace("\"", "")
         Game(bombs, side, time, statusWithoutQuotes)
     }
-
 
 end Game
 

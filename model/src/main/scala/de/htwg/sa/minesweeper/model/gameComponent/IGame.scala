@@ -13,7 +13,6 @@ trait IGame {
     def calcX(symbols: String)(visibleMatrix: Matrix[String]): Int
     def calcAdjacentMines(row: Int, col: Int, side: Int, invisibleMatrix: Matrix[String]): Int
     def calcWonOrLost(visibleMatrix: Matrix[String], mines: Int): Boolean
-
     def isValid(row: Int, col: Int, side: Int): Boolean
 
     def initializeAdjacentNumbers(matrix: Matrix[String]): Matrix[String]
@@ -28,7 +27,7 @@ trait IGame {
     def time: Int
 
     def prepareBoard(s: Option[String])(game: IGame): (IField, IGame) // currying
-
+    
     def gameToJson: String
     def jsonToGame(jsonString: String): IGame
 }
@@ -50,8 +49,7 @@ trait IField{
     def matrix: Matrix[String]
     def hidden: Matrix[String]
     def toString: String
-
-    //def fieldToHtml: String
+    
     def fieldToJson(fieldInput: IField): String
     def fieldToJson: String
     def jsonToField(jsonString: String): IField

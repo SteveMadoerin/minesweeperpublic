@@ -3,8 +3,8 @@ package de.htwg.sa.minesweeper.persistence.persistenceComponent.persistenceSlick
 import akka.NotUsed
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.model.*
-import akka.http.scaladsl.server.Directives.*
+import akka.http.scaladsl.model._
+import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.unmarshalling.{FromEntityUnmarshaller, Unmarshal, Unmarshaller}
 import akka.stream.scaladsl.GraphDSL.Builder
 import akka.stream.scaladsl.{Broadcast, Flow, GraphDSL, Merge, Sink, Source}
@@ -12,7 +12,7 @@ import akka.stream.{FlowShape, Materializer, UniformFanInShape, UniformFanOutSha
 import de.htwg.sa.minesweeper.persistence.entity.*
 import de.htwg.sa.minesweeper.persistence.persistenceComponent.IPersistence
 import de.htwg.sa.minesweeper.persistence.persistenceComponent.config.Default
-import play.api.libs.json.*
+import play.api.libs.json._
 
 import java.io.File
 import java.util.concurrent.TimeUnit
@@ -62,14 +62,12 @@ class PersistenceApi(using var p: IPersistence) {
         }
 
         val leGetRequestFlowShape = builder.add(leGetRequestFlow)
-
         val leGetRequestResponseFlow = Flow[HttpResponse].mapAsync(1) { resp =>
             Unmarshal(resp.entity).to[String]
         }
 
         val leGetResponseFlowShape = builder.add(leGetRequestResponseFlow)
-
-
+        
         val putRequestFlow: Flow[HttpRequest, HttpResponse, NotUsed] = Flow[HttpRequest].mapAsync(3) { req =>
             req.uri.path.toString match {
                 case "/persistence/putField" => {
@@ -84,7 +82,7 @@ class PersistenceApi(using var p: IPersistence) {
                     req.entity.toStrict(Duration.apply(3, TimeUnit.SECONDS)).flatMap { entity =>
                         ((req.uri.query().get("bombs"), req.uri.query().get("size"), req.uri.query().get("time"), req.uri.query().get("board"))) match {
                             case (Some(bombs), Some(size), Some(time), Some(board)) => {
-                                val tempGame = Game(bombs.toInt, size.toInt, time.toInt, board.toString)
+                                val tempGame = Game(bombs.toInt, size.toInt, time.toInt, board)
                                 Try(p.saveGame(tempGame)) match {
                                     case Success(_) =>
                                         Future.successful(HttpResponse(entity = tempGame.gameToJson))
@@ -119,46 +117,31 @@ class PersistenceApi(using var p: IPersistence) {
                 }
             }
         }
-
-
-        val postResponseFlow: Flow[HttpResponse, String, NotUsed] = Flow[HttpResponse].mapAsync(1) { resp =>
-            Unmarshal(resp.entity).to[String]
-        }
-
-
+        
+        val postResponseFlow: Flow[HttpResponse, String, NotUsed] = Flow[HttpResponse].mapAsync(1) { resp => Unmarshal(resp.entity).to[String] }
         val postResponseFlowShape = builder.add(postResponseFlow)
         val putRequestFlowShape = builder.add(putRequestFlow)
-
-        // Connect the output of the broadcast to the GET request Flow and then to the GET response Flow,
-        // which then feeds into the merge node.
+        
         broadcast.out(0) ~> leGetRequestFlowShape ~> leGetResponseFlowShape ~> merge.in(0)
-        // Connect the output of the broadcast to the PUT request Flow and then to the POST response Flow,
-        // which also feeds into the merge node.
         broadcast.out(1) ~> putRequestFlowShape ~> postResponseFlowShape ~> merge.in(1)
-
-        // Expose the input of the broadcast and the output of the merge as the FlowShape of the graph.
+        
         FlowShape(broadcast.in, merge.out)
-
     })
 
     Http().newServerAt("0.0.0.0", 9083).bind(
         pathPrefix("persistence") {
-            // Directive to extract the HttpRequest from the route context
             extractRequest { request =>
-                // Complete the HTTP request processing
                 complete(
-                    // Create a single-element stream with the request, which is then passed through the persistFlow.
                     akka.stream.scaladsl.Source.single(request)
-                        .via(persistFlow) // The request is processed by the persistFlow defined earlier.
-                        .runWith(Sink.head) // Run the stream and get the first (head) element from the result.
-                        .map(resp => resp) // Map 
+                        .via(persistFlow)
+                        .runWith(Sink.head)
+                        .map(resp => resp)
                 )
             }
         }
     )
 
     def start(): Future[Nothing] = Future.never
-
     def loadPlayerScoresToJson(filePath: String): JsValue = {
 
         val file = new File(filePath)

@@ -2,7 +2,7 @@ package de.htwg.sa.minesweeper.persistence.persistenceComponent.persistenceSlick
 
 import de.htwg.sa.minesweeper.persistence.persistenceComponent.persistenceSlickImpl.{FieldTable, IDao}
 import slick.jdbc.JdbcBackend.Database
-import slick.jdbc.PostgresProfile.api.*
+import slick.jdbc.PostgresProfile.api._
 import slick.lifted.TableQuery
 
 import scala.concurrent.Await
@@ -53,8 +53,7 @@ class FieldDao(db: Database)  extends IDao[String, Int] {
         println("Database find Field by id")
         fieldSeq.head
     }
-
-
+    
     override def update(id: Int, obj: String): String = {
         val query = fieldTable
             .filter(_.id === id)

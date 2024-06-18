@@ -22,8 +22,7 @@ trait IField{
 
     def showInvisibleCell(x: Int, y: Int): String
     def showVisibleCell(x: Int, y: Int): String
-
-    //def fieldToHtml: String
+    
     def fieldToJson(fieldInput: IField): String
     def fieldToJson: String
     def jsonToField(jsonString: String): IField
