@@ -2,7 +2,7 @@
 =====================================================
 
 
-This is a project developped by [Steve Madoerin](https://github.com/SteveMadoerin) to create the game Minesweeper written in Scala used in the
+This is a project developped by [Steve Madoerin](https://github.com/SteveMadoerin) and [Dennis Hoang](https://github.com/dennis_hoang) to create the game Minesweeper written in Scala used in the
 class Software Engineering at the University of Applied Science HTWG Konstanz.
 
 
@@ -39,8 +39,11 @@ When using the Text User Interface:
 
 # Using Docker
 
-- `docker build -t minesweeper-image .` to build image
-- `docker run -it --rm -v /tmp/.X11-unix:/tmp/.X11-unix --device /dev/dri -p 8080:8080 --privileged -v :/minesweeper minesweeper-image` to run image
+- `build_assembly.bat` double-click on the file to build the .jar for each subproject in parallel - only for Windows
+- `sbt assembly` go to each directory of each Module and run sbt assembly to build the .jar - for all OS
+
+- `bash build_docker.sh` to run build_docker.sh script to build images for each subproject
+- `docker-compose up -d` to start Application 
 
 
 
