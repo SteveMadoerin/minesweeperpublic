@@ -1,11 +1,9 @@
 name: Scala CI
 on:
-  push:
-    branches:
-      - SA_05_REST
-  pull_request:
-    branches:
-      - SA_05_REST
+ push:
+   branches: [ development ]
+ pull_request:
+   branches: [ development ]
 jobs:
   build:
     runs-on: ubuntu-latest
