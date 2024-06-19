@@ -22,8 +22,6 @@ lazy val commonSettings = Seq(
   libraryDependencies += "org.apache.kafka" % "kafka-clients" % "2.8.0",
   libraryDependencies += "org.apache.kafka" % "kafka-streams" % "2.8.0",
   libraryDependencies += ("org.apache.kafka" %% "kafka-streams-scala" % "3.7.0").cross(CrossVersion.for3Use2_13),
-  /*    libraryDependencies += "org.apache.kafka" % "kafka-clients" % "3.7.0",
-      libraryDependencies += "org.apache.kafka" %% "kafka-streams-scala" % "3.7.0",*/
 )
 
 lazy val ui = (project in file("."))

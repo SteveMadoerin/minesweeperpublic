@@ -33,7 +33,7 @@ class GUI() extends Frame:
     private var timeLoaded: Boolean = false
     private var digitBar = DigitDisplay(0, 0, 0)
     var clock = new AtomicInteger(0)
-    val timer = Timer()
+    val timer: Timer = Timer()
     var task: Option[TimerTask] = None
 
     def startTimer(): Unit = {
@@ -56,22 +56,22 @@ class GUI() extends Frame:
         timerStarted = false
     }
 
-    def cells(first: Boolean) = {
+    def cells(first: Boolean): CellPanel = {
         val tmpPanel = new CellPanel(boardBounds+1, boardBounds+1, boardBounds, first)
         tmpPanel.border = borderCreator(0, 2, 2, 2)
         tmpPanel
     }
 
-    def statusbar = new BorderPanel{
+    def statusbar: BorderPanel = new BorderPanel{
 
-        val flagCountDisplay = buildFlagCountDisplay
+        val flagCountDisplay: (ImageIcon, ImageIcon, ImageIcon) = buildFlagCountDisplay
         add(new BoxPanel(Orientation.NoOrientation){
             contents ++= flagCountDisplay.productIterator.map(digit => new DigitLabel(digit.asInstanceOf[ImageIcon]))
         }, BorderPanel.Position.West)
 
         add(new SmileLabel(s"${controllerGame.board}"), BorderPanel.Position.Center)
 
-        val timerDigits = Seq(digitBar.leftDigit, digitBar.middleDigit, digitBar.rightDigit).map(showDigits)
+        val timerDigits: Seq[ImageIcon] = Seq(digitBar.leftDigit, digitBar.middleDigit, digitBar.rightDigit).map(showDigits)
         add(new BoxPanel(Orientation.NoOrientation){
             contents ++= timerDigits.map(new DigitLabel(_))
         }, BorderPanel.Position.East)
@@ -126,7 +126,7 @@ class GUI() extends Frame:
         open()
     }
     var b = true
-    def updateContents = {
+    def updateContents: BorderPanel = {
 
         if ((controllerGame.board == "Lost" || controllerGame.board == "Won") && b) {
             b = false
@@ -299,7 +299,7 @@ class GUI() extends Frame:
         icon
 
     def showGraphicalInput: Option[String] = {
-        showInput(None.orNull, "Choose Difficulty", "NewGame", Message.Info, Swing.EmptyIcon, List("SuperEasy","Easy", "Medium", "Hard"), "Easy") // was null before
+        showInput(None.orNull, "Choose Difficulty", "NewGame", Message.Info, Swing.EmptyIcon, List("SuperEasy","Easy", "Medium", "Hard"), "Easy")
     }
 
     def saveScoreNew(playerName: String, saveScore: Int): Unit = {
@@ -363,7 +363,7 @@ class GUI() extends Frame:
     
     def calcFlagCount: Int = calcMineAndFlag(controllerField.matrix, controllerGame)
     def prettyFormat(fieldTui: FieldTui): String = { fieldTui.matrix.rows.map(_.mkString(" ")).mkString("\n") }
-    def calcMineAndFlag(visibleMatrix: MatrixTui[String], gamely: GameTui) = { (gamely.bombs - calcX("F")(visibleMatrix)) }
+    def calcMineAndFlag(visibleMatrix: MatrixTui[String], gamely: GameTui): Int = { (gamely.bombs - calcX("F")(visibleMatrix)) }
     def isValid(row: Int, col: Int, side: Int): Boolean = {row >= 0 && row <= side && col >= 0 && col <= side}
     
     def calcX(symbols: String)(visibleMatrix: MatrixTui[String]): Int = {
