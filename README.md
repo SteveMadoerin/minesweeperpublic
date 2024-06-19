@@ -7,7 +7,7 @@ class Software Architecture at the University of Applied Science HTWG Konstanz.
 
 
 [![Coverage Status](https://coveralls.io/repos/github/SteveMadoerin/minesweeperpublic/badge.svg?branch=main)](https://coveralls.io/github/SteveMadoerin/minesweeperpublic?branch=main)
-                                                [![Scala CI](https://github.com/SteveMadoerin/minesweeperpublic/actions/workflows/scala.yml/badge.svg?branch=SA_04_Microservices&event=push)](https://github.com/SteveMadoerin/minesweeperpublic/actions/workflows/scala.yml)
+                                                [![Scala CI](https://github.com/SteveMadoerin/minesweeperpublic/actions/workflows/scala.yml/badge.svg?branch=SA_04_Microservices&event=push)](https://github.com/SteveMadoerin/minesweeperpublic/actions/workflows/scala.yml) ![Scala](https://img.shields.io/badge/Scala-v3.3.1-00A550?style=flat&logo=scala&logoColor=white&colorA=2C2C2C)
 
 ![Minesweeper_Steve_Madoerin](https://github.com/SteveMadoerin/minesweeper/assets/115166447/9b831e76-6268-4ecd-a35e-a2448302f2f9)
 
