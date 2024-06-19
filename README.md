@@ -2,7 +2,7 @@
 =====================================================
 
 
-This is a project developped by [Steve Madoerin](https://github.com/SteveMadoerin) and [Dennis Hoang](https://github.com/dennis_hoang) to create the game Minesweeper written in Scala used in the
+This is a project developped by [Steve Madoerin](https://github.com/SteveMadoerin) and [Dennis Hoang](https://github.com/dennishoang) to create the game Minesweeper written in Scala used in the
 class Software Engineering at the University of Applied Science HTWG Konstanz.
 
 
