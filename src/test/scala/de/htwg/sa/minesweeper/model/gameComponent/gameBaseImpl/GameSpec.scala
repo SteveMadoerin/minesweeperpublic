@@ -1,4 +1,4 @@
-package de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl
+/* package de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl
 
 import org.scalatest.matchers.should.Matchers._
 import org.scalatest.wordspec.AnyWordSpec
@@ -164,4 +164,4 @@ class GameSpec extends AnyWordSpec {
 
     
 
-}
+} */

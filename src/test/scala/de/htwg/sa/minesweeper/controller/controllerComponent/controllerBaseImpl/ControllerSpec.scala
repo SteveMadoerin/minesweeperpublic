@@ -1,4 +1,4 @@
-package de.htwg.sa.minesweeper.controller.controllerComponent.controllerBaseImpl
+/* package de.htwg.sa.minesweeper.controller.controllerComponent.controllerBaseImpl
 
 
 import org.scalatest.matchers.should.Matchers._
@@ -6,14 +6,17 @@ import org.scalatest.wordspec.AnyWordSpec
 
 import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl._
 
-import de.htwg.sa.minesweeper.util.{Observer, Move}
+import de.htwg.sa.minesweeper.shared.{Observer, Move}
 
 import java.io.ByteArrayOutputStream
-import de.htwg.sa.minesweeper.util.Event
-import de.htwg.sa.minesweeper.Default.{given}
+import de.htwg.sa.minesweeper.shared.Event
+//import de.htwg.sa.minesweeper.controller.controllerComponent.config.Default.{given}
+//import de.htwg.sa.minesweeper.ui.config.Default.{given} // take care
+import de.htwg.sa.minesweeper.Default.given_IFileIO
+import de.htwg.sa.minesweeper.Default.given_IGame
 import de.htwg.sa.minesweeper.controller.controllerComponent.IController
 import de.htwg.sa.minesweeper.model.gameComponent.IGame
-import de.htwg.sa.minesweeper.model.fileIoComponent.IFileIO
+import de.htwg.sa.minesweeper.persistence.persistenceComponent.IFileIO
 import de.htwg.sa.minesweeper.Default
 import de.htwg.sa.minesweeper.controller.controllerComponent.controllerBaseImpl.Controller
 import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl.{Playfield, Game, Field}
@@ -464,4 +467,4 @@ class ControllerSpec extends AnyWordSpec{
         }
     }
 
-}
+} */

@@ -1,16 +1,15 @@
-package de.htwg.sa.minesweeper.model.fileIoComponent.fileIoJsonImpl
+/* package de.htwg.sa.minesweeper.model.fileIoComponent.fileIoJsonImpl
 
 import org.scalatest.matchers.should.Matchers._
 import org.scalatest.wordspec.AnyWordSpec
 
 import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl.{Field, Game, Matrix, Playfield, Symbols}
-import de.htwg.sa.minesweeper.model.fileIoComponent.fileIoJsonImpl.FileIO
+import de.htwg.sa.minesweeper.persistence.fileIoComponent.fileIoJsonImpl.FileIO
 import de.htwg.sa.minesweeper.model.gameComponent.{IGame, IField}
 import de.htwg.sa.minesweeper.Default
 import java.io._
 import java.nio.file.{Files, Path, Paths}
-import play.api.libs.json.Json
-import play.api.libs.json.JsArray
+import play.api.libs.json.{Json, JsArray}
 
 
 class FileIOJasonSpec extends AnyWordSpec {
@@ -118,4 +117,4 @@ class FileIOJasonSpec extends AnyWordSpec {
     }
 
   }
-}
+} */

@@ -64,3 +64,7 @@ target/
 
 # Application
 minesweeper.log
+/controller/controller-assembly-0.1.0-SNAPSHOT.jar
+/model/model-assembly-0.1.0-SNAPSHOT.jar
+/persistence/persistence-assembly-0.1.0-SNAPSHOT.jar
+/ui/ui-assembly-0.1.0-SNAPSHOT.jar

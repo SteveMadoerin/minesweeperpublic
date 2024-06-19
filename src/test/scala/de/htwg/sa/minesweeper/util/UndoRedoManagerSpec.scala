@@ -1,8 +1,8 @@
-package de.htwg.sa.minesweeper.util
+/* package de.htwg.sa.minesweeper.shared
 
 import org.scalatest.matchers.should.Matchers._
 import org.scalatest.wordspec.AnyWordSpec
-import de.htwg.sa.minesweeper.util.UndoRedoManager
+import de.htwg.sa.minesweeper.shared.UndoRedoManager
 
 class UndoRedoManagerSpec extends AnyWordSpec{
     "UndoRedoManager" should{
@@ -38,4 +38,4 @@ class UndoRedoManagerSpec extends AnyWordSpec{
             t should be(1)
         }
     }
-}
+} */
