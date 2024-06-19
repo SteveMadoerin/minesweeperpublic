@@ -298,14 +298,8 @@ class GUI() extends Frame:
         val icon: ImageIcon = new ImageIcon(imagePath)
         icon
 
-    def showGraphicalInput: Option[String] = {
-        showInput(None.orNull, "Choose Difficulty", "NewGame", Message.Info, Swing.EmptyIcon, List("SuperEasy","Easy", "Medium", "Hard"), "Easy")
-    }
-
-    def saveScoreNew(playerName: String, saveScore: Int): Unit = {
-
-        RestUtil.requestControllerSaveScoreAndPlayerName(saveScore, playerName)
-    }
+    def showGraphicalInput: Option[String] = { showInput(None.orNull, "Choose Difficulty", "NewGame", Message.Info, Swing.EmptyIcon, List("SuperEasy","Easy", "Medium", "Hard"), "Easy") }
+    def saveScoreNew(playerName: String, saveScore: Int): Unit = { RestUtil.requestControllerSaveScoreAndPlayerName(saveScore, playerName) }
 
     def loadScoreNew(playername: String, saveScore: Int) = {
 
@@ -402,18 +396,14 @@ class GUI() extends Frame:
         listenTo(mouse.clicks)
         reactions += {
             case e: MouseClicked if (updateGame.board == "Won" || updateGame.board == "Lost") =>
-                //controllerField = FieldTui(controllerField.hidden, controllerField.hidden)
                 update(Event.GameOver)
                 val unit = "returns unit"
 
             case e: MouseClicked if e.peer.getButton == MouseEvent.BUTTON3 =>
-                // Check if controllerField is up to date
                 controllerField = RestUtil.requestControllerField
                 if (controllerField.matrix.rows(x)(y) == "~"){
-                    //controller.makeAndPublish(controller.put, Move("flag", y, x))
                     RestUtil.requestControllerMakeAndPublishPut(Move("flag", y, x))
                 } else if (controllerField.matrix.rows(x)(y) == "F"){
-                    //controller.makeAndPublish(controller.put, Move("unflag", y, x))
                     RestUtil.requestControllerMakeAndPublishPut(Move("unflag", y, x))
                 } else {
                     println(">> You can't flag an open field")
