@@ -3,7 +3,7 @@
 
 
 This is a project developped by [Steve Madoerin](https://github.com/SteveMadoerin) and [Dennis Hoang](https://github.com/dennishoang) to create the game Minesweeper written in Scala used in the
-class Software Engineering at the University of Applied Science HTWG Konstanz.
+class Software Architecture at the University of Applied Science HTWG Konstanz.
 
 
 [![Coverage Status](https://coveralls.io/repos/github/SteveMadoerin/minesweeperpublic/badge.svg?branch=main)](https://coveralls.io/github/SteveMadoerin/minesweeperpublic?branch=SA_04_Microservices)
@@ -43,7 +43,9 @@ When using the Text User Interface:
 - `sbt assembly` go to each directory of each Module and run sbt assembly to build the .jar - for all OS
 
 - `bash build_docker.sh` to run build_docker.sh script to build images for each subproject
-- `docker-compose up -d` to start Application 
+- `xming` start Xming to Display GUI in Docker  
+- `docker-compose up -d` to start Application
+
 
 
 
