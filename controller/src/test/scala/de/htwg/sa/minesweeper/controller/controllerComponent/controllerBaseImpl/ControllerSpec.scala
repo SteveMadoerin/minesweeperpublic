@@ -1,16 +1,11 @@
 package de.htwg.sa.minesweeper.controller.controllerComponent.controllerBaseImpl
 
 
-import org.scalatest.matchers.should.Matchers.*
-import org.scalatest.wordspec.AnyWordSpec
-
-import java.io.ByteArrayOutputStream
-import de.htwg.sa.minesweeper.util.{Event, Move, Observer}
-import de.htwg.sa.minesweeper.controller.controllerComponent.config.Default.given
-import de.htwg.sa.minesweeper.controller.controllerComponent.IController
 import de.htwg.sa.minesweeper.controller.controllerComponent.config.Default
-import de.htwg.sa.minesweeper.controller.controllerComponent.controllerBaseImpl.Controller
 import de.htwg.sa.minesweeper.entity.{FieldDTO, GameDTO, MatrixDTO}
+import de.htwg.sa.minesweeper.util.{Event, Move, Observer}
+import org.scalatest.matchers.should.Matchers._
+import org.scalatest.wordspec.AnyWordSpec
 
 
 class ControllerSpec extends AnyWordSpec{

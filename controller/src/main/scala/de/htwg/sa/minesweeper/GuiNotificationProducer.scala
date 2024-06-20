@@ -11,8 +11,7 @@ import org.apache.kafka.common.serialization.StringSerializer
 import scala.concurrent.Future
 
 class GuiNotificationProducer(system: ActorSystem)(implicit val materializer: Materializer) {
-
-    //val TuiCommandTopic = "tui-notify"
+    
     val GuiCommandTopic = "gui-notify"
     
     private val producerSettings = ProducerSettings(system, new StringSerializer, new StringSerializer)
@@ -25,10 +24,7 @@ class GuiNotificationProducer(system: ActorSystem)(implicit val materializer: Ma
         println(s"sending command: $command")
         Source.single(message)
             .via(Producer.flexiFlow(producerSettings))
-            .map {
-                case ProducerMessage.Result(metadata, _) => metadata
-                // Handle other cases such as passThrough and multiResult if needed
-            }
+            .map { case ProducerMessage.Result(metadata, _) => metadata }
             .runWith(Sink.head)(akka.stream.Materializer.matFromSystem(system))
     }
 }

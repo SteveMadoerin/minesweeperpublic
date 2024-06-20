@@ -3,8 +3,6 @@ package de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl
 
 import org.scalatest.matchers.should.Matchers._
 import org.scalatest.wordspec.AnyWordSpec
-import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl.{Game, Field}
-
 
 class FieldSpec extends AnyWordSpec 
 {

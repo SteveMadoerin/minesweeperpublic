@@ -24,10 +24,7 @@ class TuiNotificationProducer(system: ActorSystem)(implicit val materializer: Ma
         println(s"sending command: $command")
         Source.single(message)
             .via(Producer.flexiFlow(producerSettings))
-            .map {
-                case ProducerMessage.Result(metadata, _) => metadata
-                // Handle other cases such as passThrough and multiResult if needed
-            }
+            .map { case ProducerMessage.Result(metadata, _) => metadata }
             .runWith(Sink.head)(akka.stream.Materializer.matFromSystem(system))
     }
 }

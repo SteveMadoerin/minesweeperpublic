@@ -1,43 +1,27 @@
 package de.htwg.sa.minesweeper.ui
 
 
-import org.scalatest.matchers.should.Matchers._
+import org.scalatest.matchers.should.Matchers.*
 import org.scalatest.wordspec.AnyWordSpec
-/*
-import de.htwg.sa.minesweeper.controller.controllerComponent.controllerBaseImpl.Controller
-//import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl._
-import de.htwg.sa.minesweeper.util.Move
-import de.htwg.sa.minesweeper.util.Event
-//import de.htwg.sa.minesweeper.ui.config.Default.{given}
+
 import java.io.PrintStream
 import java.io.ByteArrayOutputStream
 import de.htwg.sa.minesweeper.ui.TUI
-*/
+import de.htwg.sa.minesweeper.ui.model.{Event, Move}
+
 
 class TUISpec extends AnyWordSpec {
+    
 
-/*     "A TUI when initialised" should {
-        val controller = new Controller
-        val tui = new TUI(using controller)
-        "self register with controller" in{
-            controller.subscribers should contain(tui)
-
-        }
-
-    } */
-
-/*     "def processMove" should {
-        val controller = new Controller
-        val tui = new TUI(using controller)
+    "def processMove" should {
+        val tui = new TUI()
         val leMove = Move("", 0, 0)
         "should print a message when user input is invalid" in{
             tui.processMove(leMove, false) should be(false)
-
         }
+    }
 
-    } */
-
-/*     "A TUI with following input" should {
+     "A TUI with following input" should {
         val tui = new TUI()
         "run only once" in {
             val in = new java.io.ByteArrayInputStream("0\nq\n".getBytes)
@@ -46,14 +30,14 @@ class TUISpec extends AnyWordSpec {
             }
         } 
 
-    } */
+    } 
 
-/*
+
     "The TUI update method" should{
         val tui2 = new TUI()
         "update or not a Event" in{
-            //tui2.update(Event.Cheat) should be(false)
-            //tui2.update(Event.Help) should be(false)
+            tui2.update(Event.Cheat) should be(false)
+            tui2.update(Event.Help) should be(false)
         }
     }
 
@@ -123,10 +107,6 @@ class TUISpec extends AnyWordSpec {
             }
 
         }
-*/
-        
 
-
-
-
+    }
 }

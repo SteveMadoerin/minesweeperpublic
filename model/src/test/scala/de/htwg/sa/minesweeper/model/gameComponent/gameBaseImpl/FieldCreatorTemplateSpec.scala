@@ -2,16 +2,14 @@ package de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl
 
 import org.scalatest.matchers.should.Matchers._
 import org.scalatest.wordspec.AnyWordSpec
-import de.htwg.sa.minesweeper.model.gameComponent.config.Default
-import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl.{EmptyField, Playfield, Game, Minefield}
 
 class FieldCreatorTemplateSpec extends AnyWordSpec{
 
     "it" should {
         "ceate an empty field" in {
             val testfield = new EmptyField
-            val testGame = new Game(3, 1, 0, "Playing")
-
+            val testGame = Game(3, 1, 0, "Playing")
+            
             val result = testfield.newField(3, testGame)
             result.showVisibleCell(1,1) should be ("~")
         }

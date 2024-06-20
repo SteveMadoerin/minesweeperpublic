@@ -59,31 +59,41 @@ class ControllerApi(using var controller: IController) extends Observer:
             request.uri.path.toString match {
                 case "/controller/" =>
                     HttpResponse(entity = controller.toString)
+                    
                 case "/controller/controller" =>
                     HttpResponse(entity = controller.toString())
+                    
                 case "/controller/field" =>
                     HttpResponse(entity = RestUtil.fieldDtoToJson(controller.field))
+                    
                 case "/controller/gameOver" =>
                     controller.gameOver
                     HttpResponse(entity = RestUtil.fieldDtoToJson(controller.field))
+                    
                 case "/controller/field/toString" =>
                     HttpResponse(entity = controller.fieldToString)
+                    
                 case "/controller/game" =>
                     HttpResponse(entity = RestUtil.gameDtoToJson(controller.game))
+                    
                 case "/controller/helpMenu" =>
                     controller.helpMenu
                     HttpResponse(entity = controller.helpMenuRest)
+                    
                 case "/controller/loadGame" =>
                     controller.loadGame
                     HttpResponse(entity = controller.fieldToString)
+                    
                 case "/controller/newGameGui" =>
                     controller.newGameGUI
                     HttpResponse(entity = "newGameGui")
+                    
                 case path if path.startsWith("/controller/saveTime") =>
                     val query = request.uri.query()
                     val time = query.get("time").get.toInt
                     controller.saveTime(time)
                     HttpResponse(entity = "Time saved")
+                    
                 case path if path.startsWith("/controller/saveScoreAndPlayerName") =>
                     val query = request.uri.query()
                     val score = query.get("score").get.toInt
@@ -91,12 +101,14 @@ class ControllerApi(using var controller: IController) extends Observer:
                     val emptypath = ""
                     controller.saveScoreAndPlayerName(playerName, score, emptypath)
                     HttpResponse(entity = "score saved")
+                    
                 case path if path.startsWith("/controller/newGameFieldGui") =>
                     val query = request.uri.query()
                     val input = query.get("input").get
                     val inputOption = Some(input)
                     controller.newGameField(inputOption)
                     HttpResponse(entity = "newGameFieldGui")
+                    
                 case "/controller/cheat" =>
                     val cheat = controller.cheatRest
                     controller.notifyObserversRest("Cheat")
@@ -122,6 +134,7 @@ class ControllerApi(using var controller: IController) extends Observer:
                         controller.makeAndPublish(controller.doMove, firstMoveCheck, move, GameDTO(bombs, size, time, newBoard))
                     }
                     HttpResponse(entity = "success doMove")
+                    
                 case path if path.startsWith("/controller/makeAndPublish/put") =>
                     val move = Unmarshal(request.entity).to[String].map { moveEntity =>
                         val requestBody = Json.parse(moveEntity)
@@ -129,18 +142,23 @@ class ControllerApi(using var controller: IController) extends Observer:
                         controller.makeAndPublish(controller.put, move)
                     }
                     HttpResponse(entity = "success")
+                    
                 case "/controller/makeAndPublish/undo" =>
                     val returnField = controller.makeAndPublish(controller.undo)
                     HttpResponse(entity = controller.fieldToString)
+                    
                 case "/controller/makeAndPublish/redo" =>
                     val returnField = controller.makeAndPublish(controller.redo)
                     HttpResponse(entity = controller.fieldToString)
+                    
                 case "/controller/saveGame" =>
                     controller.saveGame
                     HttpResponse(entity = "successfully saved")
+                    
                 case "/controller/undo" =>
                     controller.undo
                     HttpResponse(entity = RestUtil.fieldDtoToJson(controller.field))
+                    
                 case "/controller/redo" =>
                     controller.redo
                     HttpResponse(entity = RestUtil.fieldDtoToJson(controller.field))
@@ -148,20 +166,18 @@ class ControllerApi(using var controller: IController) extends Observer:
         }
 
         val getRequestFlowShape = builder.add(getControllerFlow)
-
-        val getResponseFlow = Flow[HttpResponse].mapAsync(1) { response =>
-            Unmarshal(response.entity).to[String]
-        }
-
+        val getResponseFlow = Flow[HttpResponse].mapAsync(1) { response => Unmarshal(response.entity).to[String] }
         val getResponseFlowShape = builder.add(getResponseFlow)
 
         val putControllerFlow = Flow[HttpRequest].mapAsync(1) { request =>
             request.uri.path.toString match {
                 case "/controller/put" =>
                     Future.successful(HttpResponse(entity = "controller.put(controller.jsonStringToMove(requestBody))"))
+                    
                 case "/controller/exit" =>
                     controller.exit
                     Future.successful(HttpResponse(entity = "exit"))
+                    
                 case "/controller/checkGameOver" =>
                     request.entity.toStrict(Duration.apply(3, TimeUnit.SECONDS)).map { entity =>
                         val requestbody = entity.data.utf8String
@@ -169,9 +185,11 @@ class ControllerApi(using var controller: IController) extends Observer:
                         print(requestbody + "checkgameover string")
                         HttpResponse(entity = result.toString)
                     }
+                    
                 case "/controller/checkGameOverGui" =>
                     val result = controller.checkGameOverGui
                     Future.successful(HttpResponse(entity = result.toString))
+                    
                 case path if path.startsWith("/controller/newGameForGui") =>
                     val query = request.uri.query()
                     val bombs = query.get("bombs").get.toInt
@@ -183,6 +201,7 @@ class ControllerApi(using var controller: IController) extends Observer:
                     val jsonGame = Json.parse(RestUtil.gameDtoToJson(game))
                     val jsonGameFieldArray = Json.arr(jsonGame, jsonField)
                     Future.successful(HttpResponse(entity = jsonGameFieldArray.toString))
+                    
                 case path if path.startsWith("/controller/newGame") =>
                     val query = request.uri.query()
                     val side = query.get("side").get.toInt
@@ -198,11 +217,7 @@ class ControllerApi(using var controller: IController) extends Observer:
         }
 
         val putRequestFlowShape = builder.add(putControllerFlow)
-
-        val putResponseFlow = Flow[HttpResponse].mapAsync(1) { response =>
-            Unmarshal(response.entity).to[String]
-        }
-
+        val putResponseFlow = Flow[HttpResponse].mapAsync(1) { response => Unmarshal(response.entity).to[String] }
         val putResponseFlowShape = builder.add(putResponseFlow)
 
         broadcast.out(0) ~> getRequestFlowShape ~> getResponseFlowShape ~> merge.in(0)

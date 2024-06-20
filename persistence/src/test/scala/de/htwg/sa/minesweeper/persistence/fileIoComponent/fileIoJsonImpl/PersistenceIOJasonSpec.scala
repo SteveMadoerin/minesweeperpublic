@@ -1,23 +1,19 @@
 package de.htwg.sa.minesweeper.persistence.fileIoComponent.fileIoJsonImpl
 
+import de.htwg.sa.minesweeper.persistence.entity._
 import org.scalatest.matchers.should.Matchers._
 import org.scalatest.wordspec.AnyWordSpec
-/*
-import de.htwg.sa.minesweeper.model.gameComponent.gameBaseImpl.{Field, Game, Matrix, Playfield}
-import de.htwg.sa.minesweeper.persistence.fileIoComponent.fileIoJsonImpl.FileIO
-import de.htwg.sa.minesweeper.model.gameComponent.{IGame, IField}
-import de.htwg.sa.minesweeper.model.gameComponent.config.Default
-import java.io._
-import java.nio.file.{Files, Path, Paths}
-import play.api.libs.json.{Json, JsArray}
+import play.api.libs.json.{JsArray, Json}
 
-*/
+import java.io._
+
 class PersistenceIOJasonSpec extends AnyWordSpec {
+  
   "A FileIO" when {
 
-/*     "save and load Game" should {
-      val fileIO1 = new FileIO()
-      var game: IGame = Default.prepareGame(10, 10, 10)
+     "save and load Game" should {
+      val fileIO1 = de.htwg.sa.minesweeper.persistence.persistenceComponent.persistenceJsonImpl.Persistence()
+       val game: IGame = Game(10, 10, 10, "Playing")
 
       "save the game status, bombs, side and time and reload it" in {
         fileIO1.saveGame(game)
@@ -26,12 +22,11 @@ class PersistenceIOJasonSpec extends AnyWordSpec {
         loadGameTest.get.side should be (10)
         loadGameTest.get.time should be (10)
       }
-    } */
+    }
 
-/*     "save and load Field" should {
-      val fileIO2 = new FileIO()
-      var field: IField = new Field(1, "~")
-      field = field.put("*", 0, 0)
+     "save and load Field" should {
+      val fileIO2 = de.htwg.sa.minesweeper.persistence.persistenceComponent.persistenceJsonImpl.Persistence()
+      val field: IField = Field(Matrix(Vector(Vector(("~")))), Matrix(Vector(Vector(("0")))))
 
       "save the field and reload it" in {
         fileIO2.saveField(field)
@@ -41,7 +36,7 @@ class PersistenceIOJasonSpec extends AnyWordSpec {
     }
     
     "saving a player score" should {
-      val fileIo9 = new FileIO()
+      val fileIo9 = de.htwg.sa.minesweeper.persistence.persistenceComponent.persistenceJsonImpl.Persistence()
       "append the new score to the JSON file if it exists" in {
         val filePath = "C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\highscoretest.json"
         val tempFile = new File(filePath)
@@ -71,7 +66,7 @@ class PersistenceIOJasonSpec extends AnyWordSpec {
       "create a new JSON file with the score if it does not exist" in {
         val filePath = "C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\highscoretest2.json"
         val tempFilePath = "C:\\github\\scalacticPlayground\\minesweeper\\src\\main\\data\\highscoretest2.json"
-        val fileIo10 = new FileIO()
+        val fileIo10 = de.htwg.sa.minesweeper.persistence.persistenceComponent.persistenceJsonImpl.Persistence()
         // Ensure the file does not exist
         new File(tempFilePath).delete()
 
@@ -92,7 +87,5 @@ class PersistenceIOJasonSpec extends AnyWordSpec {
         new File(tempFilePath).delete()
       }
     }
-    */
-
   }
 }

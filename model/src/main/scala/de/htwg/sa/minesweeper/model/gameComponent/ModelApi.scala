@@ -38,12 +38,15 @@ class ModelApi(using var game: IGame, var field: IField){
 
         val getModelFlow = Flow[HttpRequest].map { request =>
             request.uri.path.toString match {
+                
                 case "/model/game" =>
                     val game = Game(10, 9, 0, "Playing")
                     HttpResponse(entity = game.gameToJson)
+                
                 case "/model/game/helpMessage" =>
                     val message = game.helpMessage
                     HttpResponse(entity = message)
+                
                 case path if path.startsWith("/model/game/new") =>
                     val queryString = request.uri.query().toString()
                     val params = queryString.split("&")
@@ -52,12 +55,14 @@ class ModelApi(using var game: IGame, var field: IField){
                     val time = params(2).split("=")(1).toInt
                     this.game = Game(bombs, size, time, "Playing")
                     HttpResponse(entity = game.gameToJson)
+                
                 case path if path.startsWith("/model/game/checkExit") =>
                     val queryString = request.uri.query().toString()
                     val params = queryString.split("&")
                     val board = params(0).split("=")(1)
                     val boolean = game.checkExit(board)
                     HttpResponse(entity = boolean.toString())
+                
                 case path if path.startsWith("/model/field/new") =>
                     val queryString = request.uri.query().toString()
                     val params = queryString.split("&")
@@ -69,6 +74,7 @@ class ModelApi(using var game: IGame, var field: IField){
                     val feld = createField(spiel)
                     this.field = feld
                     HttpResponse(entity = feld.fieldToJson)
+                
                 case "/model/field" =>
                     HttpResponse(entity = field.fieldToJson)
             }
@@ -76,14 +82,12 @@ class ModelApi(using var game: IGame, var field: IField){
 
         val getRequestFlowShape = builder.add(getModelFlow)
 
-        val getResponseFlow = Flow[HttpResponse].mapAsync(1) { response =>
-            Unmarshal(response.entity).to[String]
-        }
-
+        val getResponseFlow = Flow[HttpResponse].mapAsync(1) { response => Unmarshal(response.entity).to[String] }
         val getResponseFlowShape = builder.add(getResponseFlow)
 
         val putModelFlow = Flow[HttpRequest].mapAsync(1) { request =>
             request.uri.path.toString match {
+                
                 case path if path.startsWith("/model/field/decider") =>
                     val queryString = request.uri.query().toString()
                     val params = queryString.split("&")
@@ -191,7 +195,6 @@ class ModelApi(using var game: IGame, var field: IField){
                     request.entity.toStrict(Duration.apply(3, TimeUnit.SECONDS)).map { entity =>
                         val requestbody = entity.data.utf8String
                         val jasonStringField = requestbody
-                        // optimization after gatling test
                         val newJsonString = updateMatrixWithHidden(jasonStringField)
                         println("field/gameOverField")
                         HttpResponse(entity = Json.parse(newJsonString).toString())
@@ -243,10 +246,7 @@ class ModelApi(using var game: IGame, var field: IField){
         }
 
         val putRequestFlowShape = builder.add(putModelFlow)
-        val putResponseFlow = Flow[HttpResponse].mapAsync(1) { response =>
-            Unmarshal(response.entity).to[String]
-        }
-
+        val putResponseFlow = Flow[HttpResponse].mapAsync(1) { response => Unmarshal(response.entity).to[String] }
         val putResponseFlowShape = builder.add(putResponseFlow)
 
         broadcast.out(0) ~> getRequestFlowShape ~> getResponseFlowShape ~> merge.in(0)
