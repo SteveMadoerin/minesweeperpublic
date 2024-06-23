@@ -24,7 +24,7 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
     def loadGame =
         // TWO TRACK CODE
         val gameBox = file.loadGame
-        val gameBox2 = gameBox // just for study purposes
+        val gameBox2 = gameBox
         val gameBoxList = List[GameBox](gameBox, gameBox2)
         val packGame = new PackGame(gameBoxList)
         
