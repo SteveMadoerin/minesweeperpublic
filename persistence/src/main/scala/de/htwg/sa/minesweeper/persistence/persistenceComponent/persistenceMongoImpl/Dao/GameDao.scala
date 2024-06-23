@@ -36,7 +36,7 @@ class GameDao(db: MongoDatabase) extends IDao[Game, Int] {
             )
         }
 
-        val document: Document = gameToDocument(obj, loadNextGameId) // what if a game gets deleted?
+        val document: Document = gameToDocument(obj, loadNextGameId)
         val insertObservable: SingleObservable[InsertOneResult] = gameCollection.insertOne(document)
 
         insertObservable.subscribe(new Observer[InsertOneResult] {
