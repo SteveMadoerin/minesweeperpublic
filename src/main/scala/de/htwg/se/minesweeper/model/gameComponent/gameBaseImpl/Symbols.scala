@@ -2,9 +2,9 @@ package de.htwg.se.minesweeper.model.gameComponent.gameBaseImpl
 
 
 enum Symbols(representedAsString: String):
-    override def toString = representedAsString
+    override def toString: String = representedAsString
 
-    case Covered extends Symbols(s"${(0x7E).toChar}")
+    case Covered extends Symbols(" ")
     case F extends Symbols("F")
     case Bomb extends Symbols("*")
     case Empty extends Symbols(" ")
