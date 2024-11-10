@@ -21,3 +21,5 @@ enum Event:
     case Save
     case SaveTime
     case Exit
+    case Undo
+    case Redo

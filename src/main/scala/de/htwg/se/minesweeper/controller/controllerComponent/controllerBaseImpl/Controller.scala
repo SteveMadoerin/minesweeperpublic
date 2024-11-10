@@ -126,8 +126,8 @@ class Controller(using var game: IGame, var file: IFileIO) extends IController w
     def showVisibleCell(x: Int, y: Int): String = field.showVisibleCell(x,y).toString
     
     def put(move: Move): IField = undoRedoManager.doStep(field, DoCommand(move))
-    def undo: IField = undoRedoManager.undoStep(field)
-    def redo: IField = undoRedoManager.redoStep(field)
+    def undo: IField = undoRedoManager.undoStep(field); notifyObservers(Event.Undo)
+    def redo: IField = undoRedoManager.redoStep(field); notifyObservers(Event.Redo)
 
     override def toString = field.toString
 
